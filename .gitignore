@@ -1,0 +1,21 @@
+*.log
+*.fdb_latexmk
+*.fls 
+*.out
+*.synctex.gz 
+*.toc
+*.aux
+*.bib
+*.run.xml
+*.bbl
+*.blg
+**/adaptive control with prof serrani
+**/Le-Gorrec
+**/ML
+/MSMS/*MSMS*
+/MSMS/images/
+/RTOS/*RTOS*
+**/Mobile Robotics
+**/MM4A
+script.sh
+*lazygit
