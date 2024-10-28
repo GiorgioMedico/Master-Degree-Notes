@@ -1,39 +1,70 @@
-\documentclass{book}
+
+% Document class for a book with a4paper and openany options
+\documentclass[openany]{book}
+
+% Packages for mathematical symbols, theorems, graphics, fonts, and floating objects
 \usepackage{amsmath, amsthm, graphicx, amsfonts, float, bm}
+
+% Package for language-specific rules (English)
 \usepackage[english]{babel}
+
+% Path for images
 \graphicspath{ {./images/} }
 
+% Package for setting page geometry
 \usepackage{geometry}
- \geometry{
- a4paper,
- total={170mm,237mm},
- left=20mm,
- top=30mm,
- }
- \usepackage[hidelinks]{hyperref}
+\geometry{
+ a4paper, % Paper size
+ total={170mm,237mm}, % Total usable area
+ left=20mm, % Left margin
+ top=30mm, % Top margin
+}
 
-\newcommand\at[2]{\left.#1\right|_{#2}}
-\DeclareMathOperator{\sgn}{sgn}
-\DeclareMathOperator{\col}{col}
-\DeclareMathOperator{\des}{des}
-\DeclareMathOperator*{\argmax}{arg\,max}
-\DeclareMathOperator*{\argmin}{arg\,min}
+% Package for hyperlinks without colored borders
+\usepackage[hidelinks]{hyperref}
+
+% Package for custom headers and footers
+\usepackage{fancyhdr}
+
+% Set page style to fancy
+\pagestyle{fancy}
+
+% Clear all header and footer fields
+\fancyhf{}
+
+% Remove header rule
+\renewcommand{\headrulewidth}{0pt}
+
+% Center the page number in the footer
+\fancyfoot[C]{\thepage}
+
+% Increase the distance between the footer and the text
+\setlength{\footskip}{50pt}
+
+% Custom commands and operators
+\newcommand\at[2]{\left.#1\right|_{#2}} % Evaluation of a function at a point
+\DeclareMathOperator{\sgn}{sgn} % Sign function
+\DeclareMathOperator{\col}{col} % Column operator
+\DeclareMathOperator{\des}{des} % Descent operator
+\DeclareMathOperator*{\argmax}{arg\,max} % Argument of the maximum
+\DeclareMathOperator*{\argmin}{arg\,min} % Argument of the minimum
 \newcommand{\notimplies}{%
-  \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}}
-\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})}
+    \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}} % Not implies symbol
+\newcommand{\R}{\mathbb{R}} % Real numbers symbol
+\newcommand{\N}{\mathbb{N}} % Natural numbers symbol
+\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}} % Derivative operator
+\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})} % Trajectory notation
 
-
+% Theorem styles and definitions
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{proposition}{Proposition}[section]
+\newtheorem{definition}{Definition}[section] % Definition environment
+\newtheorem{theorem}{Theorem}[section] % Theorem environment
+\newtheorem{proposition}{Proposition}[section] % Proposition environment
+
+% Remark styles
 \theoremstyle{remark}
-\newtheorem*{remark}{Remark}
-\theoremstyle{remark}
-\newtheorem*{notation}{Notation}
+\newtheorem*{remark}{Remark} % Remark environment
+\newtheorem*{notation}{Notation} % Notation environment
 
 \title{Optimal Control M}
 \author{Giorgio Medico based on Dante Piotto's notes}
@@ -43,10 +74,30 @@
 \begin{document}
 \maketitle
 \tableofcontents
+
+\chapter*{Course Overview}
+This course focuses on optimization-based control of dynamical systems. It provides theoretical and numerical methods to compute control system trajectories that minimize a performance index, with particular emphasis on their application to trajectory optimization and maneuvering of Autonomous Systems.
+
+\section*{Learning Objectives}
+Upon completion of this course, students will be able to:
+\begin{enumerate}
+    \item Set up optimal control problems and characterize optimality conditions
+    \item Develop numerical optimization methods to compute optimal, feasible trajectories
+    \item Design optimization-based receding-horizon control schemes for nonlinear systems
+\end{enumerate}
+
+\section*{Course Applications}
+To bridge the gap between theory and application, students will apply the proposed techniques to trajectory optimization and maneuvering of Autonomous Systems across various domains including:
+\begin{itemize}
+    \item Autonomous Vehicles
+    \item Robotic Systems (e.g., Aerial Robots)
+    \item Other Mechatronic Systems
+\end{itemize}
+
 \chapter{Introduction to optimal control}
 
 \section{Optimal control problem formulation}
-Consider the continuous-time system ($t\in\R$)
+Consider the continuous-time system (State-Space representation) ($t\in\R$)
 
 \begin{equation}\label{system}
     \begin{gathered}\
@@ -60,9 +111,8 @@ Consider the continuous-time system ($t\in\R$)
     \item $u(t)\in\R^m$ input of the system at time $t$ 
     \item $y(t)\in\R^p$ output of the system at time $t$
 \end{itemize}
-We will mainly work with time invariant systems, $\dot{x}(t)=f(x(t),u(t))$. 
-
-We consider nonlinear, discrete-time systems described by:
+We will mainly work with time invariant systems, $\dot{x}(t)=f(x(t),u(t))$. \\[0.5cm]
+We consider nonlinear, discrete-time systems described by Finite-Difference Equations (FDE):
 \[
     x(t+1)=f_t(x(t),u(t)) \quad t\in\N_0
 \]
@@ -76,7 +126,7 @@ Consider a nonlinear, discrete-time system on a finite time horizon
 \[
     x_{t+1} = f_t(x_t,u_t) \quad t=0,\dots,T-1
 \]
-We use $\mathbf{x}\in\R^{nT}$ and $\mathbf{u}\in\R^{mT}$ to denote, respectively, the stack of the states $x_t$ for all $t\in\{1,\dots,T\}$ and the unputs $u_t$ for all $t\in\{0,\dots,T-1\}$, that is:
+We use $\mathbf{x}\in\R^{nT}$ and $\mathbf{u}\in\R^{mT}$ to denote, respectively, the stack of the states $x_t$ for all $t\in\{1,\dots,T\}$ and the inputs $u_t$ for all $t\in\{0,\dots,T-1\}$, that is:
 \begin{gather*}
     \mathbf{x} := \begin{bmatrix}
         x_1 \\ \vdots \\ x_T
@@ -88,13 +138,12 @@ We use $\mathbf{x}\in\R^{nT}$ and $\mathbf{u}\in\R^{mT}$ to denote, respectively
 
 \subsubsection{Trajectory of a system}
 
-Definition: A pair ($\bar{\mathbf{x}},\bar{\mathbf{u}})\in\R^{nT} \times \R^{mT}$ is called a trajectory of system \eqref{system} 
-if $\bar{x}_{t+1}=f_t(\bar{x}_t,\bar{u}_t)$ for all $t\in\{0,\dots,T-1\}$., That is, if $(\bar{\mathbf{x}},\bar{\mathbf{u}})$ satisfies the system dynamics (the same holds for continuous time systems with proper adjustments). In particular, $\bar{\mathbf{x}}$ is the state trajectory, while $\bar{\mathbf{u}}$ is the input trajectory.
+\textbf{Definition:} A pair ($\bar{\mathbf{x}},\bar{\mathbf{u}})\in\R^{nT} \times \R^{mT}$ is called a trajectory of system \eqref{system} 
+if $\bar{x}_{t+1}=f_t(\bar{x}_t,\bar{u}_t)$ for all $t\in\{0,\dots,T-1\}$. That is, if $(\bar{\mathbf{x}},\bar{\mathbf{u}})$ satisfies the system dynamics (the same holds for continuous time systems with proper adjustments). In particular, $\bar{\mathbf{x}}$ is the state trajectory, while $\bar{\mathbf{u}}$ is the input trajectory.
 
 \subsubsection{Equilibrium}
-Definition: A state-input pair $(x_e,u_e)\in\R^n\times\R^m$ is called an equilibrium pair of \eqref{system} 
-if $(x_t,u_t)=(x_e,u_e),\forall t\in\N_0$ is a trajectory of the system. \\
-Equilibria of time-invariant systems satisfy $x_e=f(x_e,u_e)$
+
+\textbf{Definition:} A state-input pair $(x_e,u_e)\in\R^n\times\R^m$ is called an equilibrium pair of \eqref{system} if $(x_t,u_t)=(x_e,u_e),\forall t\in\N_0$ is a trajectory of the system. Equilibria of time-invariant systems satisfy $x_e=f(x_e,u_e)$
 
 \subsubsection{Linearization of a system about a trajectory}
 Given the dynamics \eqref{system}
@@ -106,41 +155,44 @@ with $A_t$ and $B_t$ the Jacobians of $f_t$, with respect to state and input res
 \[
     A_t = \at{\displaystyle\frac{\partial}{\partial x}f(\bar{x}_t,\bar{u}_t)}{(\bar{\mathbf{x}},\bar{\mathbf{u}})} \quad B_t = \at{\displaystyle\frac{\partial}{\partial u}f(\bar{x}_t,\bar{u}_t)}{(\bar{\mathbf{x}},\bar{\mathbf{u}})}
 \]
+where $x_t \approx \bar{x}_t + \Delta x_t$ and $u_t \approx \bar{u}_t + \Delta u_t$.\\ 
+($\bar{x_t}$ and $\bar{u_t}$ are the nominal trajectory values of $x_{t+1} = f_t(x_t,u_t)$ and $\Delta x_t$, $\Delta u_t$ are the trajectory of the linearized system.)
+
 
 \subsection{Optimization}
 \subsubsection{Main ingredients}
 \begin{itemize}
-    \item Decision variable: $x\in\R^n$ 
-    \item Cost function: $\ell(x):\R^n\to\R$ cost associated to decision $x$
-    \item Constraints (constraint sets): for some given functions $h_i:\R^n\to\R,  \text{ and } g_j:\R^n\to\R,$ the decision vector $x\in\R^n$ needs to satisfy 
+    \item Decision variable: $z\in\R^d$ 
+    \item Cost function: $\ell(z):\R^d\to\R$ cost associated to decision $z$
+    \item Constraints (constraint sets): for some given functions $h_i:\R^d\to\R,  \text{ and } g_j:\R^d\to\R,$ the decision vector $z\in\R^d$ needs to satisfy 
         \begin{gather*}
-            h_i(x)=0 \quad i=1,\dots,m \\
-            g_j(x)\leq0 \quad j=1,\dots,r
+            h_i(z)=0 \quad i=1,\dots,m \\
+            g_j(z)\leq0 \quad j=1,\dots,r
         \end{gather*}
-        equivalently we can say that we require $x\in X$ with 
+        equivalently we can say that we require $z\in Z$ with 
         \[
-            X=\{x\in\R^n|h(x)=0, g(x)\leq 0\},
+            Z=\{z\in\R^d|h(z)=0, g(z)\leq 0\},
         \]
-        where we compactly denoted $h(x)=\col(h_1(x),\dots,h_m(x))$ and $g(x) = \col(g_1(x),\dots,g_r(x))$
+        where we compactly denoted $h(z)=\col(h_1(z),\dots,h_m(z))$ and $g(z) = \col(g_1(z),\dots,g_r(z))$
 \end{itemize}
 
 \subsubsection{Minimization}
 We can write our optimization problem as 
 \begin{align*}
-    \min_{x\in\R^n} &\ell(x)\\
-    \text{subj. to } &h_i(x) = 0 \quad i=1,\dots,m\\
-    &g_j(x)\leq 0 \quad j=1,\dots,r
+    \min_{z\in\R^d} &\ell(z)\\
+    \text{subj. to } &h_i(z) = 0 \quad i=1,\dots,m\\
+    &g_j(z)\leq 0 \quad j=1,\dots,r
 \end{align*}
-where $h_i:\R^n\to\R$ and $g_j:\R^n\to\R$\\
+where $h_i:\R^d\to\R$ and $g_j:\R^d\to\R$\\
 We can write it more compactly as 
 \begin{align*}
-    \min_{x\in\R^n} &\ell(x)\\
-    \text{subj. to } &h(x) = 0 \\
-    &g(x)\leq 0 
+    \min_{z\in\R^d} &\ell(z)\\
+    \text{subj. to } &h(z) = 0 \\
+    &g(z)\leq 0 
 \end{align*}
-where $h:\R^n\to\R^m$ and $g:\R^n\to\R^r$
+where $h:\R^d\to\R^m$ and $g:\R^d\to\R^r$
 \subsection{Discrete-time optimal control}
-\subsubsection{main ingredients}
+\subsubsection{Main Ingredients}
 \begin{itemize}
     \item Dynamics: a discrete-time system in state space form 
         \[
@@ -171,12 +223,13 @@ where $h:\R^n\to\R^m$ and $g:\R^n\to\R^r$
         \]
 \end{itemize}
 
+
 A discrete-time optimal control problem can be written as 
 \begin{gather*}
-    \min_{\substack{x_0,x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} \displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T)\\
+    \min_{\substack{x_0,x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} \displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T)\\[10pt]
     \begin{array}{l l }
-        \text{subj. to } & x_{t+1}=f_t(x_t,u_t), \quad t\in\{0,\dots,T-1\}\\
-                         & r(x_0,x_T) = 0  \\
+        \text{subj. to } & x_{t+1}=f_t(x_t,u_t), \quad t\in\{0,\dots,T-1\}\\[5pt]
+                         & r(x_0,x_T) = 0  \\[5pt]
                          & g_t(x_t,u_t)\leq 0, \quad t\in\{0,\dots,T-1\}
     \end{array}
 \end{gather*}
@@ -274,7 +327,7 @@ A set $X\subset \R^n$ is convex if for any two points $x_A$ and $x_B$ in $X$ and
 \[
     \lambda x_A + (1-\lambda)x_B \in X
 \]
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \begin{minipage}{.5\textwidth}
         \centering
@@ -293,7 +346,7 @@ Let $X \subset \R^n$ be a convex set. A function $\ell:X\to\R$ is convex if for 
 \[
     \ell(\lambda x_A + (1-\lambda)x_B)\leq \lambda\ell(x_A)+ (1-\lambda)\ell(x_B)
 \]
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.35\textwidth]{cvxfcn}
     \caption{Convex function}
@@ -546,7 +599,7 @@ The Armijo rule is applied as follows:
 \end{enumerate}
 Typical values are $\beta=0.7$ and $c=0.5$
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \begin{minipage}{.33\textwidth}
         \centering
@@ -1603,7 +1656,9 @@ where
 \[
     \Delta\mathbf{u}^k = \argmin_{\Delta u} \nabla J(\mathbf{u}^k)^T \Delta\mathbf{u} + \displaystyle\frac{1}{2}\Delta \mathbf{u}^T\nabla^2J(\mathbf{u}^k)\Delta\mathbf{u}
 \]
-\section{Calculation of $\nabla^2J(u)$}
+%\section{Calculation of $\nabla^2J(u)$}
+\section{Calculation of \texorpdfstring{$\nabla^2J(u)$}{Calculation of the Hessian of J(u)}}
+
 In order to calculate $\nabla^2J(\mathbf{u})$ we move from:
 \[
     \nabla J(\mathbf{u}) = \nabla \phi(\mathbf{u}) \nabla_1\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}) + \nabla_2\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda})
@@ -1728,7 +1783,7 @@ Where $Q_t,R_t,P_f$ are suitably chosen cost matrices and $(\mathbf{x}^{des},\ma
 
 Note: $(\mathbf{x}^{des},\mathbf{u}^{des})$ is NOT a trajectory. It is based, e.g., on geometric considerations
 
-Idea: by using an optimal control algorithm, compute an open loop (optimal) state-input trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$, i.e., such that $x_{t+1}^{opt}=f(x_t^{opt},u_t^{opt}),  t=0,\dots,T-1$. Then, a feedback controller can be used to track the system trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$
+Idea: by using an optimal control algorithm, compute an open loop (optimal) state-input trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$, i.e., such that $x_{t+1}^{opt}=f(x_t^{opt},u_t^{opt}),  t=0,\dots,T-1$. Then, a feedback controller can be used to track the system trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$.
 
 
 \section{LQR based trajectory tracking}
