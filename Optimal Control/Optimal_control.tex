@@ -26,6 +26,8 @@
 % Package for custom headers and footers
 \usepackage{fancyhdr}
 
+\usepackage{tikz}
+
 % Set page style to fancy
 \pagestyle{fancy}
 
@@ -60,6 +62,7 @@
 \newtheorem{definition}{Definition}[section] % Definition environment
 \newtheorem{theorem}{Theorem}[section] % Theorem environment
 \newtheorem{proposition}{Proposition}[section] % Proposition environment
+\newtheorem*{corollary}{Corollary} % Corollary environment
 
 % Remark styles
 \theoremstyle{remark}
@@ -263,109 +266,323 @@ Note that $\mathcal{F}$ is a space of functions (function space). This is an inf
 \end{itemize}
 
 \chapter{Nonlinear Optimization}
+
+\section{Overview}
+
+\begin{enumerate}
+    \item \textbf{Motivating Examples}
+        \begin{itemize}
+            \item Drone trajectory generation
+            \item Pendulum control
+            \item Trajectory manifold concept
+        \end{itemize}
+    
+    \item \textbf{Theoretical Foundations}
+        \begin{itemize}
+            \item Types of minima
+                \begin{itemize}
+                    \item Global/Local
+                    \item Strict/Non-strict
+                \end{itemize}
+            \item Optimality conditions
+                \begin{itemize}
+                    \item First-order necessary
+                    \item Second-order necessary
+                    \item Second-order sufficient
+                \end{itemize}
+        \end{itemize}
+    
+    \item \textbf{Convex Optimization}
+        \begin{itemize}
+            \item Convex sets and functions
+            \item Constraint definitions
+            \item Properties
+                \begin{itemize}
+                    \item Local = Global minima
+                    \item First-order sufficiency
+                \end{itemize}
+            \item Quadratic programs
+        \end{itemize}
+    
+    \item \textbf{Solution Methods}
+        \begin{itemize}
+            \item Iterative descent methods
+                \begin{itemize}
+                    \item Gradient methods
+                    \item Quadratic minimization
+                \end{itemize}
+            \item Newton's method
+                \begin{itemize}
+                    \item Zero-finding
+                    \item Unconstrained optimization
+                \end{itemize}
+            \item Step-size selection
+                \begin{itemize}
+                    \item Constant
+                    \item Diminishing
+                    \item Armijo rule
+                \end{itemize}
+        \end{itemize}
+    
+    \item \textbf{Constrained Optimization}
+        \begin{itemize}
+            \item Convex set optimization
+                \begin{itemize}
+                    \item Projection methods
+                    \item Feasible directions
+                \end{itemize}
+            \item Equality/Inequality constraints
+                \begin{itemize}
+                    \item Active constraints
+                    \item KKT conditions
+                    \item Complementary slackness
+                \end{itemize}
+            \item Advanced methods
+                \begin{itemize}
+                    \item Sequential Quadratic Programming
+                    \item Barrier functions
+                \end{itemize}
+        \end{itemize}
+    
+    \item \textbf{Implementation}
+        \begin{itemize}
+            \item Python implementation
+            \item Convergence visualization
+            \item Performance analysis
+        \end{itemize}
+\end{enumerate}
+
+\textbf{Nonlinear programming (NLP) is the process of solving an optimization problem where the objective function or some of the constraints are Non-Linear.}
+
 \section{Unconstrained Optimization}
 Consider the unconstrained optimization problem 
 \[
-    \min_{x\in\R^n}\ell(x)
+    \min_{z\in\R^n}\ell(z)
 \]
-with $\ell:\R^n\to\R$ a cost function to be minimized and $x$ a decision vector 
+with $\ell:\R^d\to\R$ a cost function to be minimized and $z$ a decision vector 
 
-We say that $x^*$ is a  
+We say that $z^*$ is a  
 \begin{itemize}
-    \item global minimum if $\ell(x^*)\leq\ell(x)$ for all $x\in\R^n$ 
-    \item strict global minimum if $\ell(x^*)<\ell(x)$ for all $x\neq x^*$
-    \item local minimum if there exists $\epsilon>0$ such that $\ell(x^*)\leq\ell(x)$ for all $x\in B(x^*,\epsilon) = \{x\in\R^n| \|x-x^*\|<\epsilon\}$
-    \item strict local minimum if there exists $\epsilon>0$ such that $\ell(x^*)<\ell(x)$ for all $x\in B(x^*,\epsilon)$ 
+    \item global minimum if $\ell(z^*)\leq\ell(z)$ for all $z\in\R^n$ 
+    \item strict global minimum if $\ell(z^*)<\ell(z)$ for all $z\neq z^*$
+    \item local minimum if there exists $\epsilon>0$ such that $\ell(z^*)\leq\ell(z)$ for all $z\in B(z^*,\epsilon) = \{z\in\R^d| \|z-z^*\|<\epsilon\}$
+    \item strict local minimum if there exists $\epsilon>0$ such that $\ell(z^*)<\ell(z)$ for all $z\in B(z^*,\epsilon)$ 
 
 \end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.35\textwidth]{min.png}
+    \caption{Illustration of different types of minima in an optimization problem}
+    \label{fig:min}
+\end{figure}
+
 \subsubsection{Notation}
-We denote $\ell(x^*)$ the optimal (minimum) value of a generic optimization problem, i.e. 
+We denote $\ell(z^*)$ the optimal (minimum) value of a generic optimization problem, i.e. 
 \[
-    \ell(x^*) = \min_{x\in\R^n}\ell(x)
+    \ell(z^*) = \min_{z\in\R^d}\ell(z)
 \]
-where $x^*$ is the minimum point (optimal value for the optimization variable) i.e. 
+where $z^*$ is the minimum point (optimal value for the optimization variable) i.e. 
 \[
-    x^* = \argmin_{x\in\R^n} \ell(x)
+    z^* = \argmin_{z\in\R^d} \ell(z)
 \]
 \subsubsection{Gradient and Hessian}
-Gradient of a function: for a function $r:\R^n\to\R$  the gradient is denoted as 
+Gradient of a function: for a function $r:\R^d\to\R$  the gradient is denoted as 
 \[
-    \nabla r(x) = \begin{bmatrix}
-        \displaystyle\frac{\partial r(x)}{\partial x_1} \\ \vdots \\ \displaystyle\frac{\partial r(x)}{\partial x_n}
-    \end{bmatrix} \in \R^{n\times 1}
+    \nabla r(z) = \begin{bmatrix}
+        \displaystyle\frac{\partial r(z)}{\partial z_1} \\ \vdots \\ \displaystyle\frac{\partial r(z)}{\partial z_d}
+    \end{bmatrix} \in \R^{d\times 1}
 \]
-Hessian matrix of a function: for a fcuntion $r:\R^n\to\R$  the Hessian matrix is denoted as 
+Hessian matrix of a function: for a function $r:\R^d\to\R$  the Hessian matrix is denoted as 
 \[
-    \nabla^2(r(x)) = \begin{bmatrix}
-        \displaystyle\frac{\partial^2 r(x)}{\partial x_1^2} & \cdots & \displaystyle\frac{\partial^2 r(x)}{\partial x_1x_n} \\ \vdots & \ddots & \vdots \\ \displaystyle\frac{\partial^2 r(x)}{\partial x_nx_1} & \cdots & \displaystyle\frac{\partial^2 r(x)}{\partial x_1^2}
-    \end{bmatrix}
+    \nabla^2(r(z)) = \begin{bmatrix}
+        \displaystyle\frac{\partial^2 r(z)}{\partial z_1^2} & \cdots & \displaystyle\frac{\partial^2 r(z)}{\partial z_1z_d} \\ \vdots & \ddots & \vdots \\ \displaystyle\frac{\partial^2 r(z)}{\partial z_dz_1} & \cdots & \displaystyle\frac{\partial^2 r(z)}{\partial z_d^2}
+    \end{bmatrix} \in \R^{d\times d}
 \]
-Gradient of a vector-valued function: for a vector field $r:\R^n\to\R^m$, the gradient is denoted as 
+The Hessian matrix is a symmetric matrix, since the assumption of continuity of the second derivatives implies that the order of differentiation does not matter.\\
+
+Gradient of a vector-valued function: for a vector field $r:\R^d\to\R^m$, the gradient is denoted as 
 \[
-    \nabla r(x) = \begin{bmatrix}
-        \nabla r_1(x) & \cdots & \nabla r_m(x)
+    \nabla r(z) = \begin{bmatrix}
+        \nabla r_1(z) & \cdots & \nabla r_m(z)
     \end{bmatrix} = \begin{bmatrix}
-        \displaystyle\frac{\partial r_1(x)}{\partial x_1} & \cdots & \displaystyle\frac{\partial r_m(x)}{\partial x_1} \\
+        \displaystyle\frac{\partial r_1(z)}{\partial z_1} & \cdots & \displaystyle\frac{\partial r_m(z)}{\partial z_1} \\
         \vdots & \ddots & \vdots \\
-        \displaystyle\frac{\partial r_1(x)}{\partial x_n} & \cdots & \displaystyle\frac{\partial r_m(x)}{\partial x_n} \\
-    \end{bmatrix} \in \R^{n\times m}
+        \displaystyle\frac{\partial r_1(z)}{\partial z_d} & \cdots & \displaystyle\frac{\partial r_m(z)}{\partial z_d} \\
+    \end{bmatrix} \in \R^{d\times m}
 \]
 which is the transpose of the Jacobian matrix of $r$
+
 \subsection{Conditions of optimality}
-\subsubsection{First order necessary condition (FNC) of optimality (unconstrained)}
-Let $x^*$ be an unconstrained local minimum of $\ell:\R^n\to\R$ and assume that $\ell$ is continuously differentiable ($\mathcal{C}^1$) in $B(x^*,\varepsilon)$\footnote{Ball of radius $\varepsilon$ centered in $x^*$} for some $\varepsilon>0$. Then $\nabla \ell(x^*)=0$
-\subsubsection{Second order necessary condition (FNC) of optimality (unconstrained)}
-If additionally $\ell$ is twice continuously differentiable ($\mathcal{C}^2$) in $B(x^*,\varepsilon)$, then $\nabla^2 \ell(x^*)\geq 0$ (The Hessian of $\ell$ is positive semidifinite)
-\subsubsection{Second order sufficient conditions of optimality (unconstrained)}
-Let $\ell:\R^n\to\R\in\mathcal{C}^2$ in $B(x^*,\varepsilon)$ for some $\varepsilon>0$. Suppose that $x^*\in\R^n$ satisfies 
+
+\subsubsection{First order Necessary condition (FNC) of optimality (unconstrained)}
+
+Let $z^*$ be an unconstrained local minimum of $\ell:\R^d\to\R$ and assume that $\ell$ is continuously differentiable ($\mathcal{C}^1$) in $B(z^*,\varepsilon)$\footnote{Ball of radius $\varepsilon$ centered in $z^*$} for some $\varepsilon>0$. Then $\nabla \ell(z^*)=0$ (the gradient of $\ell$ at $z^*$ is zero).
+
+\subsubsection{Second order Necessary condition (FNC) of optimality (unconstrained)}
+
+If additionally $\ell$ is twice continuously differentiable ($\mathcal{C}^2$) in $B(z^*,\varepsilon)$, then $\nabla^2 \ell(z^*)\geq 0$ (The Hessian of $\ell$ is positive semidifinite).
+\\
+% Remark 
+\begin{remark}
+    Points $\bar{z}$ satisfying $\nabla \ell(\bar{z})=0$ are called stationary points. They include minima, maxima and
+saddle points.
+\end{remark}
+
+\subsubsection{Second order Sufficient conditions of optimality (unconstrained)}
+
+Let $\ell:\R^d\to\R\in\mathcal{C}^2$ (twice differentiable) in $B(z^*,\varepsilon)$ for some $\varepsilon>0$. Suppose that $z^*\in\R^d$ satisfies 
 \[
-    \nabla\ell(x^*) = 0\quad \text{and} \quad \nabla^2\ell(x^*)>0
+    \nabla\ell(z^*) = 0\quad \text{and} \quad \nabla^2\ell(z^*)>0
 \]
-Then $x^*$ is a strict (unconstrained) local minimum of $\ell$
+Then $z^*$ is a strict (unconstrained) local minimum of $\ell$
+
 \subsubsection{Convex set} 
-A set $X\subset \R^n$ is convex if for any two points $x_A$ and $x_B$ in $X$ and for all $\lambda\in[0,1]$, then 
+A set $Z\subset \R^d$ is convex if for any two points $z_A$ and $z_B$ in $Z$ and for all $\theta\in[0,1]$, then 
 \[
-    \lambda x_A + (1-\lambda)x_B \in X
+    \theta z_A + (1-\theta)z_B \in Z
 \]
 \begin{figure}[ht]
     \centering
     \begin{minipage}{.5\textwidth}
         \centering
-        \includegraphics[width=0.4\linewidth]{cvxset}
+        \includegraphics[width=0.3\linewidth]{cvxset}
     \caption{Convex set}
     \end{minipage}%
     \begin{minipage}{.5\textwidth}
         \centering
-        \includegraphics[width=0.4\linewidth]{ncvxset}
+        \includegraphics[width=0.3\linewidth]{ncvxset}
     \caption{Non convex set}
     \end{minipage}
 \end{figure}
 
 \subsubsection{Convex functions}
-Let $X \subset \R^n$ be a convex set. A function $\ell:X\to\R$ is convex if for any two points $x_A$ and $x_B$ in $X$ and for all $\lambda\in[0,1]$, then 
+Let $Z \subset \R^d$ be a convex set. A function $\ell:Z\to\R$ is convex if for any two points $z_A$ and $z_B$ in $Z$ and for all $\theta\in[0,1]$, then 
 \[
-    \ell(\lambda x_A + (1-\lambda)x_B)\leq \lambda\ell(x_A)+ (1-\lambda)\ell(x_B)
+    \ell(\theta z_A + (1-\theta)z_B)\leq \theta\ell(z_A)+ (1-\theta)\ell(z_B)
 \]
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.35\textwidth]{cvxfcn}
+    \includegraphics[width=0.3\textwidth]{cvxfcn}
     \caption{Convex function}
 \end{figure}
 
-A function $\ell$ is \emph{concave} if $-\ell$ is convex. A function $\ell$ is strictly convex if the inequality holds strictly for $x_A\neq x_B$ and $\lambda\in(0,1)$
-\subsubsection{Inequality constraints and convex sets}
-Let $g:\R^n\to\R^p$, we can define a set $X_{\text{ineq}}\subset \R^n$ as
-\[
-    X_{\text{ineq}} = \{x\in\R^n|g(x)\leq 0\}
-\]
-The set $X_{\text{ineq}}$ is convex iff $g$ is a quasi-convex function (e.g., monotone functions on the axis)
-\subsubsection{Equality constraints and convex sets}
-Let $h:\R^n\to\R^p$, we can define a set $X_{\text{eq}}\subset \R^n$ as
-\[
-    X_{\text{eq}} = \{x\in\R^n|h(x)= 0\}
-\]
-The set $X_{\text{eq}}$ is convex iff $h$ is an affine function. Convex sets identified through equality constraints are linear spaces (hyperplanes).
+\begin{remark}
+A function $\ell$ is \emph{concave} if $-\ell$ is convex. A function $\ell$ is strictly convex if the inequality holds strictly for $z_A\neq z_B$ and $\theta\in(0,1)$.
+\end{remark}
 
+\subsubsection{Inequality constraints and convex sets}
+Let $g:\R^d\to\R^p$, we can define a set $Z_{\text{ineq}}\subset \R^d$ as
+\[
+    Z_{\text{ineq}} = \{z\in\R^d|g(z)\leq 0\}
+\]
+The set $Z_{\text{ineq}}$ is convex iff $g$ is a quasi-convex function (e.g., monotone functions on the axis)
+
+\begin{corollary}
+    if $g$ is convex then $Z_{\text{ineq}}$ is convex and vice versa.
+\end{corollary}
+
+% add const.png
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{const}
+    \caption{Convex set identified through inequality constraints}
+\end{figure}
+
+\subsubsection{Equality constraints and convex sets}
+Let $h:\R^d\to\R^p$, we can define a set $Z_{\text{eq}}\subset \R^d$ as
+\[
+    Z_{\text{eq}} = \{z\in\R^d|h(z)= 0\}
+\]
+The set $Z_{\text{eq}}$ is convex iff $h$ is an affine function. Convex sets identified through equality constraints are linear spaces (hyperplanes).
+
+\subsubsection{Convexity and gradient monotonicity}
+If $\ell$ is differentiable and convex, then for all $z_A, z_B \in Z$ it holds
+\[
+    \ell(z_B) \geq \ell(z_A) + \nabla\ell(z_A)^T(z_B - z_A)
+\]
+
+If $\ell$ is differentiable and convex, then its gradient $\nabla\ell: \mathbb{R}^d \to \mathbb{R}^d$ satisfies
+\[
+    (\nabla\ell(z_A) - \nabla\ell(z_B))^T(z_A - z_B) \geq 0
+\]
+for all $z_A, z_B$. That is, the gradient $\nabla\ell$ is a monotone operator.
+
+\subsubsection{Strict convexity and gradient monotonicity}
+A function $\ell$ is strictly convex if for $z_A \neq z_B$ and $\theta \in (0,1)$
+\[
+    \ell(\theta z_A + (1-\theta)z_B) < \theta\ell(z_A) + (1-\theta)\ell(z_B)
+\]
+
+If the strictly convex function $\ell$ is also differentiable, then its gradient satisfies
+\[
+    (\nabla\ell(z_A) - \nabla\ell(z_B))^T(z_A - z_B) > 0
+\]
+for all $z_A, z_B$. That is, the gradient $\nabla\ell$ is a strictly monotone operator.
+
+\subsubsection{Strong convexity and gradient monotonicity}
+A function $\ell$ is strongly convex with parameter $\mu > 0$ if for $z_A \neq z_B$ and $\theta \in (0,1)$
+\[
+    \ell(\theta z_A + (1-\theta)z_B) < \theta\ell(z_A) + (1-\theta)\ell(z_B) - \mu\theta(1-\theta)\|z_A - z_B\|^2
+\]
+
+The gradient of a differentiable strongly convex function satisfies
+\[
+    (\nabla\ell(z_A) - \nabla\ell(z_B))^T(z_A - z_B) \geq \mu\|z_A - z_B\|^2
+\]
+for all $z_A, z_B$. That is, the gradient $\nabla\ell$ is a strongly monotone operator.
+
+\subsubsection{Convexity and Lipschitz continuity of the gradient}
+Consider a differentiable convex function $\ell$ with a Lipschitz continuous gradient with parameter $L > 0$, i.e.,
+\[
+    \|\nabla\ell(z_A) - \nabla\ell(z_B)\| \leq L\|z_A - z_B\|
+\]
+for all $z_A, z_B$.
+
+Then, the following characterization holds
+\[
+    (\nabla\ell(z_A) - \nabla\ell(z_B))^T(z_A - z_B) \geq \frac{1}{L}\|\nabla\ell(z_A) - \nabla\ell(z_B)\|^2
+\]
+for all $z_A, z_B$. That is, the gradient $\nabla\ell$ is a co-coercive operator.
+
+\subsubsection{Strong convexity and Lipschitz continuity of the gradient}
+Consider a strongly convex (with parameter $\mu > 0$) function $\ell$ with Lipschitz continuous gradient (with parameter $L > 0$)
+
+Then the following characterization holds
+\[
+    (\nabla\ell(z_A) - \nabla\ell(z_B))^T(z_A - z_B) \geq \frac{\mu L}{\mu+L}\|z_A - z_B\|^2 + \frac{1}{\mu+L}\|\nabla\ell(z_A) - \nabla\ell(z_B)\|^2
+\]
+for all $z_A, z_B$
+
+\subsubsection{Graphical interpretation of convexity}
+If $\ell$ is differentiable and convex, then
+\[
+    \ell(z_B) \geq \ell(z_A) + \nabla\ell(z_A)^T(z_B - z_A)
+\]
+for all $z_A, z_B \in Z$
+
+If $\ell$ is differentiable and $\mu$-strongly convex, then
+\[
+    \ell(z_B) \geq \ell(z_A) + \nabla\ell(z_A)^T(z_B - z_A) + \frac{\mu}{2}\|z_B - z_A\|^2
+\]
+for all $z_A, z_B \in Z$
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{quadratic lower bound on l}
+    \caption{Strong convexity imposes a quadratic lower bound on $\ell$}
+\end{figure}
+
+\subsubsection{Graphical interpretation of Lipschitz continuity of the gradient}
+If $\ell$ is differentiable with Lipschitz continuous gradient, then
+\[
+    \ell(z_B) \leq \ell(z_A) + \nabla\ell(z_A)^T(z_B - z_A) + \frac{L}{2}\|z_B - z_A\|^2
+\]
+for all $z_A, z_B \in Z$
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{quadratic upper bound on l}
+    \caption{Lipschitz continuity of $\nabla\ell$ imposes a quadratic upper bound on $\ell$}
+\end{figure}
 
 
 \subsection{Minimization of convex functions}
