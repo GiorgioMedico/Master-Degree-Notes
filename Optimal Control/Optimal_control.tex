@@ -584,64 +584,65 @@ for all $z_A, z_B \in Z$
     \caption{Lipschitz continuity of $\nabla\ell$ imposes a quadratic upper bound on $\ell$}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Minimization of convex functions}
+
 \subsubsection{Proposition}
-Let $X\subset\R^n$ be a convex set and $\ell: X\to\R$ a convex function. Then a local minimum of $\ell$ is also a global minimum \\
+Let $Z\subset\R^d$ be a convex set and $\ell: Z\to\R$ a convex function. Then a local minimum of $\ell$ is also a global minimum. \\
 Proof: not done in class but present in slides for funsies
+
 \subsubsection{Necessary and sufficient condition of optimality (unconstrained)}
 For the unconstrained minimization of a convex function it can be shown that the first order necessary condition of optimality is also sufficient (for a global minimum).
-\subsubsection{Proposition}
-Let $\ell:\R^n \to \R$ be a convex function. Then $x^*$ is a global minimum if and only if $\nabla\ell(x^*)=0$
 
+\subsubsection{Proposition}
+Let $\ell:\R^d \to \R$ be a convex function. Then $z^*$ is a global minimum if and only if $\nabla\ell(z^*)=0$.\\
 Proof: not done in class but present in slides for funsies
 
 \section{Quadratic programming (unconstrained)}
 Let us consider a special class of optimization problems, namely quadratic optimization problems or quadratic programs: 
 \[
-    \min_{x\in\R^n}x^TQx+b^Tx
+    \min_{z\in\R^d}z^TQz+b^Tz
 \]
-with $Q=Q^T\in\R^{n\times n}$ and $b\in\R^n$
+with $Q=Q^T\in\R^{d\times d}$ and $b\in\R^d$.
 
 
-\subsubsection{optimality conditions}
-First-order necessary condition for optimality: if $x^*$ is a minimum then 
+\subsubsection{Optimality conditions}
+First-order necessary condition for optimality: if $z^*$ is a minimum then 
 \[
-    \nabla \ell(x^*)=0 \implies 2Qx^*+b=0
+    \nabla \ell(z^*)=0 \implies 2Qz^*+b=0
 \]
-Second-order necessary condition for optimality: if $x^*$ is a minimum then 
+Second-order necessary condition for optimality: if $z^*$ is a minimum then 
 \[
-    \nabla^2\ell(x^*)\geq 0 \implies 2Q\geq0
+    \nabla^2\ell(z^*)\geq 0 \implies 2Q\geq0
 \]
 A necessary condition for the existence of minima for a quadratic program is that $Q\geq 0$. Thus, quadratic programs admitting at least a minimum are convex optimization problems.
 
 
-\subsubsection{properties}
+\subsubsection{Properties}
 Since quadratic programs are convex programs ($Q\geq 0$ is necessary to have a local minimum), then the following holds: 
 \begin{center}
      For a quadratic program necessary conditions of optimality are also sufficient and minima are global
 \end{center}
 If $Q>0$, then there exists a unique global minimum given by 
 \[
-    x^* = -\displaystyle\frac{1}{2}Q^{-1}b
+    z^* = -\displaystyle\frac{1}{2}Q^{-1}b
 \]
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Unconstrained Optimization Algorithms}
 \subsection{Iterative descent methods}
-We consider optimization algorithms relying on the iterative descent idea. We denote $x^k\in\R^n$ an estimate of a local minimum at iteration $k\in\N$. The algorithm starts at a given initial guess $x^0$ and iteratively generates vectors $x^1,x^2,\dots$ such that $\ell$ is decreased at each iteration, i.e. 
+We consider optimization algorithms relying on the iterative descent idea. We denote $z^k\in\R^d$ an estimate of a local minimum at iteration $k\in\N$. The algorithm starts at a given initial guess $z^0$ and iteratively generates vectors $z^1,z^2,\dots$ such that $\ell$ is decreased at each iteration, i.e. 
 \[
-    \ell(x^{k+1})<\ell(x^k) \qquad k = 1,2,\dots
+    \ell(z^{k+1})<\ell(z^k) \qquad k = 1,2,\dots
 \]
 \subsubsection{two-step procedure}
 We consider a general two-step procedure that reads as follows 
 \[
-    x^{k+1} = x^k+\gamma^k d^k, \qquad k=1,2,\dots
+    z^{k+1} = z^k+\gamma^k d^k, \qquad k=1,2,\dots
 \]
 in which 
 \begin{enumerate}
     \item each $\gamma^k>0$ is a "step-size" 
-    \item $d^k\in\R^n$ is a "direction"
+    \item $d^k\in\R^d$ is a "direction"
 \end{enumerate}
 The goal is to 
 \begin{enumerate}
@@ -650,91 +651,92 @@ The goal is to
 \end{enumerate}
 In other references these are called line-search methods.
 \subsection{Gradient methods}
-Let $x^k$ be such that $\nabla\ell(x^k)\neq 0$. We start by considering the update rule 
+Let $z^k$ be such that $\nabla\ell(z^k)\neq 0$. We start by considering the update rule 
 \[
-    x^{k+1} = x^k-\gamma^k\nabla\ell(x^k)
+    z^{k+1} = z^k-\gamma^k\nabla\ell(z^k)
 \]
-i.e., we choose $d^k = -\nabla\ell(x^k)$
+i.e., we choose $d^k = -\nabla\ell(z^k)$
 
-From the first order Taylor expansion of $\ell$ at $x$ we have 
+From the first order Taylor expansion of $\ell$ at $z$ we have 
 \begin{align*}
-    \ell(x^{k+1}) & =  \ell(x^k)+\nabla\ell(x^k)^T(x^{k+1}-x^k)+o(\|x^{k+1}-x^k\|)\\
-    & =  \ell(x^k)-\gamma^k\|\nabla\ell(x^k)\|^2+o(\gamma^k)
+    \ell(z^{k+1}) & =  \ell(z^k)+\nabla\ell(z^k)^T(z^{k+1}-z^k)+o(\|z^{k+1}-z^k\|)\\
+    & =  \ell(z^k)-\gamma^k\|\nabla\ell(z^k)\|^2+o(\gamma^k)
 \end{align*}
-Thus, for $\gamma^k>0$ sufficiently small it can be shown that $\ell(x^k+1)<\ell(x^k)$
+Thus, for $\gamma^k>0$ sufficiently small it can be shown that $\ell(z^k+1)<\ell(z^k)$
 
 The update rule 
 \[
-    x^{k+1}=x^k-\gamma^k\nabla\ell(x^k)
+    z^{k+1}=z^k-\gamma^k\nabla\ell(z^k)
 \]
 can be generalized to so called \emph{gradient methods}
 \[
-    x^{k+1}=x^k+\gamma^kd^k
+    z^{k+1}=z^k+\gamma^kd^k
 \]
 with $d^k$ such that
 \[
-    \nabla\ell(x^k)^Td^k<0
+    \nabla\ell(z^k)^Td^k<0
 \]
 Also, $d^k$ must be gradient related, i.e. $d^k$ must not asymptotically become perpendicular to $\nabla\ell$
 \subsubsection{selecting the descent direction}
 Several gradient methods can be written as 
 \[
-    x^{k+1} = x^k-\gamma^kD^k\nabla\ell(x^k) \quad k=1,2,\dots
+    z^{k+1} = z^k-\gamma^kD^k\nabla\ell(z^k) \quad k=1,2,\dots
 \]
-where $D^k\in\R^{n\times n}$ is  a symmetric positive definite matrix. It can be immediately seen that 
+where $D^k\in\R^{d\times d}$ is  a symmetric positive definite matrix. It can be immediately seen that 
 \[
-    -\nabla\ell(x^k)^TD^k\nabla\ell(x^k)<0
+    -\nabla\ell(z^k)^TD^k\nabla\ell(z^k)<0
 \]
-i.e. $d^k = -D^k\nabla\ell(x^k)$ is a descent direction. The choice of $D^k$ must be made such that there exist $d_1,d_2$ positive real, such that $d_1 I \leq D^k \leq d_2 I$
+i.e. $d^k = -D^k\nabla\ell(z^k)$ is a descent direction. The choice of $D^k$ must be made such that there exist $d_1,d_2$ positive real, such that $d_1 I \leq D^k \leq d_2 I$
 
 Some choices for $D^k$:
 \begin{itemize}
-    \item Steepest descent $D^k=I_n$
-    \item Newton's method $D^k = (\nabla^2\ell(x^k))^{-1}$\\
-        It can be used when $\nabla^2\ell(x^k)>0$. It typically converges very fast asymptotically. For $\gamma^k = 1$ pure Newton's method
-    \item Discretized Newton's method $D^k=(H(x^k))^{-1}$, where $H(x^k)$ is a positive definite symmetric approximation of $\nabla^2\ell(x^k)$ obtained by using finite difference approximations of the second derivatives 
+    \item Steepest descent $D^k=I_d$
+    \item Newton's method $D^k = (\nabla^2\ell(z^k))^{-1}$\\
+        It can be used when $\nabla^2\ell(z^k)>0$. It typically converges very fast asymptotically. For $\gamma^k = 1$ pure Newton's method
+    \item Discretized Newton's method $D^k=(H(z^k))^{-1}$, where $H(z^k)$ is a positive definite symmetric approximation of $\nabla^2\ell(z^k)$ obtained by using finite difference approximations of the second derivatives 
     \item Some regularized version of the Hessian
 \end{itemize}
 \subsection{gradient method}
 The update rule obtained for $D^k=I$ is called steepest descent. The name steepest descent is due to the following property: the normalized negative gradient direction 
 \[
-    d^k = -\displaystyle\frac{\nabla\ell(x^k)}{\|\nabla\ell(x^k)\|}
+    d^k = -\displaystyle\frac{\nabla\ell(z^k)}{\|\nabla\ell(z^k)\|}
 \]
-minimizes the slope $\nabla \ell(x^k)^Td^k$ among all normalized directions, i.e. it gives the steepest descent.
+minimizes the slope $\nabla \ell(z^k)^Td^k$ among all normalized directions, i.e. it gives the steepest descent.
 
 \subsection{Newton's method for root finding}
 Consider the nonlinear root finding problem 
 \[
-    r(x) = 0
+    r(z) = 0
 \]
-Idea: iteratively refine the solution such that the improved guess $x^{k+1}$ represents a root of the linear approximation of $r$ about the current tentative solution $x^k$. Consider the linear approximation of $r$ about $x^k$, we have 
+Idea: iteratively refine the solution such that the improved guess $z^{k+1}$ represents a root of the linear approximation of $r$ about the current tentative solution $z^k$. Consider the linear approximation of $r$ about $z^k$, we have 
 \[
-    r^k(x^k+\Delta x^k) = r(x^k)+\nabla r(x^k)^T\Delta x^k
+    r^k(z^k+\Delta z^k) = r(z^k)+\nabla r(z^k)^T\Delta z^k
 \]
 then, finding the zeros of the approximation, we have
 \[
-    \Delta x^k = -(\nabla r(x^k)^T)^{-1}r(x^k)
+    \Delta z^k = -(\nabla r(z^k)^T)^{-1}r(z^k)
 \]
 Thus, the solution is improved as 
 \[
-    x^{k+1} = x^k-(\nabla r(x^k)^T)^{-1}r(x^k)
+    z^{k+1} = z^k-(\nabla r(z^k)^T)^{-1}r(z^k)
 \]
+
 \subsection{Newton's method for unconstrained optimization}
 Consider the unconstrained optimization problem 
 \[
-    \min_{x\in\R^n} \ell(x)
+    \min_{z\in\R^d} \ell(z)
 \]
-stationary points $\bar{x}$ satisfy the first order optimality condition 
+stationary points $\bar{z}$ satisfy the first order optimality condition 
 \[
-    \nabla \ell (\bar{x}) = 0
+    \nabla \ell (\bar{z}) = 0
 \]
-We can look at it as a root finding problem, with $r(x)=\nabla\ell(x)$, and solve it via Newton's method. Therefore, we can compute $\Delta x^k$ as the solution of the linearization of $r(x)=\nabla\ell(x)$ at $x^k$, i.e. 
+We can look at it as a root finding problem, with $r(z)=\nabla\ell(z)$, and solve it via Newton's method. Therefore, we can compute $\Delta z^k$ as the solution of the linearization of $r(z)=\nabla\ell(z)$ at $z^k$, i.e. 
 \[
-    \nabla \ell(x^k) + \nabla^2\ell(x^k)\Delta x^k = 0
+    \nabla \ell(z^k) + \nabla^2\ell(z^k)\Delta z^k = 0
 \]
 and run the update 
 \[
-    x^{k+1} = x^k -(\nabla^2\ell(x^k))^{-1}\nabla\ell(x^k)
+    z^{k+1} = z^k -(\nabla^2\ell(z^k))^{-1}\nabla\ell(z^k)
 \]
 We can introduce a variable step-size 
 \[
@@ -744,34 +746,33 @@ This is called generalized Newton's method
 \subsubsection{Newton's method via Quadratic Optimization}
 Observe that 
 \[
-    \nabla\ell(x^k) +\nabla^2\ell(x^k)\Delta x^k = 0
+    \nabla\ell(z^k) +\nabla^2\ell(z^k)\Delta z^k = 0
 \]
 is the first-order necessary and sufficient condition of optimality for the quadratic program 
 \begin{equation}
     \label{qp}
-    \Delta x^k = \argmin_{\Delta x}\nabla\ell(x^k)^T \Delta x+\displaystyle\frac{1}{2}\Delta x^T\nabla^2\ell(x^k)\Delta x
+    \Delta z^k = \argmin_{\Delta z}\nabla\ell(z^k)^T \Delta z+\displaystyle\frac{1}{2}\Delta z^T\nabla^2\ell(z^k)\Delta z
 \end{equation}
 Thus, the $k$-th iteration of Newton's method can be seen as 
 \[
-    x^{k+1} = x^k+\Delta x^k
+    z^{k+1} = z^k+\Delta z^k
 \]
-with $\Delta x^k$ solution of the quadratic problem \eqref{qp}. Generalized version: 
+with $\Delta z^k$ solution of the quadratic problem \eqref{qp}. Generalized version: 
 \[
-    x^{k+1} = x^k + \gamma^k \Delta x^k
+    z^{k+1} = z^k + \gamma^k \Delta z^k
 \]
-
 \subsection{Gradient methods via quadratic optimization}
-Similarly to Newton's method, a descent direction $\Delta x^k=D^k\nabla\ell(x^k)$ can be seen as the direction that minimizes at each iteration a different quadratic approximation of $\ell$ about $x^k$. In fact, consider the quadratic approximation $\ell^k(x)$ of $ \ell$ about $x^k$ given by 
+Similarly to Newton's method, a descent direction $\Delta z^k=D^k\nabla\ell(z^k)$ can be seen as the direction that minimizes at each iteration a different quadratic approximation of $\ell$ about $z^k$. In fact, consider the quadratic approximation $\ell^k(z)$ of $ \ell$ about $z^k$ given by 
 \[
-    \ell^k(x) = \ell(x^k)+\nabla\ell(x^k)^T(x-x^k)+\displaystyle\frac{1}{2}(x-x^k)^T(D^k)^{-1}(x-x^k)
+    \ell^k(z) = \ell(z^k)+\nabla\ell(z^k)^T(z-z^k)+\displaystyle\frac{1}{2}(z-z^k)^T(D^k)^{-1}(z-z^k)
 \]
 By setting the derivative to zero, we have 
 \[
-    \nabla\ell(x^k)+(D^k)^{-1}(x-x^k)=0
+    \nabla\ell(z^k)+(D^k)^{-1}(z-z^k)=0
 \]
-we can calculate the minimum of $\ell^k(x)$ and set it as the next iterate $x^{k+1}$
+we can calculate the minimum of $\ell^k(z)$ and set it as the next iterate $z^{k+1}$
 \[
-    \Delta x^k = -D^k\nabla\ell(x^k)
+    \Delta z^k = -D^k\nabla\ell(z^k)
 \]
 \subsection{step-size selection rules}
 \begin{itemize}
@@ -787,28 +788,28 @@ we can calculate the minimum of $\ell^k(x)$ and set it as the next iterate $x^{k
 \subsection{Armijo rule}
 Given the descent direction $d^k$ we can consider 
 \[
-    g^k(\gamma) = \ell(x^k+\gamma d^k), \quad g:\R\to\R
+    g^k(\gamma) = \ell(z^k+\gamma d^k), \quad g:\R\to\R
 \]
 % TODO insert image slide 30
-The value of $g^k(\gamma)$ for $\gamma=0$ is $\ell(x^k)$. The minimization rule chooses as the value for $\gamma$ the value that minimizes $g^k(\gamma)$. The partial minimization rule would search for a minimum in a restricted set of values for $\gamma$. Let us differentiate $g$ wrt $\gamma$:
+The value of $g^k(\gamma)$ for $\gamma=0$ is $\ell(z^k)$. The minimization rule chooses as the value for $\gamma$ the value that minimizes $g^k(\gamma)$. The partial minimization rule would search for a minimum in a restricted set of values for $\gamma$. Let us differentiate $g$ wrt $\gamma$:
 \begin{gather*}
-    g'(\gamma)=\displaystyle\frac{d}{d\gamma}g(\gamma)=\displaystyle\frac{d}{d\gamma}\ell(x^k+\gamma d^k)\\
-    g'(0) = \displaystyle\frac{d}{d\gamma}\at{\ell(x^k+\gamma d^k)}{\gamma=0} = \nabla \ell(x^k)^Td^k\\
+    g'(\gamma)=\displaystyle\frac{d}{d\gamma}g(\gamma)=\displaystyle\frac{d}{d\gamma}\ell(z^k+\gamma d^k)\\
+    g'(0) = \displaystyle\frac{d}{d\gamma}\at{\ell(z^k+\gamma d^k)}{\gamma=0} = \nabla \ell(z^k)^Td^k\\
 \end{gather*}
 We compute a linear approximation of $g(\gamma)$:
 \begin{gather*}
     g(\gamma) = g(0) + g'(0)\gamma+o(\gamma)\\
-    \ell(x^k+\gamma d^k) = \ell(x^k)+\gamma \nabla\ell(x^k)^Td^k + o(\gamma)
+    \ell(z^k+\gamma d^k) = \ell(z^k)+\gamma \nabla\ell(z^k)^Td^k + o(\gamma)
 \end{gather*}
 This is the tangent to the $g(\gamma)$ curve at $\gamma=0$. We also consider the line 
 \[
-    \ell(x^k)+c\gamma\nabla\ell(x^k)^Td^k
+    \ell(z^k)+c\gamma\nabla\ell(z^k)^Td^k
 \]
 which is a line with a slightly less negative slope given that $c\in(0,1)$.
 The Armijo rule is applied as follows: 
 \begin{enumerate}
     \item Set $\bar{\gamma}^0>0,\quad\beta\in(0,1),\quad c\in(0,1)$
-    \item While $\ell(x^k+\bar{\gamma}^id^k)\geq \ell(x^k)+c\bar{\gamma}^i\nabla\ell(x^k)^Td^k$:
+    \item While $\ell(z^k+\bar{\gamma}^id^k)\geq \ell(z^k)+c\bar{\gamma}^i\nabla\ell(z^k)^Td^k$:
         \[
             \bar{\gamma}^{i+1}=\beta\bar{\gamma}^i
         \]
@@ -833,14 +834,14 @@ Typical values are $\beta=0.7$ and $c=0.5$
 \end{figure}
 
 \subsubsection{Proposition: convergence with Armijo step-size}
-Let $\{x^k\}$ be a sequence generated by a gradient method $x^{k+1}=x^k-\gamma^kD^k\nabla\ell(x^k)$ with $d_1I\leq D^k \leq d_2I, \quad d_1,d_2>0$. Assume that $\gamma^k$ is chosen by the Armijo rule and $\ell(x)\in \mathcal{C}^1$. Then, every limit point $\bar{x}$ of the sequence $\{x^k\}$ is a stationary point, i.e. $\nabla\ell(\bar{x})=0$
+Let $\{z^k\}$ be a sequence generated by a gradient method $z^{k+1}=z^k-\gamma^kD^k\nabla\ell(z^k)$ with $d_1I\leq D^k \leq d_2I, \quad d_1,d_2>0$. Assume that $\gamma^k$ is chosen by the Armijo rule and $\ell(z)\in \mathcal{C}^1$. Then, every limit point $\bar{z}$ of the sequence $\{z^k\}$ is a stationary point, i.e. $\nabla\ell(\bar{z})=0$
 \begin{remark}
-Recall that a vector $x\in\R^n$ is a limit point of a sequence $\{x^k\}$ in $\R^n$ if there exists a subsequence of $\{x^k\}$ that converges to $x$.
+Recall that a vector $z\in\R^d$ is a limit point of a sequence $\{z^k\}$ in $\R^d$ if there exists a subsequence of $\{z^k\}$ that converges to $z$.
 \end{remark}
 \subsubsection{Convergence with constant or diminishing step-size}
-Let $\{x^k\}$ be a sequence generated by a gradient method $x^{k+1}=x^k-\gamma^kD^k\nabla\ell(x^k)$ with $d_1I\leq D^k \leq d_2I, \quad d_1,d_2>0$. Assume that for some $L>0$ 
+Let $\{z^k\}$ be a sequence generated by a gradient method $z^{k+1}=z^k-\gamma^kD^k\nabla\ell(z^k)$ with $d_1I\leq D^k \leq d_2I, \quad d_1,d_2>0$. Assume that for some $L>0$ 
 \[
-    \|\nabla\ell(x)-\nabla\ell(y)\|\leq L\|x-y\|, \qquad \forall x,y\in\R^n
+    \|\nabla\ell(z)-\nabla\ell(y)\|\leq L\|z-y\|, \qquad \forall z,y\in\R^d
 \]
 i.e. The gradient is a Lipschitz continuous function.
 Assume either
@@ -848,12 +849,12 @@ Assume either
     \item $\gamma^k=\gamma>0$ sufficiently small, or 
     \item $\gamma^k\to 0$ and $\displaystyle\sum_{t=0}^{\infty}\gamma^k=\infty$
 \end{enumerate}
-Then, every limit point $\bar{x}$ of the sequence $\{x^k\}$ is a stationary point, i.e. $\nabla\ell(\bar{x})=0$
+Then, every limit point $\bar{z}$ of the sequence $\{z^k\}$ is a stationary point, i.e. $\nabla\ell(\bar{z})=0$
 
 \subsubsection{Remarks on gradient methods}
 \begin{itemize}
-    \item The propositions do not guarantee that the sequence converges and not even existence of limit points. Then either $\ell(x^k)\to-\infty$ or $\ell(x^k)$ converges to a finite value and $\nabla\ell(x^k)\to 0$. In the second case, one can show that any subsequnce $\{x^{k_p}\}$ converges to some stationary point $\bar{x}$ satisfying $\nabla\ell(\bar{x})=0$
-    \item Existence of minima can be guaranteed by excluding $\ell(x^k)\to-\infty$ via suitable assumptions. Assume, e.g., $\ell$ coercive (radially unboundend)
+    \item The propositions do not guarantee that the sequence converges and not even existence of limit points. Then either $\ell(z^k)\to-\infty$ or $\ell(z^k)$ converges to a finite value and $\nabla\ell(z^k)\to 0$. In the second case, one can show that any subsequnce $\{z^{k_p}\}$ converges to some stationary point $\bar{z}$ satisfying $\nabla\ell(\bar{z})=0$
+    \item Existence of minima can be guaranteed by excluding $\ell(z^k)\to-\infty$ via suitable assumptions. Assume, e.g., $\ell$ coercive (radially unboundend)
     \item For general (nonconvex) problems, assuming coercivity, only convergence (of subsequences) to stationary points can be proven.
     \item for convex programs, assuming coercivity, convergence to global minima is guaranteed since necessary conditions of optimality are also sufficient.
 \end{itemize}
@@ -861,47 +862,47 @@ Then, every limit point $\bar{x}$ of the sequence $\{x^k\}$ is a stationary poin
 \section{Constrained optimization over convex sets}
 Consider the optimization problem 
 \[
-    \min_{x\in X}\ell(x)
+    \min_{z\in Z}\ell(z)
 \]
-where $X \subset \R^n$ is nonempty, convex, and closed, and $\ell$ is continuously differentiable on $X$. 
+where $Z \subset \R^d$ is nonempty, convex, and closed, and $\ell$ is continuously differentiable on $Z$. 
 \subsubsection{Optimality conditions}
-If a point $x^* \in X$ is a local minimum of $\ell(x)$ over $X$, then 
+If a point $z^* \in Z$ is a local minimum of $\ell(z)$ over $Z$, then 
 \[
-    \nabla\ell(x^*)^T(\bar{x}-x^*)\geq 0 \qquad \forall\bar{x}\in X
+    \nabla\ell(z^*)^T(\bar{z}-z^*)\geq 0 \qquad \forall\bar{z}\in Z
 \]
 \subsubsection{Projection over a convex set}
-Given a point $x\in\R^n$ and a closed convex set $X$, it can be shown that 
+Given a point $z\in\R^d$ and a closed convex set $Z$, it can be shown that 
 \[
-    P_X(x) := \argmin_{z\in X}\|z-x\|^2
+    P_Z(z) := \argmin_{z\in Z}\|z-z\|^2
 \]
-exists and is unique. The point $P_X(x)$ is called the projection of $x$ on $X$.
+exists and is unique. The point $P_Z(z)$ is called the projection of $z$ on $Z$.
 \subsection{Projected gradient method}
 Gradient methods can be generalized to optimization over convex sets 
 \[
-    x^{k+1}=P_X(x^k-\gamma^k\nabla\ell(x^k))
+    z^{k+1}=P_Z(z^k-\gamma^k\nabla\ell(z^k))
 \]
-The algorithm is based on the idea of generating at each $t$ feasible points (i.e. belonging to $X$) that give a descent in the cost. The analysis follows similar arguments to the one of unconstrained gradient methods.
+The algorithm is based on the idea of generating at each $t$ feasible points (i.e. belonging to $Z$) that give a descent in the cost. The analysis follows similar arguments to the one of unconstrained gradient methods.
 
 \subsection{Feasible direction method}
-Find $\tilde{x}\in\R^n$ such that 
+Find $\tilde{z}\in\R^d$ such that 
 \[
-    \tilde{x} = \argmin_{x\in X} \ell(x^k)+\nabla\ell(x^k)^T(x-x^k)+\displaystyle\frac{1}{2}(x-x^k)^T(x-x^k)
+    \tilde{z} = \argmin_{z\in Z} \ell(z^k)+\nabla\ell(z^k)^T(z-z^k)+\displaystyle\frac{1}{2}(z-z^k)^T(z-z^k)
 \]
 Update the solution 
 \[
-    x^{k+1}=x^k+\gamma^k(\tilde{x}-x^k)
+    z^{k+1}=z^k+\gamma^k(\tilde{z}-z^k)
 \]
-where $(\tilde{x}-x^k)$ is a feasible direction as it is contained in the set by construction. For $\gamma^k$ sufficiently small, $x^{k+1}\in X$
+where $(\tilde{z}-z^k)$ is a feasible direction as it is contained in the set by construction. For $\gamma^k$ sufficiently small, $z^{k+1}\in Z$
 
 \subsubsection{Barrier function strategy for inequality constraints}
 Consider the inequality constrained optimization problem 
 \begin{align*}
-    &\min_{x\in\R^d}\ell(x)\\
-    \text{subj. to } &g_j(x)\leq 0 \quad j\in \{1,\dots,r\}
+    &\min_{z\in\R^d}\ell(z)\\
+    \text{subj. to } &g_j(z)\leq 0 \quad j\in \{1,\dots,r\}
 \end{align*}  
-inequality constraints can be relaxed and embedded in the cost function by means of a barrier function $-\varepsilon \log(x)$. The resulting unconstraind problem reads as 
+inequality constraints can be relaxed and embedded in the cost function by means of a barrier function $-\varepsilon \log(z)$. The resulting unconstraind problem reads as 
 \[
-    \min_{x\in\R^d} \ell(x) + \varepsilon \displaystyle\sum_{j=1}^{r}-\log(-g_j(x))
+    \min_{z\in\R^d} \ell(z) + \varepsilon \displaystyle\sum_{j=1}^{r}-\log(-g_j(z))
 \]
 Implementation: every few iterations shrink the barrier parameters $\varepsilon$
 
@@ -910,48 +911,48 @@ Methods such as this go by the name of \emph{interior point methods}
 \section{Constrained optimization: optimality conditions}
 
 \begin{align*}
-    \min_{x\in X}\  &\ell(x)\\
-    \text{subj. to } & g_j(x)\leq 0 \quad j\in\{1,\dots,r\}\\
-    & h_i(x)=0 \quad i\in\{1,\dots,m\}
+    \min_{z\in Z}\  &\ell(z)\\
+    \text{subj. to } & g_j(z)\leq 0 \quad j\in\{1,\dots,r\}\\
+    & h_i(z)=0 \quad i\in\{1,\dots,m\}
 \end{align*}
 
 \begin{definition}[Set of active inequality constraints]
-    For a point $x$, the set of active inequality constraints at $x$ is $A(x) = \{j\in\{1,\dots,r\}|g_j(x)=0\}$
+    For a point $z$, the set of active inequality constraints at $z$ is $A(z) = \{j\in\{1,\dots,r\}|g_j(z)=0\}$
 \end{definition}
 \begin{definition}[Regular point]
-    A point $x$ is regular if the vectors $\nabla h_i(x), i\in \{1,\dots,m\}$ and $\nabla g_j(x), j\in A(x)$, are linearly independent
+    A point $z$ is regular if the vectors $\nabla h_i(z), i\in \{1,\dots,m\}$ and $\nabla g_j(z), j\in A(z)$, are linearly independent
 \end{definition}
 \subsubsection{Lagrangian function}
 In order to state the first-order necessary conditions of optimality for (equality and inequality) constrained problems it is useful to introduce the Lagrangian function 
 \[
-    \mathcal{L}(x,\mu,\lambda)=\ell(x)+\displaystyle\sum_{j=1}^{r}\mu_ig_j(x) + \displaystyle\sum_{i=1}^{m}\lambda_i h_i(x)
+    \mathcal{L}(z,\mu,\lambda)=\ell(z)+\displaystyle\sum_{j=1}^{r}\mu_ig_j(z) + \displaystyle\sum_{i=1}^{m}\lambda_i h_i(z)
 \]
 \begin{theorem}[Karush-Kuhn-Tucker necessary conditions]
-    Let $x^*$ be a regular local minimum of 
+    Let $z^*$ be a regular local minimum of 
     \begin{align*}
-        \min_{x\in\R^d}\  &\ell(x) \\
-        \text{subj. to }\  & g_j(x)\leq 0 \quad j\in\{1,\dots,r\}\\
-        & h_i(x)=0 \quad i\in\{1,\dots,m\}
+        \min_{z\in\R^d}\  &\ell(z) \\
+        \text{subj. to }\  & g_j(z)\leq 0 \quad j\in\{1,\dots,r\}\\
+        & h_i(z)=0 \quad i\in\{1,\dots,m\}
     \end{align*}
     where $\ell,g_j$ and $h_i$ are $\mathcal{C}^1$. \\
     Then $\exists!$  $\mu_j^*$ and $\lambda_i^*$, called \emph{Lagrange multipliers}, s.t.
     \[
         \begin{array}{ r c l}
-            \nabla_1\mathcal{L}(x^*,\mu^*,\lambda^*) & = & 0 \\             \mu_j^* & \geq & 0 \\
-            \mu^*_jg_j(x^*) & = & 0 \qquad j\in \{1,\dots,r\} 
+            \nabla_1\mathcal{L}(z^*,\mu^*,\lambda^*) & = & 0 \\             \mu_j^* & \geq & 0 \\
+            \mu^*_jg_j(z^*) & = & 0 \qquad j\in \{1,\dots,r\} 
         \end{array}
     \]
     Moreover, if $\ell, g_j$ and $h_i$ are $\mathcal{C}^2$ it holds
     \[
-        y^T\nabla_{11}^2\mathcal{L}(x^*,\mu^*,\lambda^*)y \geq 0
+        y^T\nabla_{11}^2\mathcal{L}(z^*,\mu^*,\lambda^*)y \geq 0
     \]
-    for all $y\in\R^n$ such that
+    for all $y\in\R^d$ such that
     \[
-    \nabla h_i(x)^Ty = 0, \quad i\in\{1,\dots,m\}, \qquad \nabla g_j(x)^Ty = 0, \quad j\in A(x) \quad \text{(i.e. } j\in\{1,\dots,r\} \text{ s.t. } g_j(x)=0\}
+    \nabla h_i(z)^Ty = 0, \quad i\in\{1,\dots,m\}, \qquad \nabla g_j(z)^Ty = 0, \quad j\in A(z) \quad \text{(i.e. } j\in\{1,\dots,r\} \text{ s.t. } g_j(z)=0\}
 \]
 \end{theorem}
 \begin{remark}
-    The condition $\mu^*g_j^*(x^*)=0,j\in\{1,\dots,r\}$, is called \emph{complementary slackness}
+    The condition $\mu^*g_j^*(z^*)=0,j\in\{1,\dots,r\}$, is called \emph{complementary slackness}
 \end{remark}
 \begin{notation}
     Points satisfying the KKT necessary conditions of optimality are referred to as \emph{KKT points}. They are the counterpart of stationary points in constrained optimization.
@@ -967,122 +968,122 @@ In order to state the first-order necessary conditions of optimality for (equali
 \subsection{Quadratic programming (constrained)}
 Let us consider quadratic optimization problems with linear equality constraints 
 \begin{align*}
-    \min_{x\in\R^n}\ & x^TQx+q^Tx \\
-    \text{subj. to }\ & Ax=b
+    \min_{z\in\R^d}\ & z^TQz+q^Tz \\
+    \text{subj. to }\ & Az=b
 \end{align*}
-with $Q=Q^T\in\R^{n\times n}, q\in\R^n, a\in\R^{m\times n}$ and $b\in\R^m$.
+with $Q=Q^T\in\R^{d\times d}, q\in\R^d, a\in\R^{m\times d}$ and $b\in\R^m$.
 The Lagrangian function is:
 \[
-    \mathcal{L}(x,\lambda) = x^TQx + q^Tx +\displaystyle\sum_{i=1}^{m}\lambda_i(A_ix+b_i) =  x^TQx + q^Tx + \lambda^T(Ax-b)
+    \mathcal{L}(z,\lambda) = z^TQz + q^Tz +\displaystyle\sum_{i=1}^{m}\lambda_i(A_iz+b_i) =  z^TQz + q^Tz + \lambda^T(Az-b)
 \]
 And the gradient computes as 
 \[
-    \nabla_1 \mathcal{L}(x^*,\lambda^*) = 2Qx^* + q + \displaystyle\sum_{i=1}^{m}\lambda_i^*A_i^T =  2Qx^* + q + A^T\lambda^*
+    \nabla_1 \mathcal{L}(z^*,\lambda^*) = 2Qz^* + q + \displaystyle\sum_{i=1}^{m}\lambda_i^*A_i^T =  2Qz^* + q + A^T\lambda^*
 \]
 The equality constraints must also be enforced: 
 \[
-    Ax^*-b = 0
+    Az^*-b = 0
 \]
 We can note that 
 \[
-    \nabla_2\mathcal{L}(x^*,\lambda^*) = Ax-b
+    \nabla_2\mathcal{L}(z^*,\lambda^*) = Az-b
 \]
 Therefore, first order conditions of optimality may be written as 
 \[
     \begin{bmatrix}
-        \nabla_1\mathcal{L}(x^*,\lambda^*)\\ \nabla_2\mathcal{L}(x^*,\lambda^*)
+        \nabla_1\mathcal{L}(z^*,\lambda^*)\\ \nabla_2\mathcal{L}(z^*,\lambda^*)
     \end{bmatrix} = 0
 \]
-This is always the case when only equality constraints are present. Second order necessary conditions for optimality impose that, if $x^*$ is a minimum then 
+This is always the case when only equality constraints are present. Second order necessary conditions for optimality impose that, if $z^*$ is a minimum then 
 \[
-    y^T\nabla^2_{11}\mathcal{L}(x^*,\lambda^*)y = y^TQy \geq 0
+    y^T\nabla^2_{11}\mathcal{L}(z^*,\lambda^*)y = y^TQy \geq 0
 \]
-for all $y\in\R^n$ such that 
+for all $y\in\R^d$ such that 
 \[
-    \nabla h_i(x)^T y = 0 \qquad i\in\{1,\dots,m\} \quad \implies \quad A^Ty = 0
+    \nabla h_i(z)^T y = 0 \qquad i\in\{1,\dots,m\} \quad \implies \quad A^Ty = 0
 \]
-namely, for all $y\in\R^n$ in the null-space of $A^T$
+namely, for all $y\in\R^d$ in the null-space of $A^T$
 \section{Constrained optimization: optimization algorithms}
 \subsection{Newton's method for equality constrained problems}
-KKT points can be found by solving a root finding problem in variables $x,\lambda$ wrt $r(x,\lambda)=\nabla \mathcal{L}(x,\lambda)$. Newton's method for this root finding problem reads as 
+KKT points can be found by solving a root finding problem in variables $z,\lambda$ wrt $r(z,\lambda)=\nabla \mathcal{L}(z,\lambda)$. Newton's method for this root finding problem reads as 
 \[
     \begin{bmatrix}
-        x^{k+1} \\ \lambda^{k+1}
+        z^{k+1} \\ \lambda^{k+1}
         \end{bmatrix} = \begin{bmatrix}
-        x^k \\ \lambda^k
+        z^k \\ \lambda^k
         \end{bmatrix} + \begin{bmatrix}
-        \Delta x^k \\ \Delta \lambda^k
+        \Delta z^k \\ \Delta \lambda^k
     \end{bmatrix}
 \]
 with 
 \[
     \begin{bmatrix}
-        \Delta x^k \\ \Delta \lambda^k
-    \end{bmatrix} = -(\nabla^2 \mathcal{L}(x^k,\lambda^k))^{-1}\nabla \mathcal{L}(x^k,\lambda^k)
+        \Delta z^k \\ \Delta \lambda^k
+    \end{bmatrix} = -(\nabla^2 \mathcal{L}(z^k,\lambda^k))^{-1}\nabla \mathcal{L}(z^k,\lambda^k)
 \]
 where 
 \begin{gather*}
-    \nabla^2\mathcal{L}(x^k,\lambda^k)= \begin{bmatrix}
-        \nabla_{11} \mathcal{L}(x^*,\lambda^*) & \nabla_{12} \mathcal{L}(x^*,\lambda^*)\\
-        \nabla_{21} \mathcal{L}(x^*,\lambda^*) & \nabla_{22} \mathcal{L}(x^*,\lambda^*)
+    \nabla^2\mathcal{L}(z^k,\lambda^k)= \begin{bmatrix}
+        \nabla_{11} \mathcal{L}(z^*,\lambda^*) & \nabla_{12} \mathcal{L}(z^*,\lambda^*)\\
+        \nabla_{21} \mathcal{L}(z^*,\lambda^*) & \nabla_{22} \mathcal{L}(z^*,\lambda^*)
         \end{bmatrix} = \begin{bmatrix}
-        H^k & \nabla h(x^k) \\
-        \nabla h(x^k)^T & 0
-        \end{bmatrix} \\ \nabla \mathcal{L}(x^k,\lambda^k) = \begin{bmatrix}
-        \nabla \ell(x^k)+\nabla h(x^k)\lambda^k \\ h(x^k)
+        H^k & \nabla h(z^k) \\
+        \nabla h(z^k)^T & 0
+        \end{bmatrix} \\ \nabla \mathcal{L}(z^k,\lambda^k) = \begin{bmatrix}
+        \nabla \ell(z^k)+\nabla h(z^k)\lambda^k \\ h(z^k)
     \end{bmatrix} \\
-    H^k = \nabla_{11}^2 \mathcal{L}(x^k,\lambda^k) \qquad
-    \nabla_{11}\mathcal{L}(x,\lambda) = \nabla^2 \ell(x) + \displaystyle\sum_{i=1}^{m}\lambda_i\nabla^2h_i(x)
+    H^k = \nabla_{11}^2 \mathcal{L}(z^k,\lambda^k) \qquad
+    \nabla_{11}\mathcal{L}(z,\lambda) = \nabla^2 \ell(z) + \displaystyle\sum_{i=1}^{m}\lambda_i\nabla^2h_i(z)
 \end{gather*}
 We can write 
 \[
-    \nabla^2\mathcal{L}(x^k,\lambda^k)\begin{bmatrix}
-        \Delta x^k \\ \Delta \lambda^k
-    \end{bmatrix} = -\nabla \mathcal{L}(x^k,\lambda^k)
+    \nabla^2\mathcal{L}(z^k,\lambda^k)\begin{bmatrix}
+        \Delta z^k \\ \Delta \lambda^k
+    \end{bmatrix} = -\nabla \mathcal{L}(z^k,\lambda^k)
 \]
 namely 
 \[
     \begin{bmatrix}
-        H^k & \nabla h(x^k) \\
-        \nabla h(x^k)^T & 0
+        H^k & \nabla h(z^k) \\
+        \nabla h(z^k)^T & 0
         \end{bmatrix}  \begin{bmatrix}
-        \Delta x^k \\ \Delta \lambda^k
+        \Delta z^k \\ \Delta \lambda^k
         \end{bmatrix} = -\begin{bmatrix}
-        \nabla \ell(x^k)+\nabla h(x^k)\lambda^k \\ h(x^k)
+        \nabla \ell(z^k)+\nabla h(z^k)\lambda^k \\ h(z^k)
     \end{bmatrix}
 \]
-thus, $\Delta x^k, \Delta\lambda^k$ can be obtained as solution of a linear system of equations in the variables $\Delta x, \Delta\lambda$.
+thus, $\Delta z^k, \Delta\lambda^k$ can be obtained as solution of a linear system of equations in the variables $\Delta z, \Delta\lambda$.
 The linear system of equations can be rewritten as 
 \begin{gather*}
-    H^k\Delta x^k+\nabla h(x^k)\Delta \lambda^k = -\nabla\ell(x^k) - \nabla h(x^k)\lambda^k \\
-    \nabla h(x^k)^T \Delta x^k = -h(x^k)
+    H^k\Delta z^k+\nabla h(z^k)\Delta \lambda^k = -\nabla\ell(z^k) - \nabla h(z^k)\lambda^k \\
+    \nabla h(z^k)^T \Delta z^k = -h(z^k)
 \end{gather*}
 and equivalently as 
 \begin{gather*}
-    \nabla\ell(x^k) +H^k\Delta x^k+\nabla h(x^k)\lambda^{k+1} = 0 \\
-    h(x^k)+\nabla h(x^k)^T\Delta x^k = 0
+    \nabla\ell(z^k) +H^k\Delta z^k+\nabla h(z^k)\lambda^{k+1} = 0 \\
+    h(z^k)+\nabla h(z^k)^T\Delta z^k = 0
 \end{gather*}
 We can observe that the above equations are the necessary and sufficient optimality conditions for the Quadratic Program (QP)
 \begin{align*}
-    \min_{\Delta x}\  &\nabla\ell(x^k)^T\Delta x + \displaystyle\frac{1}{2}\Delta x^TH^k\Delta x \\
-    \text{subj. to }\  & h(x^k) + \nabla h(x^k)^T \Delta x = 0
+    \min_{\Delta z}\  &\nabla\ell(z^k)^T\Delta z + \displaystyle\frac{1}{2}\Delta z^TH^k\Delta z \\
+    \text{subj. to }\  & h(z^k) + \nabla h(z^k)^T \Delta z = 0
 \end{align*}
-Therefore, in the Newton's update, we can obtain $(\Delta x^k, \lambda^{k+1})$ by solving this QP.
+Therefore, in the Newton's update, we can obtain $(\Delta z^k, \lambda^{k+1})$ by solving this QP.
 
 \subsection{Sequential Quadratic Programming (SQP)}
-Start from a tentative solution $x^0$. For $k=0,1,\dots$ (up to convergence)
+Start from a tentative solution $z^0$. For $k=0,1,\dots$ (up to convergence)
 \begin{enumerate}
-    \item Compute $\nabla\ell(x^k),H^k,\nabla h(x^k)$ 
-    \item Obtain ($\Delta x^k, \Delta \lambda^k_{QP}$) from 
+    \item Compute $\nabla\ell(z^k),H^k,\nabla h(z^k)$ 
+    \item Obtain ($\Delta z^k, \Delta \lambda^k_{QP}$) from 
         \begin{align}\label{sqp}
-                \Delta x^k = \argmin_{\Delta x}\  & \nabla \ell(x^k)^T\Delta x +\displaystyle\frac{1}{2}\Delta x^TH^k \Delta x \\
-                \text{subj. to }\  & h(x^k) + \nabla h(x^k)^T \Delta x = 0
+                \Delta z^k = \argmin_{\Delta z}\  & \nabla \ell(z^k)^T\Delta z +\displaystyle\frac{1}{2}\Delta z^TH^k \Delta z \\
+                \text{subj. to }\  & h(z^k) + \nabla h(z^k)^T \Delta z = 0
         \end{align}
         with $\Delta\lambda^k_{QP}$ the Lagrange multiplier associated to the optimal solution of \eqref{sqp}
-    \item Choose $\gamma^k$ using Armijo's rule on \emph{merit function} $M_1(x^k+\gamma\Delta x^k)$
+    \item Choose $\gamma^k$ using Armijo's rule on \emph{merit function} $M_1(z^k+\gamma\Delta z^k)$
     \item Update 
         \begin{gather*}
-            x^{k+1} = x^k+ \gamma^k\Delta x^k \\
+            z^{k+1} = z^k+ \gamma^k\Delta z^k \\
             \lambda^{k+1} = \Delta \lambda^*_{QP}
         \end{gather*}
 \end{enumerate}
@@ -1090,18 +1091,21 @@ Start from a tentative solution $x^0$. For $k=0,1,\dots$ (up to convergence)
 \subsection{Barrier function strategy for inequality constraints}
 Consider the inequality optimization problem 
 \begin{align*}
-    \min_{x\in\R^d} & \ell(x) \\
-    \text{subj. to } & g_j(x) \leq 0 \qquad j\in\{1,\dots,r\}\\
-    & h(x) = 0
+    \min_{z\in\R^d} & \ell(z) \\
+    \text{subj. to } & g_j(z) \leq 0 \qquad j\in\{1,\dots,r\}\\
+    & h(z) = 0
 \end{align*}
-Inequality constraints can be embedded in the cost function by means of a \emph{barrier function} $-\varepsilon \log(x)$. The resulting unconstrained problem reads as 
+Inequality constraints can be embedded in the cost function by means of a \emph{barrier function} $-\varepsilon \log(z)$. The resulting unconstrained problem reads as 
 \begin{gather*}
-    \min_{x\in\R^d}\ell(x) + \varepsilon\displaystyle\sum_{j=1}^{r}-\log(-g_j(x)) \\
-    h(x) = 0
+    \min_{z\in\R^d}\ell(z) + \varepsilon\displaystyle\sum_{j=1}^{r}-\log(-g_j(z)) \\
+    h(z) = 0
 \end{gather*}
 Implementation: every few iterations shrink the barrier parameters $\varepsilon$
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sostituisci x con z e X con Z e R^n con R^d
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Optimality conditions for optimal control}
 \section{boh}
