@@ -1,0 +1,83 @@
+
+% Document class for a book with a4paper and openany options
+\documentclass[openany]{book}
+
+% Packages for mathematical symbols, theorems, graphics, fonts, and floating objects
+\usepackage{amsmath, amsthm, graphicx, amsfonts, float, bm}
+
+% Package for language-specific rules (English)
+\usepackage[english]{babel}
+
+% Path for images
+\graphicspath{ {./images/} }
+
+% Package for setting page geometry
+\usepackage{geometry}
+\geometry{
+ a4paper, % Paper size
+ total={170mm,237mm}, % Total usable area
+ left=20mm, % Left margin
+ top=30mm, % Top margin
+}
+
+% Package for hyperlinks without colored borders
+\usepackage[hidelinks]{hyperref}
+
+% Package for custom headers and footers
+\usepackage{fancyhdr}
+
+\usepackage{tikz}
+
+% Set page style to fancy
+\pagestyle{fancy}
+
+% Clear all header and footer fields
+\fancyhf{}
+
+% Remove header rule
+\renewcommand{\headrulewidth}{0pt}
+
+% Center the page number in the footer
+\fancyfoot[C]{\thepage}
+
+% Increase the distance between the footer and the text
+\setlength{\footskip}{50pt}
+
+% Custom commands and operators
+\newcommand\at[2]{\left.#1\right|_{#2}} % Evaluation of a function at a point
+\DeclareMathOperator{\sgn}{sgn} % Sign function
+\DeclareMathOperator{\col}{col} % Column operator
+\DeclareMathOperator{\des}{des} % Descent operator
+\DeclareMathOperator*{\argmax}{arg\,max} % Argument of the maximum
+\DeclareMathOperator*{\argmin}{arg\,min} % Argument of the minimum
+\newcommand{\notimplies}{%
+    \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}} % Not implies symbol
+\newcommand{\R}{\mathbb{R}} % Real numbers symbol
+\newcommand{\N}{\mathbb{N}} % Natural numbers symbol
+\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}} % Derivative operator
+\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})} % Trajectory notation
+
+% Theorem styles and definitions
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section] % Definition environment
+\newtheorem{theorem}{Theorem}[section] % Theorem environment
+\newtheorem{proposition}{Proposition}[section] % Proposition environment
+
+% Remark styles
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark} % Remark environment
+\newtheorem*{notation}{Notation} % Notation environment
+\newtheorem*{corollary}{Corollary} % Corollary environment
+
+\title{Machine Learning and Data Mining}
+\author{Giorgio Medico & Carlo Gervasi}
+\date{fall semester 2024}
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+
+
+\end{document}
