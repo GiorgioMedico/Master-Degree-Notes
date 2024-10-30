@@ -1,87 +1,755 @@
-\chapter{Introduzione alla Business Intelligence}
+\documentclass[a4paper,11pt]{article}
 
-La Business Intelligence rappresenta un insieme completo di metodologie, processi e tecnologie finalizzate alla trasformazione dei dati aziendali in informazioni utili per il processo decisionale. 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+\usepackage{geometry}
 
-\section{Definizioni Fondamentali}
-\begin{description}
-\item[Definizione Gartner:] ``La Business Intelligence è un termine ombrello che include applicazioni, infrastrutture, strumenti e best practice che abilitano l'accesso e l'analisi delle informazioni per migliorare decisioni e performance.''
-\item[Definizione Forrester:] ``La Business Intelligence è un insieme di metodologie, processi, architetture e tecnologie che trasformano i dati grezzi in informazioni significative e utili.''
-\end{description}
+\geometry{
+  a4paper,
+  left=2.5cm,
+  right=2.5cm,
+  top=2.5cm,
+  bottom=2.5cm,
+}
 
-\section{Obiettivi Principali}
-Gli obiettivi fondamentali della BI sono:
+\title{\textbf{Business Intelligence and Data Warehouse}\\\large Course Notes}
+\author{University of Bologna\\Data Mining Course}
+\date{Academic Year 2020/21}
+
+\newcommand{\definition}[1]{
+  \begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=Definition]
+    #1
+  \end{tcolorbox}
+}
+
+\newcommand{\note}[1]{
+  \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Note]
+    #1
+  \end{tcolorbox}
+}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction to Business Intelligence and Data Warehouse}
+
+\subsection{Basic Concepts and Definitions}
+\definition{
+Business Intelligence (BI) is a set of methodologies, processes, architectures, and technologies that:
 \begin{itemize}
-\item Trasformare i dati grezzi in informazioni utili
-\item Supportare strategie aziendali consapevoli
-\item Fornire le informazioni giuste alle persone giuste
-\item Garantire la tempestività dell'informazione
-\item Ottimizzare i canali di distribuzione delle informazioni
+    \item Transform raw data into useful information
+    \item Support effective business strategies
+    \item Deliver the right information to the right people, at the right time, through the right channel
+\end{itemize}
+}
+
+\paragraph{Authoritative Definitions}
+According to Gartner: "Business intelligence is an umbrella term that includes the applications, infrastructure and tools, and best practices that enable access to and analysis of information to improve and optimize decisions and performance."
+
+According to Forrester Research: "Business Intelligence is a set of methodologies, processes, architectures, and technologies that transform raw data into meaningful and useful information used to enable more effective strategic, tactical, and operational insights and decision-making."
+
+\paragraph{Data Warehouse Characteristics}
+\definition{
+The Data Warehouse (DWH) serves as an optimized repository for decision-making and represents a specific type of Decision Support System (DSS).
+}
+
+Key features:
+\begin{itemize}
+    \item Subject-oriented: 
+        \begin{itemize}
+            \item Focuses on enterprise-specific concepts
+            \item Examples: customers, products, sales
+        \end{itemize}
+    \item Integrated and consistent:
+        \begin{itemize}
+            \item Integrates data from different and heterogeneous sources
+            \item Provides unified view of all data
+        \end{itemize}
+    \item Time variant and non-volatile:
+        \begin{itemize}
+            \item Tracks and records changes over time
+            \item Data is static and read-only once committed
+            \item Retained for future reporting
+        \end{itemize}
 \end{itemize}
 
-\chapter{Il Data Warehouse}
+\subsection{BI Infrastructure and Architecture}
 
-\section{Caratteristiche Fondamentali}
-Un Data Warehouse è una collezione di dati che supporta i processi decisionali e presenta le seguenti caratteristiche distintive:
+\paragraph{The BI Pyramid}
+Business Intelligence is structured according to a pyramid representing different levels of data processing:
 
-\begin{description}
-\item[Orientamento ai soggetti] Focus su concetti specifici dell'impresa come clienti, prodotti, vendite
-\item[Integrazione] Unificazione di dati provenienti da fonti eterogenee
-\item[Non volatilità] I dati, una volta inseriti, non vengono modificati
-\item[Variazione temporale] Mantenimento della storicità dei dati
-\end{description}
+\begin{center}
+\begin{tabular}{|c|l|}
+    \hline
+    \textbf{Level} & \textbf{Components} \\
+    \hline
+    DECISIONS & What-if Analysis and simulation modeling \\
+    \hline
+    KNOWLEDGE & Data Mining and learning models \\
+    \hline
+    INFORMATION & OLAP and data warehouse \\
+    \hline
+    DATA & Operational databases and data sources \\
+    \hline
+\end{tabular}
+\end{center}
 
-\section{Vantaggi dei Sistemi DWH}
-I principali vantaggi offerti da un sistema DWH sono:
+\paragraph{Platform Requirements}
+An effective BI platform requires:
 \begin{itemize}
-\item Gestione efficiente dei dati storici
-\item Esecuzione di analisi multidimensionali
-\item Semplicità di apprendimento per gli utenti
-\item Supporto al calcolo di indicatori prestazionali
+    \item Ad-hoc Hardware
+    \item Network infrastructure
+    \item Databases
+    \item Data Warehouse
+    \item Front-end software (Data Visualization)
 \end{itemize}
 
-\chapter{La Piramide della BI}
-La struttura della Business Intelligence può essere rappresentata come una piramide con quattro livelli:
+\subsection{Application Fields}
 
-\begin{description}
-\item[Dati] Database operazionali e fonti dati
-\item[Informazione] OLAP e data warehouse
-\item[Conoscenza] Data Mining e modelli di apprendimento
-\item[Decisioni] Analisi what-if e modelli di simulazione
-\end{description}
-
-\chapter{Campi di Applicazione}
-
-I sistemi DWH trovano applicazione in numerosi settori:
-
-\section{Commercio}
+\paragraph{Commercial Applications}
 \begin{itemize}
-\item Analisi delle vendite e dei reclami
-\item Controllo spedizioni e inventario
-\item Customer care e relazioni pubbliche
+    \item Trade:
+        \begin{itemize}
+            \item Sales and claims analyses
+            \item Shipment and inventory control
+            \item Customer care and public relations
+        \end{itemize}
+    \item Financial Services:
+        \begin{itemize}
+            \item Risk analysis
+            \item Fraud detection
+            \item Credit card management
+        \end{itemize}
 \end{itemize}
 
-\section{Servizi Finanziari}
+\paragraph{Service Applications}
 \begin{itemize}
-\item Analisi del rischio
-\item Gestione carte di credito
-\item Rilevamento frodi
+    \item Transport: Vehicle management
+    \item Telecommunications:
+        \begin{itemize}
+            \item Customer profile analysis
+            \item Network performance analysis
+        \end{itemize}
+    \item Healthcare: Patient admission and discharge analysis
 \end{itemize}
 
-\section{Altri Settori}
+\section{Data Processing and OLAP}
+
+\subsection{OLAP Fundamentals}
+\definition{
+Online Analytical Processing (OLAP) allows users to interactively navigate data warehouse information by exploiting the multidimensional model. Data is analyzed at different levels of aggregation through subsequent OLAP operators.
+}
+
+\paragraph{Typical Queries}
+Common OLAP analytical questions include:
 \begin{itemize}
-\item \textbf{Trasporti:} Gestione veicoli
-\item \textbf{Telecomunicazioni:} Analisi profilo clienti e performance di rete
-\item \textbf{Sanità:} Analisi ammissioni e dimissioni pazienti
+    \item Which products maximize profit?
+    \item What is the total revenue per product category and state?
+    \item What is the relationship between profits gained by different products?
+    \item What is the revenue trend in the last three years?
 \end{itemize}
 
-\chapter{Infrastruttura BI}
+\paragraph{OLTP vs OLAP Comparison}
+\begin{center}
+\begin{tabular}{|p{3.5cm}|p{5cm}|p{5cm}|}
+    \hline
+    \textbf{Feature} & \textbf{OLTP} & \textbf{OLAP} \\
+    \hline
+    System Type & Transaction processing & Analytical processing \\
+    \hline
+    Data Scope & Few records per transaction & Millions of records per query \\
+    \hline
+    Processing Pattern & Fixed transactions & Dynamic analyses \\
+    \hline
+    Data Access & Read and write & Mainly read-only \\
+    \hline
+    Update Frequency & Continuous & Periodic \\
+    \hline
+    Optimization & For transaction speed & For query performance \\
+    \hline
+\end{tabular}
+\end{center}
 
-Un'efficace piattaforma BI richiede:
+\subsection{Multidimensional Analysis}
+
+\paragraph{Data Cube Example}
+Here's an example of how data is organized in a multidimensional view:
+
+\begin{center}
+\begin{tabular}{|l|l|l|r|r|r|r|}
+    \hline
+    \textbf{Category} & \textbf{Type} & \textbf{Product} & \multicolumn{2}{c|}{\textbf{2015}} & \multicolumn{2}{c|}{\textbf{2014}} \\
+    \cline{4-7}
+    & & & \textbf{Jan} & \textbf{Feb} & \textbf{Jan} & \textbf{Feb} \\
+    \hline
+    Food and & Dairy & White milk & 90 & 90 & 60 & 80 \\
+    Beverages & products & Chocolate milk & 60 & 80 & 70 & 70 \\
+    & & Yogurt XY & 20 & 30 & 30 & 35 \\
+    \cline{2-7}
+    & Beverages & Cola & 20 & 10 & 35 & 30 \\
+    & & Orange Juice X & 50 & 60 & 60 & 45 \\
+    \hline
+\end{tabular}
+\end{center}
+
+\paragraph{OLAP Operators}
+\begin{itemize}
+    \item \textbf{Roll-up:} 
+        \begin{itemize}
+            \item Increases data aggregation
+            \item Removes detail level from hierarchy
+            \item Example: Product → Type → Category
+        \end{itemize}
+    \item \textbf{Drill-down:}
+        \begin{itemize}
+            \item Reduces data aggregation
+            \item Adds detail level to hierarchy
+            \item Example: Category → Type → Product
+        \end{itemize}
+    \item \textbf{Slice-and-dice:}
+        \begin{itemize}
+            \item Slice: Sets one dimension to specific value
+            \item Dice: Reduces data set by selection criteria
+        \end{itemize}
+    \item \textbf{Pivot:}
+        \begin{itemize}
+            \item Changes data presentation layout
+            \item Reorganizes multidimensional view
+        \end{itemize}
+    \item \textbf{Drill-across:}
+        \begin{itemize}
+            \item Links concepts between related cubes
+            \item Enables cross-cube analysis
+        \end{itemize}
+    \item \textbf{Drill-through:}
+        \begin{itemize}
+            \item Accesses detailed operational data
+            \item Connects aggregates to source data
+        \end{itemize}
+\end{itemize}
+
+\subsection{Data Mart}
+\definition{
+A Data Mart is a subset or an aggregation of data stored in a primary data warehouse, focused on a specific business area, corporate department, or category of users.
+}
+
+\paragraph{Key Characteristics}
+\begin{itemize}
+    \item Serves as building block for incremental DWH development
+    \item Focuses on specific business area or user group
+    \item Provides better query performance due to smaller size
+    \item Enables departmental data management
+\end{itemize}
+
+\note{
+Data Marts can be dependent (sourced from enterprise DWH) or independent (sourced directly from operational systems).
+}
+
+\section{ETL Process}
+
+\subsection{Overview and Components}
+\definition{
+The ETL (Extraction, Transformation, Loading) process extracts, integrates, and cleans data from operational sources to feed the Data Warehouse layer. This process ensures data quality and consistency in the DWH.
+}
+
+\subsection{Extraction Phase}
+\paragraph{Extraction Methods}
+\begin{itemize}
+    \item \textbf{Static Extraction:}
+        \begin{itemize}
+            \item Initial DWH population
+            \item Complete snapshot of operational data
+            \item Used for first-time setup
+        \end{itemize}
+    \item \textbf{Incremental Extraction:}
+        \begin{itemize}
+            \item Regular DWH updates
+            \item Captures changes since last extraction
+            \item Based on timestamps or triggers
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Data Source Types}
+\begin{itemize}
+    \item \textbf{Structured Data:}
+        \begin{itemize}
+            \item Relational databases
+            \item Fixed format files
+            \item Well-defined schemas
+        \end{itemize}
+    \item \textbf{Unstructured Data:}
+        \begin{itemize}
+            \item No pre-defined data model
+            \item Variable formats
+            \item Requires more complex processing
+        \end{itemize}
+\end{itemize}
+
+\subsection{Data Cleansing}
+\paragraph{Common Quality Issues}
+\begin{enumerate}
+    \item \textbf{Data Duplication:}
+        \begin{itemize}
+            \item Multiple customer registrations
+            \item Redundant records
+            \item Inconsistent representations
+        \end{itemize}
+    \item \textbf{Missing or Incomplete Data:}
+        \begin{itemize}
+            \item Null values
+            \item Partial information
+            \item Empty required fields
+        \end{itemize}
+    \item \textbf{Format Issues:}
+        \begin{itemize}
+            \item Inconsistent date formats
+            \item Mixed number representations
+            \item Character encoding problems
+        \end{itemize}
+    \item \textbf{Value Problems:}
+        \begin{itemize}
+            \item Invalid entries (e.g., "30th Feb 2016")
+            \item Out-of-range values
+            \item Logical inconsistencies
+        \end{itemize}
+\end{enumerate}
+
+\paragraph{Cleansing Solutions}
+\begin{itemize}
+    \item \textbf{Dictionary-based Techniques:}
+        \begin{itemize}
+            \item Lookup tables for standardization
+            \item Abbreviation resolution
+            \item Format normalization
+        \end{itemize}
+    \item \textbf{Approximate Matching:}
+        \begin{itemize}
+            \item Similarity functions
+            \item Fuzzy matching
+            \item Pattern recognition
+        \end{itemize}
+    \item \textbf{Custom Algorithms:}
+        \begin{itemize}
+            \item Business rule validation
+            \item Domain-specific checks
+            \item Complex data verification
+        \end{itemize}
+\end{itemize}
+
+\note{
+Example of lookup table for standardization:
+\begin{center}
+\begin{tabular}{|l|l|}
+    \hline
+    \textbf{Short Form} & \textbf{Standard Form} \\
+    \hline
+    IT & Italy \\
+    FR & France \\
+    DE & Germany \\
+    GR & Greece \\
+    ES & Spain \\
+    \hline
+\end{tabular}
+\end{center}
+}
+
+\subsection{Transformation and Loading}
+
+\paragraph{Transformation Types}
+\begin{enumerate}
+    \item \textbf{Basic Conversion:}
+        \begin{itemize}
+            \item Data type changes
+            \item Format standardization
+            \item Unit conversion
+            \item Example: Date formatting (12/11/2018 → 20181112)
+        \end{itemize}
+    \item \textbf{Data Enrichment:}
+        \begin{itemize}
+            \item Derived calculations
+            \item Attribute combination
+            \item Value enhancement
+            \item Example: Profit = Revenue - Cost
+        \end{itemize}
+    \item \textbf{Structural Transformation:}
+        \begin{itemize}
+            \item Denormalization
+            \item Key generation
+            \item Hierarchy building
+            \item Example: Combining customer name fields
+        \end{itemize}
+\end{enumerate}
+
+\paragraph{Loading Strategies}
+\begin{itemize}
+    \item \textbf{Full Refresh:}
+        \begin{itemize}
+            \item Complete DWH rewrite
+            \item Suitable for initial loads
+            \item Ensures data consistency
+        \end{itemize}
+    \item \textbf{Incremental Update:}
+        \begin{itemize}
+            \item Adds only changed data
+            \item Preserves existing records
+            \item More efficient for regular updates
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Loading Considerations}
+\begin{itemize}
+    \item Performance optimization
+    \item Data integrity maintenance
+    \item Recovery procedures
+    \item Load monitoring and validation
+\end{itemize}
+\section{Data Warehouse Architectures}
+
+\subsection{Architectural Requirements}
+\definition{
+DWH architectures must satisfy specific requirements to ensure effective data management, analysis capabilities, and system maintainability.
+}
+
+\paragraph{Core Requirements}
+\begin{enumerate}
+    \item \textbf{Separation}
+        \begin{itemize}
+            \item Analytical and transactional processing kept separate
+            \item Dedicated resources for each type of operation
+            \item Optimized performance for both workloads
+        \end{itemize}
+    \item \textbf{Scalability}
+        \begin{itemize}
+            \item Easy hardware/software upgrades
+            \item Handles increasing data volumes
+            \item Accommodates growing user base
+            \item Supports additional applications
+        \end{itemize}
+    \item \textbf{Extensibility}
+        \begin{itemize}
+            \item Integrates new technologies
+            \item Adds functionality without redesign
+            \item Supports evolving business needs
+        \end{itemize}
+    \item \textbf{Security}
+        \begin{itemize}
+            \item Access control and monitoring
+            \item Data protection mechanisms
+            \item Audit trail capabilities
+        \end{itemize}
+    \item \textbf{Administrability}
+        \begin{itemize}
+            \item Simplified management procedures
+            \item Efficient maintenance processes
+            \item Clear operational procedures
+        \end{itemize}
+\end{enumerate}
+
+\subsection{Architectural Models}
+
+\paragraph{Single-Layer Architecture}
+\definition{
+A simple architecture that minimizes data storage by removing redundancies, where the source layer is the only physical layer available.
+}
 
 \begin{itemize}
-\item Hardware dedicato
-\item Infrastruttura di rete
-\item Database ottimizzati
-\item Data Warehouse
-\item Software di front-end per la visualizzazione
+    \item \textbf{Characteristics:}
+        \begin{itemize}
+            \item DWH implemented as virtual view
+            \item Uses middleware for data access
+            \item Minimal data duplication
+        \end{itemize}
+    \item \textbf{Advantages:}
+        \begin{itemize}
+            \item Reduced storage requirements
+            \item Simpler maintenance
+            \item Always current data
+        \end{itemize}
+    \item \textbf{Disadvantages:}
+        \begin{itemize}
+            \item Performance limitations
+            \item No separation of workloads
+            \item Complex query processing
+        \end{itemize}
 \end{itemize}
+
+\paragraph{Two-Layer Architecture}
+\definition{
+Provides clear separation between source systems and the data warehouse through distinct layers for different functionalities.
+}
+
+\begin{itemize}
+    \item \textbf{Layer Structure:}
+        \begin{itemize}
+            \item Source Layer (operational data)
+            \item Data Staging Area (ETL processing)
+            \item Data Warehouse Layer (analytical data)
+            \item Analysis Layer (user access)
+        \end{itemize}
+    \item \textbf{Key Features:}
+        \begin{itemize}
+            \item Separate physical storage
+            \item Dedicated processing areas
+            \item Clear functional separation
+        \end{itemize}
+\end{itemize}
+
+\note{
+The two-layer architecture represents a balance between complexity and functionality, making it a popular choice for many organizations.
+}
+
+\paragraph{Three-Layer Architecture}
+\definition{
+Extends the two-layer architecture by adding a reconciled layer between sources and the data warehouse, providing additional data integration capabilities.
+}
+
+\begin{itemize}
+    \item \textbf{Layer Components:}
+        \begin{enumerate}
+            \item \textbf{Source Layer:}
+                \begin{itemize}
+                    \item Internal data sources
+                    \item External data sources
+                    \item Operational systems
+                \end{itemize}
+            \item \textbf{Reconciled Layer:}
+                \begin{itemize}
+                    \item Integrated operational data
+                    \item Common data model
+                    \item Cleansed and standardized data
+                \end{itemize}
+            \item \textbf{Data Warehouse Layer:}
+                \begin{itemize}
+                    \item Enterprise data warehouse
+                    \item Data marts
+                    \item Analytical databases
+                \end{itemize}
+        \end{enumerate}
+\end{itemize}
+
+\paragraph{Architecture Comparison}
+\begin{center}
+\begin{tabular}{|p{3cm}|p{4cm}|p{4cm}|p{4cm}|}
+    \hline
+    \textbf{Feature} & \textbf{Single-Layer} & \textbf{Two-Layer} & \textbf{Three-Layer} \\
+    \hline
+    Complexity & Low & Medium & High \\
+    \hline
+    Data Redundancy & Minimal & Moderate & Higher \\
+    \hline
+    Performance & Limited & Good & Excellent \\
+    \hline
+    Maintenance & Simple & Moderate & Complex \\
+    \hline
+    Scalability & Limited & Good & Excellent \\
+    \hline
+    Data Integration & Basic & Good & Advanced \\
+    \hline
+\end{tabular}
+\end{center}
+
+\subsection{Implementation Considerations}
+
+\paragraph{Technology Selection}
+\begin{itemize}
+    \item Hardware infrastructure requirements
+    \item Database management systems
+    \item ETL tools and middleware
+    \item Analysis and reporting tools
+\end{itemize}
+
+\paragraph{Performance Optimization}
+\begin{itemize}
+    \item Data partitioning strategies
+    \item Index design and management
+    \item Query optimization techniques
+    \item Cache management
+\end{itemize}
+
+\paragraph{Management and Monitoring}
+\begin{itemize}
+    \item System health monitoring
+    \item Performance metrics tracking
+    \item Capacity planning
+    \item Disaster recovery procedures
+\end{itemize}
+
+\section{Dimensional Fact Model}
+
+\subsection{Conceptual Design Approaches}
+\definition{
+The DFM (Dimensional Fact Model) is a conceptual model specifically created to support data mart design. It is graphic-based and founded on the multidimensional model.
+}
+
+\paragraph{Design Methodologies}
+\begin{itemize}
+    \item \textbf{Requirement-driven Approach:}
+        \begin{itemize}
+            \item Based on user analysis
+            \item Extracts information about facts, measures, hierarchies
+            \item Used when source data is complex or unavailable
+        \end{itemize}
+    \item \textbf{Data-driven Approach:}
+        \begin{itemize}
+            \item Based on operational source structure
+            \item Direct translation from source schemas
+            \item Used when sources are well-defined
+        \end{itemize}
+    \item \textbf{Mixed Approach:}
+        \begin{itemize}
+            \item Combines both methodologies
+            \item Balances user needs with data availability
+            \item Most common in practice
+        \end{itemize}
+\end{itemize}
+
+\subsection{Core Components}
+
+\paragraph{Facts and Measures}
+\begin{itemize}
+    \item \textbf{Facts:}
+        \begin{itemize}
+            \item Business events or processes
+            \item Examples: sales, orders, shipments
+            \item Center of analysis interest
+        \end{itemize}
+    \item \textbf{Measures:}
+        \begin{itemize}
+            \item Numerical properties of facts
+            \item Quantitative aspects
+            \item Examples: quantity, revenue, profit
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Dimensions and Attributes}
+\begin{itemize}
+    \item \textbf{Dimensions:}
+        \begin{itemize}
+            \item Analysis perspectives
+            \item Finite domains
+            \item Examples: time, product, location
+        \end{itemize}
+    \item \textbf{Dimensional Attributes:}
+        \begin{itemize}
+            \item Descriptive properties
+            \item Hierarchy components
+            \item Examples: product category, month name
+        \end{itemize}
+\end{itemize}
+
+\subsection{Advanced Concepts}
+
+\paragraph{Hierarchies and Relationships}
+\begin{itemize}
+    \item \textbf{Standard Hierarchies:}
+        \begin{itemize}
+            \item Many-to-one relationships
+            \item Regular structure
+            \item Example: Day → Month → Year
+        \end{itemize}
+    \item \textbf{Specialized Hierarchies:}
+        \begin{itemize}
+            \item Recursive relationships
+            \item Multiple paths
+            \item Optional relationships
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Advanced Features}
+\begin{itemize}
+    \item \textbf{Cross-dimensional Attributes:}
+        \begin{itemize}
+            \item Derived from multiple dimensions
+            \item Complex relationships
+            \item Advanced analysis capabilities
+        \end{itemize}
+    \item \textbf{Convergence:}
+        \begin{itemize}
+            \item Multiple paths to same attribute
+            \item Alternative drill-down paths
+            \item Complex hierarchical structures
+        \end{itemize}
+    \item \textbf{Optional Elements:}
+        \begin{itemize}
+            \item Conditional relationships
+            \item Partial hierarchies
+            \item Flexible structures
+        \end{itemize}
+\end{itemize}
+
+\subsection{Logical Implementation}
+
+\paragraph{Star Schema}
+\definition{
+A denormalized schema structure where a central fact table is connected to dimension tables in a star-like pattern.
+}
+
+\begin{itemize}
+    \item \textbf{Components:}
+        \begin{itemize}
+            \item Central fact table with measures
+            \item Surrounding dimension tables
+            \item Simple join paths
+        \end{itemize}
+    \item \textbf{Characteristics:}
+        \begin{itemize}
+            \item Denormalized dimensions
+            \item Optimized for queries
+            \item Simple to understand and use
+        \end{itemize}
+\end{itemize}
+
+
+\paragraph{Snowflake Schema}
+\bigskip
+
+\definition{
+A normalized variant of the star schema where dimension tables are split into multiple related tables.
+}
+
+\begin{itemize}
+    \item \textbf{Structure:}
+        \begin{itemize}
+            \item Normalized dimensions
+            \item Multiple related tables
+            \item Hierarchical organization
+        \end{itemize}
+    \item \textbf{Trade-offs:}
+        \begin{itemize}
+            \item Reduced storage space
+            \item More complex queries
+            \item Better data consistency
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Schema Comparison}
+\begin{center}
+\begin{tabular}{|p{3cm}|p{5.5cm}|p{5.5cm}|}
+    \hline
+    \textbf{Aspect} & \textbf{Star Schema} & \textbf{Snowflake Schema} \\
+    \hline
+    Structure & Simple, denormalized dimensions & Complex, normalized dimensions \\
+    \hline
+    Storage Space & Higher due to redundancy & Lower due to normalization \\
+    \hline
+    Query Performance & Better (fewer joins) & May be slower (more joins) \\
+    \hline
+    Maintenance & Easier to maintain & More complex maintenance \\
+    \hline
+    Data Integrity & Possible redundancy issues & Better referential integrity \\
+    \hline
+\end{tabular}
+\end{center}
+
+\end{document}
