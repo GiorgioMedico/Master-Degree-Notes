@@ -1,51 +1,7 @@
-\documentclass[a4paper,11pt]{article}
+\chapter{Introduction to Business Intelligence and Data Warehouse}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{enumitem}
-\usepackage{listings}
-\usepackage{xcolor}
-\usepackage[most]{tcolorbox}
-\usepackage{hyperref}
-\usepackage{geometry}
-
-\geometry{
-  a4paper,
-  left=2.5cm,
-  right=2.5cm,
-  top=2.5cm,
-  bottom=2.5cm,
-}
-
-\title{\textbf{Business Intelligence and Data Warehouse}\\\large Course Notes}
-\author{University of Bologna\\Data Mining Course}
-\date{Academic Year 2020/21}
-
-\newcommand{\definition}[1]{
-  \begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=Definition]
-    #1
-  \end{tcolorbox}
-}
-
-\newcommand{\note}[1]{
-  \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Note]
-    #1
-  \end{tcolorbox}
-}
-
-\begin{document}
-
-\maketitle
-\tableofcontents
-\newpage
-
-\section{Introduction to Business Intelligence and Data Warehouse}
-
-\subsection{Basic Concepts and Definitions}
-\definition{
+\section{Basic Concepts and Definitions}
+\definitionbox{
 Business Intelligence (BI) is a set of methodologies, processes, architectures, and technologies that:
 \begin{itemize}
     \item Transform raw data into useful information
@@ -54,13 +10,13 @@ Business Intelligence (BI) is a set of methodologies, processes, architectures, 
 \end{itemize}
 }
 
-\paragraph{Authoritative Definitions}
+\subsection{Authoritative Definitions}
 According to Gartner: "Business intelligence is an umbrella term that includes the applications, infrastructure and tools, and best practices that enable access to and analysis of information to improve and optimize decisions and performance."
 
 According to Forrester Research: "Business Intelligence is a set of methodologies, processes, architectures, and technologies that transform raw data into meaningful and useful information used to enable more effective strategic, tactical, and operational insights and decision-making."
 
-\paragraph{Data Warehouse Characteristics}
-\definition{
+\subsection{Data Warehouse Characteristics}
+\definitionbox{
 The Data Warehouse (DWH) serves as an optimized repository for decision-making and represents a specific type of Decision Support System (DSS).
 }
 
@@ -84,9 +40,9 @@ Key features:
         \end{itemize}
 \end{itemize}
 
-\subsection{BI Infrastructure and Architecture}
+\section{BI Infrastructure and Architecture}
 
-\paragraph{The BI Pyramid}
+\subsection{The BI Pyramid}
 Business Intelligence is structured according to a pyramid representing different levels of data processing:
 
 \begin{center}
@@ -105,7 +61,7 @@ Business Intelligence is structured according to a pyramid representing differen
 \end{tabular}
 \end{center}
 
-\paragraph{Platform Requirements}
+\subsection{Platform Requirements}
 An effective BI platform requires:
 \begin{itemize}
     \item Ad-hoc Hardware
@@ -115,9 +71,9 @@ An effective BI platform requires:
     \item Front-end software (Data Visualization)
 \end{itemize}
 
-\subsection{Application Fields}
+\section{Application Fields}
 
-\paragraph{Commercial Applications}
+\subsection{Commercial Applications}
 \begin{itemize}
     \item Trade:
         \begin{itemize}
@@ -133,7 +89,7 @@ An effective BI platform requires:
         \end{itemize}
 \end{itemize}
 
-\paragraph{Service Applications}
+\subsection{Service Applications}
 \begin{itemize}
     \item Transport: Vehicle management
     \item Telecommunications:
@@ -144,14 +100,14 @@ An effective BI platform requires:
     \item Healthcare: Patient admission and discharge analysis
 \end{itemize}
 
-\section{Data Processing and OLAP}
+\chapter{Data Processing and OLAP}
 
-\subsection{OLAP Fundamentals}
-\definition{
+\section{OLAP Fundamentals}
+\definitionbox{
 Online Analytical Processing (OLAP) allows users to interactively navigate data warehouse information by exploiting the multidimensional model. Data is analyzed at different levels of aggregation through subsequent OLAP operators.
 }
 
-\paragraph{Typical Queries}
+\subsection{Typical Queries}
 Common OLAP analytical questions include:
 \begin{itemize}
     \item Which products maximize profit?
@@ -160,7 +116,7 @@ Common OLAP analytical questions include:
     \item What is the revenue trend in the last three years?
 \end{itemize}
 
-\paragraph{OLTP vs OLAP Comparison}
+\subsection{OLTP vs OLAP Comparison}
 \begin{center}
 \begin{tabular}{|p{3.5cm}|p{5cm}|p{5cm}|}
     \hline
@@ -181,9 +137,9 @@ Common OLAP analytical questions include:
 \end{tabular}
 \end{center}
 
-\subsection{Multidimensional Analysis}
+\section{Multidimensional Analysis}
 
-\paragraph{Data Cube Example}
+\subsection{Data Cube Example}
 Here's an example of how data is organized in a multidimensional view:
 
 \begin{center}
@@ -203,7 +159,7 @@ Here's an example of how data is organized in a multidimensional view:
 \end{tabular}
 \end{center}
 
-\paragraph{OLAP Operators}
+\subsection{OLAP Operators}
 \begin{itemize}
     \item \textbf{Roll-up:} 
         \begin{itemize}
@@ -238,13 +194,12 @@ Here's an example of how data is organized in a multidimensional view:
             \item Connects aggregates to source data
         \end{itemize}
 \end{itemize}
-
-\subsection{Data Mart}
-\definition{
+\section{Data Mart}
+\definitionbox{
 A Data Mart is a subset or an aggregation of data stored in a primary data warehouse, focused on a specific business area, corporate department, or category of users.
 }
 
-\paragraph{Key Characteristics}
+\subsection{Key Characteristics}
 \begin{itemize}
     \item Serves as building block for incremental DWH development
     \item Focuses on specific business area or user group
@@ -255,16 +210,15 @@ A Data Mart is a subset or an aggregation of data stored in a primary data wareh
 \note{
 Data Marts can be dependent (sourced from enterprise DWH) or independent (sourced directly from operational systems).
 }
+\chapter{ETL Process}
 
-\section{ETL Process}
-
-\subsection{Overview and Components}
-\definition{
+\section{Overview and Components}
+\definitionbox{
 The ETL (Extraction, Transformation, Loading) process extracts, integrates, and cleans data from operational sources to feed the Data Warehouse layer. This process ensures data quality and consistency in the DWH.
 }
 
-\subsection{Extraction Phase}
-\paragraph{Extraction Methods}
+\section{Extraction Phase}
+\subsection{Extraction Methods}
 \begin{itemize}
     \item \textbf{Static Extraction:}
         \begin{itemize}
@@ -280,7 +234,7 @@ The ETL (Extraction, Transformation, Loading) process extracts, integrates, and 
         \end{itemize}
 \end{itemize}
 
-\paragraph{Data Source Types}
+\subsection{Data Source Types}
 \begin{itemize}
     \item \textbf{Structured Data:}
         \begin{itemize}
@@ -296,8 +250,8 @@ The ETL (Extraction, Transformation, Loading) process extracts, integrates, and 
         \end{itemize}
 \end{itemize}
 
-\subsection{Data Cleansing}
-\paragraph{Common Quality Issues}
+\section{Data Cleansing}
+\subsection{Common Quality Issues}
 \begin{enumerate}
     \item \textbf{Data Duplication:}
         \begin{itemize}
@@ -324,8 +278,7 @@ The ETL (Extraction, Transformation, Loading) process extracts, integrates, and 
             \item Logical inconsistencies
         \end{itemize}
 \end{enumerate}
-
-\paragraph{Cleansing Solutions}
+\subsection{Cleansing Solutions}
 \begin{itemize}
     \item \textbf{Dictionary-based Techniques:}
         \begin{itemize}
@@ -362,11 +315,10 @@ Example of lookup table for standardization:
     \hline
 \end{tabular}
 \end{center}
-}
 
-\subsection{Transformation and Loading}
+}\section{Transformation and Loading}
 
-\paragraph{Transformation Types}
+\subsection{Transformation Types}
 \begin{enumerate}
     \item \textbf{Basic Conversion:}
         \begin{itemize}
@@ -391,7 +343,7 @@ Example of lookup table for standardization:
         \end{itemize}
 \end{enumerate}
 
-\paragraph{Loading Strategies}
+\subsection{Loading Strategies}
 \begin{itemize}
     \item \textbf{Full Refresh:}
         \begin{itemize}
@@ -407,21 +359,22 @@ Example of lookup table for standardization:
         \end{itemize}
 \end{itemize}
 
-\paragraph{Loading Considerations}
+\subsection{Loading Considerations}
 \begin{itemize}
     \item Performance optimization
     \item Data integrity maintenance
     \item Recovery procedures
     \item Load monitoring and validation
 \end{itemize}
-\section{Data Warehouse Architectures}
 
-\subsection{Architectural Requirements}
-\definition{
+\chapter{Data Warehouse Architectures}
+
+\section{Architectural Requirements}
+\definitionbox{
 DWH architectures must satisfy specific requirements to ensure effective data management, analysis capabilities, and system maintainability.
 }
 
-\paragraph{Core Requirements}
+\subsection{Core Requirements}
 \begin{enumerate}
     \item \textbf{Separation}
         \begin{itemize}
@@ -456,10 +409,10 @@ DWH architectures must satisfy specific requirements to ensure effective data ma
         \end{itemize}
 \end{enumerate}
 
-\subsection{Architectural Models}
+\section{Architectural Models}
 
-\paragraph{Single-Layer Architecture}
-\definition{
+\subsection{Single-Layer Architecture}
+\definitionbox{
 A simple architecture that minimizes data storage by removing redundancies, where the source layer is the only physical layer available.
 }
 
@@ -484,8 +437,9 @@ A simple architecture that minimizes data storage by removing redundancies, wher
         \end{itemize}
 \end{itemize}
 
-\paragraph{Two-Layer Architecture}
-\definition{
+
+\subsection{Two-Layer Architecture}
+\definitionbox{
 Provides clear separation between source systems and the data warehouse through distinct layers for different functionalities.
 }
 
@@ -509,8 +463,8 @@ Provides clear separation between source systems and the data warehouse through 
 The two-layer architecture represents a balance between complexity and functionality, making it a popular choice for many organizations.
 }
 
-\paragraph{Three-Layer Architecture}
-\definition{
+\subsection{Three-Layer Architecture}
+\definitionbox{
 Extends the two-layer architecture by adding a reconciled layer between sources and the data warehouse, providing additional data integration capabilities.
 }
 
@@ -538,7 +492,7 @@ Extends the two-layer architecture by adding a reconciled layer between sources 
         \end{enumerate}
 \end{itemize}
 
-\paragraph{Architecture Comparison}
+\subsection{Architecture Comparison}
 \begin{center}
 \begin{tabular}{|p{3cm}|p{4cm}|p{4cm}|p{4cm}|}
     \hline
@@ -559,9 +513,9 @@ Extends the two-layer architecture by adding a reconciled layer between sources 
 \end{tabular}
 \end{center}
 
-\subsection{Implementation Considerations}
+\section{Implementation Considerations}
 
-\paragraph{Technology Selection}
+\subsection{Technology Selection}
 \begin{itemize}
     \item Hardware infrastructure requirements
     \item Database management systems
@@ -569,7 +523,7 @@ Extends the two-layer architecture by adding a reconciled layer between sources 
     \item Analysis and reporting tools
 \end{itemize}
 
-\paragraph{Performance Optimization}
+\subsection{Performance Optimization}
 \begin{itemize}
     \item Data partitioning strategies
     \item Index design and management
@@ -577,22 +531,21 @@ Extends the two-layer architecture by adding a reconciled layer between sources 
     \item Cache management
 \end{itemize}
 
-\paragraph{Management and Monitoring}
+\subsection{Management and Monitoring}
 \begin{itemize}
     \item System health monitoring
     \item Performance metrics tracking
     \item Capacity planning
     \item Disaster recovery procedures
 \end{itemize}
+\chapter{Dimensional Fact Model}
 
-\section{Dimensional Fact Model}
-
-\subsection{Conceptual Design Approaches}
-\definition{
+\section{Conceptual Design Approaches}
+\definitionbox{
 The DFM (Dimensional Fact Model) is a conceptual model specifically created to support data mart design. It is graphic-based and founded on the multidimensional model.
 }
 
-\paragraph{Design Methodologies}
+\subsection{Design Methodologies}
 \begin{itemize}
     \item \textbf{Requirement-driven Approach:}
         \begin{itemize}
@@ -614,9 +567,9 @@ The DFM (Dimensional Fact Model) is a conceptual model specifically created to s
         \end{itemize}
 \end{itemize}
 
-\subsection{Core Components}
+\section{Core Components}
 
-\paragraph{Facts and Measures}
+\subsection{Facts and Measures}
 \begin{itemize}
     \item \textbf{Facts:}
         \begin{itemize}
@@ -632,7 +585,7 @@ The DFM (Dimensional Fact Model) is a conceptual model specifically created to s
         \end{itemize}
 \end{itemize}
 
-\paragraph{Dimensions and Attributes}
+\subsection{Dimensions and Attributes}
 \begin{itemize}
     \item \textbf{Dimensions:}
         \begin{itemize}
@@ -648,9 +601,9 @@ The DFM (Dimensional Fact Model) is a conceptual model specifically created to s
         \end{itemize}
 \end{itemize}
 
-\subsection{Advanced Concepts}
+\section{Advanced Concepts}
 
-\paragraph{Hierarchies and Relationships}
+\subsection{Hierarchies and Relationships}
 \begin{itemize}
     \item \textbf{Standard Hierarchies:}
         \begin{itemize}
@@ -666,7 +619,7 @@ The DFM (Dimensional Fact Model) is a conceptual model specifically created to s
         \end{itemize}
 \end{itemize}
 
-\paragraph{Advanced Features}
+\subsection{Advanced Features}
 \begin{itemize}
     \item \textbf{Cross-dimensional Attributes:}
         \begin{itemize}
@@ -688,10 +641,10 @@ The DFM (Dimensional Fact Model) is a conceptual model specifically created to s
         \end{itemize}
 \end{itemize}
 
-\subsection{Logical Implementation}
+\section{Logical Implementation}
 
-\paragraph{Star Schema}
-\definition{
+\subsection{Star Schema}
+\definitionbox{
 A denormalized schema structure where a central fact table is connected to dimension tables in a star-like pattern.
 }
 
@@ -711,10 +664,10 @@ A denormalized schema structure where a central fact table is connected to dimen
 \end{itemize}
 
 
-\paragraph{Snowflake Schema}
+\subsection{Snowflake Schema}
 \bigskip
 
-\definition{
+\definitionbox{
 A normalized variant of the star schema where dimension tables are split into multiple related tables.
 }
 
@@ -733,7 +686,7 @@ A normalized variant of the star schema where dimension tables are split into mu
         \end{itemize}
 \end{itemize}
 
-\paragraph{Schema Comparison}
+\subsection{Schema Comparison}
 \begin{center}
 \begin{tabular}{|p{3cm}|p{5.5cm}|p{5.5cm}|}
     \hline
@@ -751,5 +704,3 @@ A normalized variant of the star schema where dimension tables are split into mu
     \hline
 \end{tabular}
 \end{center}
-
-\end{document}

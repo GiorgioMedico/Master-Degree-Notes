@@ -1,73 +1,74 @@
-
-% Document class for a book with a4paper and openany options
 \documentclass[openany]{book}
 
-% Packages for mathematical symbols, theorems, graphics, fonts, and floating objects
+% Basic packages
 \usepackage{amsmath, amsthm, graphicx, amsfonts, float, bm}
-
-% Package for language-specific rules (English)
 \usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
 
-% Path for images
-\graphicspath{ {./images/} }
-
-% Package for setting page geometry
+% Page geometry
 \usepackage{geometry}
 \geometry{
- a4paper, % Paper size
- total={170mm,237mm}, % Total usable area
- left=20mm, % Left margin
- top=30mm, % Top margin
+ a4paper,
+ total={170mm,237mm},
+ left=20mm,
+ top=30mm,
 }
 
-% Package for hyperlinks without colored borders
+% Hyperlinks and headers
 \usepackage[hidelinks]{hyperref}
-
-% Package for custom headers and footers
 \usepackage{fancyhdr}
-
 \usepackage{tikz}
-
-% Set page style to fancy
 \pagestyle{fancy}
-
-% Clear all header and footer fields
 \fancyhf{}
-
-% Remove header rule
 \renewcommand{\headrulewidth}{0pt}
-
-% Center the page number in the footer
 \fancyfoot[C]{\thepage}
-
-% Increase the distance between the footer and the text
 \setlength{\footskip}{50pt}
 
+% Image path
+\graphicspath{ {./images/} }
+
 % Custom commands and operators
-\newcommand\at[2]{\left.#1\right|_{#2}} % Evaluation of a function at a point
-\DeclareMathOperator{\sgn}{sgn} % Sign function
-\DeclareMathOperator{\col}{col} % Column operator
-\DeclareMathOperator{\des}{des} % Descent operator
-\DeclareMathOperator*{\argmax}{arg\,max} % Argument of the maximum
-\DeclareMathOperator*{\argmin}{arg\,min} % Argument of the minimum
+\newcommand\at[2]{\left.#1\right|_{#2}}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\col}{col}
+\DeclareMathOperator{\des}{des}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\notimplies}{%
-    \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}} % Not implies symbol
-\newcommand{\R}{\mathbb{R}} % Real numbers symbol
-\newcommand{\N}{\mathbb{N}} % Natural numbers symbol
-\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}} % Derivative operator
-\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})} % Trajectory notation
+\mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}}
+\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})}
 
-% Theorem styles and definitions
+% Theorem environments
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section] % Definition environment
-\newtheorem{theorem}{Theorem}[section] % Theorem environment
-\newtheorem{proposition}{Proposition}[section] % Proposition environment
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
 
-% Remark styles
 \theoremstyle{remark}
-\newtheorem*{remark}{Remark} % Remark environment
-\newtheorem*{notation}{Notation} % Notation environment
-\newtheorem*{corollary}{Corollary} % Corollary environment
+\newtheorem*{remark}{Remark}
+\newtheorem*{notation}{Notation}
+\newtheorem*{corollary}{Corollary}
+
+% Custom boxes for definitions and notes
+\newcommand{\definitionbox}[1]{
+\begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=Definition]
+ #1
+\end{tcolorbox}
+}
+\newcommand{\note}[1]{
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Note]
+ #1
+\end{tcolorbox}
+}
 
 \title{Machine Learning and Data Mining}
 \author{Giorgio Medico and Carlo Gervasi}
