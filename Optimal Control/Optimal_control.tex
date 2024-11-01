@@ -1,74 +1,97 @@
-
-% Document class for a book with a4paper and openany options
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document Class Configuration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \documentclass[openany]{book}
 
-% Packages for mathematical symbols, theorems, graphics, fonts, and floating objects
-\usepackage{amsmath, amsthm, graphicx, amsfonts, float, bm}
-
-% Package for language-specific rules (English)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Basic Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Language settings
 \usepackage[english]{babel}
 
-% Path for images
-\graphicspath{ {./images/} }
-
-% Package for setting page geometry
+% Page geometry and layout
 \usepackage{geometry}
 \geometry{
- a4paper, % Paper size
- total={170mm,237mm}, % Total usable area
- left=20mm, % Left margin
- top=30mm, % Top margin
+    a4paper,           % Paper size
+    total={170mm,237mm}, % Total usable area
+    left=20mm,         % Left margin
+    top=30mm          % Top margin
 }
 
-% Package for hyperlinks without colored borders
-\usepackage[hidelinks]{hyperref}
+% Line spacing control
+\usepackage{setspace}
+\onehalfspacing       % Set 1.5 line spacing for the document
 
-% Package for custom headers and footers
-\usepackage{fancyhdr}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mathematical Packages and Settings
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{
+    amsmath,    % Advanced math formatting
+    amsthm,     % Theorem environments
+    amsfonts,   % Mathematical fonts
+    bm          % Bold math symbols
+}
 
-\usepackage{tikz}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Graphics and Figures
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}  % Include graphics
+\usepackage{float}     % Improved float environment
+\usepackage{tikz}      % Drawing tools
+\graphicspath{{./images/}}  % Path for images
 
-% Set page style to fancy
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Header, Footer, and Hyperlinks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[hidelinks]{hyperref}  % Hyperlinks without colored borders
+\usepackage{fancyhdr}             % Custom headers and footers
+
+% Header and footer configuration
 \pagestyle{fancy}
+\fancyhf{}                        % Clear all header/footer fields
+\renewcommand{\headrulewidth}{0pt}% Remove header rule
+\fancyfoot[C]{\thepage}          % Center page number in footer
+\setlength{\footskip}{50pt}      % Footer distance from text
 
-% Clear all header and footer fields
-\fancyhf{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Custom Mathematical Operators and Commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Function evaluation
+\newcommand\at[2]{\left.#1\right|_{#2}}
 
-% Remove header rule
-\renewcommand{\headrulewidth}{0pt}
+% Mathematical operators
+\DeclareMathOperator{\sgn}{sgn}           % Sign function
+\DeclareMathOperator{\col}{col}           % Column operator
+\DeclareMathOperator{\des}{des}           % Descent operator
+\DeclareMathOperator*{\argmax}{arg\,max}  % Argument of maximum
+\DeclareMathOperator*{\argmin}{arg\,min}  % Argument of minimum
 
-% Center the page number in the footer
-\fancyfoot[C]{\thepage}
-
-% Increase the distance between the footer and the text
-\setlength{\footskip}{50pt}
-
-% Custom commands and operators
-\newcommand\at[2]{\left.#1\right|_{#2}} % Evaluation of a function at a point
-\DeclareMathOperator{\sgn}{sgn} % Sign function
-\DeclareMathOperator{\col}{col} % Column operator
-\DeclareMathOperator{\des}{des} % Descent operator
-\DeclareMathOperator*{\argmax}{arg\,max} % Argument of the maximum
-\DeclareMathOperator*{\argmin}{arg\,min} % Argument of the minimum
+% Special symbols and notations
 \newcommand{\notimplies}{%
-    \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}} % Not implies symbol
-\newcommand{\R}{\mathbb{R}} % Real numbers symbol
-\newcommand{\N}{\mathbb{N}} % Natural numbers symbol
-\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}} % Derivative operator
-\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})} % Trajectory notation
+    \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}}
+\newcommand{\R}{\mathbb{R}}               % Real numbers
+\newcommand{\N}{\mathbb{N}}               % Natural numbers
+\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}}  % Derivative
+\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})}  % Trajectory
 
-% Theorem styles and definitions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Theorem Environments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definition-style theorems
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section] % Definition environment
-\newtheorem{theorem}{Theorem}[section] % Theorem environment
-\newtheorem{proposition}{Proposition}[section] % Proposition environment
-\newtheorem*{corollary}{Corollary} % Corollary environment
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem*{corollary}{Corollary}
 
-% Remark styles
+% Remark-style theorems
 \theoremstyle{remark}
-\newtheorem*{remark}{Remark} % Remark environment
-\newtheorem*{notation}{Notation} % Notation environment
+\newtheorem*{remark}{Remark}
+\newtheorem*{notation}{Notation}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document Information
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{Optimal Control M}
 \author{Giorgio Medico based on Dante Piotto's notes}
 \date{fall semester 2024}
@@ -627,15 +650,20 @@ If $Q>0$, then there exists a unique global minimum given by
     z^* = -\displaystyle\frac{1}{2}Q^{-1}b
 \]
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Unconstrained Optimization Algorithms}
 \subsection{Iterative descent methods}
 We consider optimization algorithms relying on the iterative descent idea. We denote $z^k\in\R^d$ an estimate of a local minimum at iteration $k\in\N$. The algorithm starts at a given initial guess $z^0$ and iteratively generates vectors $z^1,z^2,\dots$ such that $\ell$ is decreased at each iteration, i.e. 
 \[
     \ell(z^{k+1})<\ell(z^k) \qquad k = 1,2,\dots
 \]
-\subsubsection{two-step procedure}
-We consider a general two-step procedure that reads as follows 
+% add descent.png
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.35\textwidth]{descent}
+    \caption{Illustration of the iterative descent idea}
+\end{figure}
+\subsubsection{Two-step procedure}
+We consider a general two-step procedure (it's a class of algorithms) that reads as follows 
 \[
     z^{k+1} = z^k+\gamma^k d^k, \qquad k=1,2,\dots
 \]
@@ -644,26 +672,25 @@ in which
     \item each $\gamma^k>0$ is a "step-size" 
     \item $d^k\in\R^d$ is a "direction"
 \end{enumerate}
-The goal is to 
+Procedure : 
 \begin{enumerate}
     \item choose a direction $d^k$ along which the cost decreases for $\gamma^k$ sufficiently small;
     \item select a step-size $\gamma^k$ guaranteeing a sufficient decrease. 
 \end{enumerate}
 In other references these are called line-search methods.
+
 \subsection{Gradient methods}
 Let $z^k$ be such that $\nabla\ell(z^k)\neq 0$. We start by considering the update rule 
 \[
     z^{k+1} = z^k-\gamma^k\nabla\ell(z^k)
 \]
-i.e., we choose $d^k = -\nabla\ell(z^k)$
-
+i.e., we choose $d^k = -\nabla\ell(z^k)$.\\
 From the first order Taylor expansion of $\ell$ at $z$ we have 
 \begin{align*}
     \ell(z^{k+1}) & =  \ell(z^k)+\nabla\ell(z^k)^T(z^{k+1}-z^k)+o(\|z^{k+1}-z^k\|)\\
     & =  \ell(z^k)-\gamma^k\|\nabla\ell(z^k)\|^2+o(\gamma^k)
 \end{align*}
-Thus, for $\gamma^k>0$ sufficiently small it can be shown that $\ell(z^k+1)<\ell(z^k)$
-
+Thus, for $\gamma^k>0$ sufficiently small it can be shown that $\ell(z^k+1)<\ell(z^k)$.\\
 The update rule 
 \[
     z^{k+1}=z^k-\gamma^k\nabla\ell(z^k)
@@ -677,8 +704,10 @@ with $d^k$ such that
     \nabla\ell(z^k)^Td^k<0
 \]
 Also, $d^k$ must be gradient related, i.e. $d^k$ must not asymptotically become perpendicular to $\nabla\ell$
-\subsubsection{selecting the descent direction}
-Several gradient methods can be written as 
+
+\subsubsection{Selecting the descent direction}
+
+Several gradient methods (Generalized form) can be written as 
 \[
     z^{k+1} = z^k-\gamma^kD^k\nabla\ell(z^k) \quad k=1,2,\dots
 \]
@@ -686,8 +715,8 @@ where $D^k\in\R^{d\times d}$ is  a symmetric positive definite matrix. It can be
 \[
     -\nabla\ell(z^k)^TD^k\nabla\ell(z^k)<0
 \]
-i.e. $d^k = -D^k\nabla\ell(z^k)$ is a descent direction. The choice of $D^k$ must be made such that there exist $d_1,d_2$ positive real, such that $d_1 I \leq D^k \leq d_2 I$
-
+i.e. $d^k = -D^k\nabla\ell(z^k)$ is a descent direction.\\
+The choice of $D^k$ must be made such that there exist $d_1,d_2$ positive real, such that $d_1 I \leq D^k \leq d_2 I$.\\ [0.5cm]
 Some choices for $D^k$:
 \begin{itemize}
     \item Steepest descent $D^k=I_d$
@@ -696,19 +725,23 @@ Some choices for $D^k$:
     \item Discretized Newton's method $D^k=(H(z^k))^{-1}$, where $H(z^k)$ is a positive definite symmetric approximation of $\nabla^2\ell(z^k)$ obtained by using finite difference approximations of the second derivatives 
     \item Some regularized version of the Hessian
 \end{itemize}
-\subsection{gradient method}
-The update rule obtained for $D^k=I$ is called steepest descent. The name steepest descent is due to the following property: the normalized negative gradient direction 
+
+\subsection{Steepest descent (Gradient method)}
+The update rule obtained for $D^k=I$ is called steepest descent $z^{k+1} = z^k-\gamma^k\nabla\ell(z^k)$.\\
+The name steepest descent is due to the following property: the normalized negative gradient direction 
 \[
     d^k = -\displaystyle\frac{\nabla\ell(z^k)}{\|\nabla\ell(z^k)\|}
 \]
 minimizes the slope $\nabla \ell(z^k)^Td^k$ among all normalized directions, i.e. it gives the steepest descent.
 
-\subsection{Newton's method for root finding}
-Consider the nonlinear root finding problem 
+\subsection{Newton's method for root(zero) finding}
+
+Consider the nonlinear root(zero) finding problem 
 \[
     r(z) = 0
 \]
-Idea: iteratively refine the solution such that the improved guess $z^{k+1}$ represents a root of the linear approximation of $r$ about the current tentative solution $z^k$. Consider the linear approximation of $r$ about $z^k$, we have 
+Idea: iteratively refine the solution such that the improved guess $z^{k+1}$ represents a root(zero) of the linear approximation of $r$ about the current tentative solution $z^k$.\\ 
+Consider the linear approximation of $r$ about $z^k$, we have 
 \[
     r^k(z^k+\Delta z^k) = r(z^k)+\nabla r(z^k)^T\Delta z^k
 \]
@@ -716,12 +749,13 @@ then, finding the zeros of the approximation, we have
 \[
     \Delta z^k = -(\nabla r(z^k)^T)^{-1}r(z^k)
 \]
+where $\Delta z^k = z^{k+1}-z^k$.
 Thus, the solution is improved as 
 \[
     z^{k+1} = z^k-(\nabla r(z^k)^T)^{-1}r(z^k)
 \]
 
-\subsection{Newton's method for unconstrained optimization}
+\subsection{Newton's method for Unconstrained Optimization}
 Consider the unconstrained optimization problem 
 \[
     \min_{z\in\R^d} \ell(z)
@@ -736,14 +770,12 @@ We can look at it as a root finding problem, with $r(z)=\nabla\ell(z)$, and solv
 \]
 and run the update 
 \[
-    z^{k+1} = z^k -(\nabla^2\ell(z^k))^{-1}\nabla\ell(z^k)
+    z^{k+1} = z^k -\gamma^k(\nabla^2\ell(z^k))^{-1}\nabla\ell(z^k)
 \]
-We can introduce a variable step-size 
-\[
-    x^{k+1} = x^k-\gamma^k(\nabla^2\ell(x^k))^{-1}\nabla\ell(x^k)
-\]
-This is called generalized Newton's method
-\subsubsection{Newton's method via Quadratic Optimization}
+where in the pure Newton's method $\gamma^k=1$, in other cases $\gamma^k$ has to be selected.
+
+\subsection{Newton's method via Quadratic Optimization}
+This approach it's a way to reduce a complex problem into a sequence of simpler QP problems.
 Observe that 
 \[
     \nabla\ell(z^k) +\nabla^2\ell(z^k)\Delta z^k = 0
@@ -753,14 +785,16 @@ is the first-order necessary and sufficient condition of optimality for the quad
     \label{qp}
     \Delta z^k = \argmin_{\Delta z}\nabla\ell(z^k)^T \Delta z+\displaystyle\frac{1}{2}\Delta z^T\nabla^2\ell(z^k)\Delta z
 \end{equation}
+we define $q^T = \nabla\ell(z^k)^T$ and $Q = \nabla^2\ell(z^k)$, $Q$ must be positive definite to be solvable.\\
 Thus, the $k$-th iteration of Newton's method can be seen as 
 \[
-    z^{k+1} = z^k+\Delta z^k
+    z^{k+1} = z^k-\Delta z^k
 \]
 with $\Delta z^k$ solution of the quadratic problem \eqref{qp}. Generalized version: 
 \[
-    z^{k+1} = z^k + \gamma^k \Delta z^k
+    z^{k+1} = z^k - \gamma^k \Delta z^k
 \]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Gradient methods via quadratic optimization}
 Similarly to Newton's method, a descent direction $\Delta z^k=D^k\nabla\ell(z^k)$ can be seen as the direction that minimizes at each iteration a different quadratic approximation of $\ell$ about $z^k$. In fact, consider the quadratic approximation $\ell^k(z)$ of $ \ell$ about $z^k$ given by 
 \[
