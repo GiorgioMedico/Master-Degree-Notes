@@ -1089,7 +1089,7 @@ namely, for all $y\in\R^d$ in the null-space of $A^T$
 \begin{theorem}[Second Order Sufficient Conditions (Quadratic Programming Constrained)]
 If $z^*$ (satisfying $h(z^*)=0$) is such that there exists $\lambda^*$ satisfying $2Qz^* + q + A^T\lambda^* = 0$ and $y^T Q y > 0$ for all $y \neq 0$, $y \in \ker(A^T)$, then $z^*$ is a global minimum.
 \end{theorem}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Constrained optimization: optimization algorithms}
 
 \subsection{Newton's method for equality constrained problems}
@@ -1105,10 +1105,10 @@ KKT points can be found by solving a root finding problem in variables $z,\lambd
     \end{bmatrix}
 \]
 with 
-\[
+\[  \nabla^2 \mathcal{L}(z^k,\lambda^k)
     \begin{bmatrix}
         \Delta z^k \\ \Delta \lambda^k
-    \end{bmatrix} = -(\nabla^2 \mathcal{L}(z^k,\lambda^k))^{-1}\nabla \mathcal{L}(z^k,\lambda^k)
+    \end{bmatrix} = -\nabla \mathcal{L}(z^k,\lambda^k)
 \]
 where 
 \begin{gather*}
@@ -1116,14 +1116,14 @@ where
         \nabla_{11} \mathcal{L}(z^*,\lambda^*) & \nabla_{12} \mathcal{L}(z^*,\lambda^*)\\
         \nabla_{21} \mathcal{L}(z^*,\lambda^*) & \nabla_{22} \mathcal{L}(z^*,\lambda^*)
         \end{bmatrix} = \begin{bmatrix}
-        H^k & \nabla h(z^k) \\
+        B^k & \nabla h(z^k) \\
         \nabla h(z^k)^T & 0
         \end{bmatrix} \\ \nabla \mathcal{L}(z^k,\lambda^k) = \begin{bmatrix}
         \nabla \ell(z^k)+\nabla h(z^k)\lambda^k \\ h(z^k)
-    \end{bmatrix} \\
-    H^k = \nabla_{11}^2 \mathcal{L}(z^k,\lambda^k) \qquad
-    \nabla_{11}\mathcal{L}(z,\lambda) = \nabla^2 \ell(z) + \displaystyle\sum_{i=1}^{m}\lambda_i\nabla^2h_i(z)
+    \end{bmatrix}
+    %\nabla_{11}\mathcal{L}(z,\lambda) = \nabla^2 \ell(z) + \displaystyle\sum_{i=1}^{m}\lambda_i\nabla^2h_i(z)
 \end{gather*}
+whit $B^k = \nabla_{11}^2 \mathcal{L}(z^k,\lambda^k)$.\\
 We can write 
 \[
     \nabla^2\mathcal{L}(z^k,\lambda^k)\begin{bmatrix}
@@ -1133,7 +1133,7 @@ We can write
 namely 
 \[
     \begin{bmatrix}
-        H^k & \nabla h(z^k) \\
+        B^k & \nabla h(z^k) \\
         \nabla h(z^k)^T & 0
         \end{bmatrix}  \begin{bmatrix}
         \Delta z^k \\ \Delta \lambda^k
@@ -1141,20 +1141,20 @@ namely
         \nabla \ell(z^k)+\nabla h(z^k)\lambda^k \\ h(z^k)
     \end{bmatrix}
 \]
-thus, $\Delta z^k, \Delta\lambda^k$ can be obtained as solution of a linear system of equations in the variables $\Delta z, \Delta\lambda$.
+thus, $\Delta z^k, \Delta\lambda^k$ can be obtained as solution of a linear system of equations in the variables $\Delta z, \Delta\lambda$.\\
 The linear system of equations can be rewritten as 
 \begin{gather*}
-    H^k\Delta z^k+\nabla h(z^k)\Delta \lambda^k = -\nabla\ell(z^k) - \nabla h(z^k)\lambda^k \\
+    B^k\Delta z^k+\nabla h(z^k)\Delta \lambda^k = -\nabla\ell(z^k) - \nabla h(z^k)\lambda^k \\
     \nabla h(z^k)^T \Delta z^k = -h(z^k)
 \end{gather*}
 and equivalently as 
 \begin{gather*}
-    \nabla\ell(z^k) +H^k\Delta z^k+\nabla h(z^k)\lambda^{k+1} = 0 \\
+    \nabla\ell(z^k) +B^k\Delta z^k+\nabla h(z^k)\lambda^{k+1} = 0 \\
     h(z^k)+\nabla h(z^k)^T\Delta z^k = 0
 \end{gather*}
 We can observe that the above equations are the necessary and sufficient optimality conditions for the Quadratic Program (QP)
 \begin{align*}
-    \min_{\Delta z}\  &\nabla\ell(z^k)^T\Delta z + \displaystyle\frac{1}{2}\Delta z^TH^k\Delta z \\
+    \min_{\Delta z}\  &\nabla\ell(z^k)^T\Delta z + \displaystyle\frac{1}{2}\Delta z^T B^k\Delta z \\
     \text{subj. to }\  & h(z^k) + \nabla h(z^k)^T \Delta z = 0
 \end{align*}
 Therefore, in the Newton's update, we can obtain $(\Delta z^k, \lambda^{k+1})$ by solving this QP.
@@ -1163,10 +1163,10 @@ Therefore, in the Newton's update, we can obtain $(\Delta z^k, \lambda^{k+1})$ b
 
 Start from a tentative solution $z^0$. For $k=0,1,\dots$ (up to convergence)
 \begin{enumerate}
-    \item Compute $\nabla\ell(z^k),H^k,\nabla h(z^k)$ 
+    \item Compute $\nabla\ell(z^k),B^k,\nabla h(z^k)$ 
     \item Obtain ($\Delta z^k, \Delta \lambda^k_{QP}$) from 
         \begin{align}\label{sqp}
-                \Delta z^k = \argmin_{\Delta z}\  & \nabla \ell(z^k)^T\Delta z +\displaystyle\frac{1}{2}\Delta z^TH^k \Delta z \\
+                \Delta z^k = \argmin_{\Delta z}\  & \nabla \ell(z^k)^T\Delta z +\displaystyle\frac{1}{2}\Delta z^T B^k \Delta z \\
                 \text{subj. to }\  & h(z^k) + \nabla h(z^k)^T \Delta z = 0
         \end{align}
         with $\Delta\lambda^k_{QP}$ the Lagrange multiplier associated to the optimal solution of \eqref{sqp}
@@ -1177,22 +1177,6 @@ Start from a tentative solution $z^0$. For $k=0,1,\dots$ (up to convergence)
             \lambda^{k+1} = \Delta \lambda^*_{QP}
         \end{gather*}
 \end{enumerate}
-
-\subsection{Barrier function strategy for inequality constraints}
-
-Consider the inequality optimization problem 
-\begin{align*}
-    \min_{z\in\R^d} & \ell(z) \\
-    \text{subj. to } & g_j(z) \leq 0 \qquad j\in\{1,\dots,r\}\\
-    & h(z) = 0
-\end{align*}
-Inequality constraints can be embedded in the cost function by means of a \emph{barrier function} $-\varepsilon \log(z)$. The resulting unconstrained problem reads as 
-\begin{gather*}
-    \min_{z\in\R^d}\ell(z) + \varepsilon\displaystyle\sum_{j=1}^{r}-\log(-g_j(z)) \\
-    h(z) = 0
-\end{gather*}
-Implementation: every few iterations shrink the barrier parameters $\varepsilon$
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % sostituisci x con z e X con Z e R^n con R^d
