@@ -1,97 +1,121 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Document Class Configuration
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document Class
+% 'openany' allows chapters to begin on any page, not just right-hand pages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \documentclass[openany]{book}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Basic Packages
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Language settings
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Language and Page Layout
+% - babel: Provides language-specific typesetting rules
+% - geometry: Handles page dimensions and margins
+% - setspace: Controls line spacing
+% - microtype: Improves typography with micro-adjustments
+% - parskip: Manages paragraph spacing and indentation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage[english]{babel}
-
-% Page geometry and layout
 \usepackage{geometry}
 \geometry{
-    a4paper,           % Paper size
-    total={170mm,237mm}, % Total usable area
-    left=20mm,         % Left margin
-    top=30mm          % Top margin
+    a4paper,              % Standard A4 paper size
+    total={170mm,237mm},  % Total text area dimensions
+    left=20mm,            % Left margin
+    top=30mm,             % Top margin
+    heightrounded         % Rounds text height to integer number of lines
 }
-
-% Line spacing control
 \usepackage{setspace}
-\onehalfspacing       % Set 1.5 line spacing for the document
+\onehalfspacing          % Sets 1.5 line spacing throughout document
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Mathematical Packages and Settings
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{
-    amsmath,    % Advanced math formatting
-    amsthm,     % Theorem environments
-    amsfonts,   % Mathematical fonts
-    bm          % Bold math symbols
-}
+\usepackage{microtype}   % Improves line breaking and spacing
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{parskip}
+\setlength{\parindent}{15pt}                    % Paragraph indentation
+\setlength{\parskip}{6pt plus 2pt minus 1pt}    % Space between paragraphs
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mathematical Packages
+% - amsmath: Advanced mathematical formatting
+% - amsthm: Theorem environments
+% - amsfonts: Mathematical fonts
+% - bm: Bold math symbols
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{bm}
+\allowdisplaybreaks[1]   % Allows page breaks in math displays
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Graphics and Figures
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{graphicx}  % Include graphics
-\usepackage{float}     % Improved float environment
-\usepackage{tikz}      % Drawing tools
-\graphicspath{{./images/}}  % Path for images
+% - graphicx: Handles image inclusion
+% - float: Improves floating environment
+% - tikz: Drawing tools for diagrams
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\graphicspath{{./images/}}   % Directory for images
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Header, Footer, and Hyperlinks
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[hidelinks]{hyperref}  % Hyperlinks without colored borders
-\usepackage{fancyhdr}             % Custom headers and footers
-
-% Header and footer configuration
+% - hyperref: Creates clickable links and references
+% - fancyhdr: Customizes headers and footers
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[hidelinks]{hyperref}    % Creates links without colored borders
+\usepackage{fancyhdr}
 \pagestyle{fancy}
-\fancyhf{}                        % Clear all header/footer fields
-\renewcommand{\headrulewidth}{0pt}% Remove header rule
-\fancyfoot[C]{\thepage}          % Center page number in footer
-\setlength{\footskip}{50pt}      % Footer distance from text
+\fancyhf{}                          % Clears all headers and footers
+\renewcommand{\headrulewidth}{0pt}  % Removes header line
+\fancyfoot[C]{\thepage}             % Centers page number in footer
+\setlength{\footskip}{50pt}         % Space between text and footer
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Custom Mathematical Operators and Commands
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Function evaluation
-\newcommand\at[2]{\left.#1\right|_{#2}}
+% Page breaking improvements
+\raggedbottom                       % Allows flexible page breaks
+\emergencystretch=1em              % Extra stretch space for line breaking
+\tolerance=1000                     % Increases tolerance for suboptimal breaks
+\pretolerance=100                  % Initial attempt without hyphenation
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mathematical Operators and Commands
+% Custom commands for frequently used mathematical notation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand\at[2]{\left.#1\right|_{#2}}    % Function evaluation
 % Mathematical operators
-\DeclareMathOperator{\sgn}{sgn}           % Sign function
-\DeclareMathOperator{\col}{col}           % Column operator
-\DeclareMathOperator{\des}{des}           % Descent operator
-\DeclareMathOperator*{\argmax}{arg\,max}  % Argument of maximum
-\DeclareMathOperator*{\argmin}{arg\,min}  % Argument of minimum
+\DeclareMathOperator{\sgn}{sgn}            % Sign function
+\DeclareMathOperator{\col}{col}            % Column operator
+\DeclareMathOperator{\des}{des}            % Descent operator
+\DeclareMathOperator*{\argmax}{arg\,max}   % Argument of maximum
+\DeclareMathOperator*{\argmin}{arg\,min}   % Argument of minimum
 
 % Special symbols and notations
 \newcommand{\notimplies}{%
     \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}}
-\newcommand{\R}{\mathbb{R}}               % Real numbers
-\newcommand{\N}{\mathbb{N}}               % Natural numbers
-\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}}  % Derivative
-\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})}  % Trajectory
+\newcommand{\R}{\mathbb{R}}                % Real numbers
+\newcommand{\N}{\mathbb{N}}                % Natural numbers
+\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}}    % Derivative
+\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})}    % Trajectory
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Theorem Environments
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Definition-style theorems
+% Defines various theorem-like environments with consistent styling
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{proposition}{Proposition}[section]
 \newtheorem*{corollary}{Corollary}
 
-% Remark-style theorems
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
 \newtheorem*{notation}{Notation}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Line breaking penalties
+\widowpenalty=10000     % Prevents widow lines (last line of paragraph on new page)
+\clubpenalty=10000      % Prevents orphan lines (first line of paragraph at bottom of page)
+\brokenpenalty=10000    % Penalizes page breaks after hyphenated lines
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Document Information
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Title, author, and date information
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{Optimal Control M}
 \author{Giorgio Medico based on Dante Piotto's notes}
 \date{fall semester 2024}
