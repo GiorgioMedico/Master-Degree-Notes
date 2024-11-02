@@ -1178,13 +1178,37 @@ Start from a tentative solution $z^0$. For $k=0,1,\dots$ (up to convergence)
         \end{gather*}
 \end{enumerate}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% sostituisci x con z e X con Z e R^n con R^d
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Optimality conditions for optimal control}
-\section{boh}
-\subsection{Dynamics as equality constraints}
+\section{Recall on optimal control problems}
+\subsection{Discrete-time Control System and Notation}
+
+We consider nonlinear, discrete-time systems described by
+\begin{equation}
+    x_{t+1} = f_t(x_t, u_t) \qquad t \in \N_0
+\end{equation}
+where $x_t \in \R^n$ and $u_t \in \R^m$ are the state and the input of the system at time $t$.
+
+\subsubsection*{Notation}
+We use $\mathbf{x} \in \R^{nT}$ and $\mathbf{u} \in \R^{mT}$ to denote, respectively, the stack of the states $x_t$ for all $t \in 1,\ldots,T$ and the inputs $u_t$ for all $t \in 0,\ldots,T-1$, that is
+\begin{align*}
+    \mathbf{x} &:= \col(x_1,\ldots,x_T) \\
+    \mathbf{u} &:= \col(u_0,\ldots,u_{T-1}).
+\end{align*}
+where $\col(x_1,\ldots,x_T)$ is the (column) vector with components $x_1,\ldots,x_T$.
+
+\subsection{System Trajectories}
+We recall the definition of trajectory of a (possibly) nonlinear, discrete-time control system.
+
+\begin{definition}
+A pair $(\mathbf{x}, \mathbf{u}) \in \R^{nT} \times \R^{mT}$ is called a \emph{trajectory} of system (1) if $\bar{x}_{t+1} = f_t(\bar{x}_t, \bar{u}_t)$ for all $t \in 0,\ldots,T-1$. In particular, $\mathbf{x}$ is the state trajectory, while $\mathbf{u}$ is the input trajectory.
+\end{definition}
+
+\begin{remark}
+It will be sometimes useful to refer to a generic pair $(\boldsymbol{\alpha}, \boldsymbol{\mu}) \in \R^{nT} \times \R^{mT}$ with $\boldsymbol{\alpha} := \col(\alpha_1,\ldots,\alpha_T)$ and $\boldsymbol{\mu} := \col(\mu_0,\ldots,\mu_{T-1})$ as a state-input curve. Notice that a curve $(\boldsymbol{\alpha}, \boldsymbol{\mu})$ is not necessarily a trajectory, i.e., it does not necessarily satisfy the dynamics (1).
+\end{remark}
+
+\section{Dynamics as equality constraints}
 We consider nonlinear, discrete-time systems described by 
 \begin{equation} \label{system2}
     x_{t+1} = f_t(x_t,u_t) \qquad t\in\N_0
@@ -1199,12 +1223,21 @@ so that a curve $\traj$ is a trajectory of the system if it satisfies the (possi
 \[
     h\traj = 0
 \]
-\subsection{system trajectories and trajectory manifold}
+
+\subsection{System trajectories and trajectory manifold}
+
 We can now define the trajectory manifold $\mathcal{T}\subset \R^{nT}\times \R^{mT}$ of \eqref{system2}
 \begin{align*}
     \mathcal{T} := &\left\{\left(\mathbf(x),\mathbf(u)\right)\in\R^{nT}\times\R^{mT}|h\left(\mathbf(x),\mathbf(u)\right)=0\right\}\\=&\left\{\left(\mathbf(x),\mathbf(u)\right)\in\R^{nT}\times\R^{mT}|x_{t+1}=f_t\left(x_t,u_t\right),t=0,\dots,T-1\right\}
 \end{align*}
-Let $\traj\in\mathcal{T}$ be a trajectory of the system, i.e. a point on the trajectory manifold $\mathcal{T}$. The tangent space to $\mathcal{T}$ at a given trajectory (point) $\traj$, denoted as $T_{(\bar{\mathbf{x}},\bar{\mathbf{u}})}\mathcal{T}$, is the set of trajectories satisfying the linearization of $x_{t+1} = f_t(x_t,u_t)$ about the trajectory $(\bar{\mathbf{x}},\bar{\mathbf{u}})$.
+% Add manifold.png
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{manifold}
+    \caption{Trajectory manifold $\mathcal{T}$}
+\end{figure}
+
+Let $\traj\in\mathcal{T}$ be a trajectory of the system, i.e. a point on the trajectory manifold $\mathcal{T}$. The tangent space to $\mathcal{T}$ at a given trajectory (point) $\traj$, denoted as $T_{(\bar{\mathbf{x}},\bar{\mathbf{u}})}\mathcal{T}$, is the set of trajectories satisfying the linearization of $x_{t+1} = f_t(x_t,u_t)$ about the trajectory $(\bar{\mathbf{x}},\bar{\mathbf{u}})$.\\
 That is, $T_{(\bar{\mathbf{x}},\bar{\mathbf{u}})}\mathcal{T}=\{(\mathbf{\Delta x, \Delta u})\in\R^{nT}\times\R^{mT}|\nabla_1h(\mathbf{x},\mathbf{u})^T\mathbf{\Delta x} + \nabla_2h(\mathbf{x},\mathbf{u})^T\mathbf{\Delta u} = 0\}$ is the set of trajectories $(\mathbf{\Delta x, \Delta u})$ of
 \[
     \Delta x_{t+1} = A_t\Delta x_t + B_t \Delta u_t
@@ -1215,16 +1248,18 @@ with
     B_t = \nabla_2f_t(\bar{x}_t,\bar{u}_t)^T
 \end{gather*}
 
-
-\section{Unconstrained optimal control problem (d-t)}
+\section{Unconstrained optimal control problem (D-T)}
 We look for a solution of the discrete-time optimal control problemm 
 \begin{align*}
         \min_{\mathbf{x}\in\R^n,\mathbf{u}\in\R^m} & \displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T)\\
         \text{subj. to } & x_{t+1} = f_t(x_t,u_t), \quad t\in\{0,\dots,T-1\} 
 \end{align*}
-with given initial condition $x_0 = x_{\text{init}}\in \R^n$. 
+with given initial condition $x_0 = x^0\in \R^n$, where $\ell_t:\R^n\times\R^m\to\R$ and $\ell_T:\R^n\to\R$ are the stage and terminal costs, respectively, and $f_t:\R^n\times\R^m\to\R^n$ are the dynamics of the system.
+\begin{remark}
+    An optimal control problem constrainded only by the dynamics is called \emph{unconstrained} optimal control problem.
+\end{remark}
 
-From now on, we will assume that functions $\ell_t(\cdot,\cdot),\ell_T(\cdot),f_t(\cdot,\cdot)$ are twice continuosly differentiable, i.e. they are class $\mathcal{C}^2$
+From now on, we will assume that functions $\ell_t(\cdot,\cdot),\ell_T(\cdot),f_t(\cdot,\cdot)$ are twice continuosly differentiable, i.e. they are class $\mathcal{C}^2$.
 Consider the discrete-time system \eqref{system2}. We can introduce the compact notation 
 \[
     \mathbf{x} := \begin{bmatrix}
@@ -1248,10 +1283,12 @@ In light of this compact notation, we can rewrite the optimal control law proble
     \min_{\mathbf{x}\in\R^{nT},\mathbf{u}\in\R^{mT}} &\ell(\mathbf{x},\mathbf{u})\\
     \text{subj. to } & h(\mathbf{x},\mathbf{u})=0
 \end{align*}
-where $\ell:\R^{nT}\times\R^{mT}\to\R$ and $h:\R^{nT}\times\R^{mT}\to\R^{nT}$. This is a constrained nonlinear optimization problem with decision variable $(\mathbf{x},\mathbf{u})$
+where $\ell:\R^{nT}\times\R^{mT}\to\R$ and $h:\R^{nT}\times\R^{mT}\to\R^{nT}$. This is a constrained nonlinear optimization problem with decision variable $(\mathbf{x},\mathbf{u})$.
+
 
 \section{KKT conditions for unconstrained optimal control}
-the Lagrangian function has the form 
+
+The Lagrangian function has the form 
 \begin{align*}
     \mathcal{L}(\mathbf{x,u,\lambda}) &= \ell(\mathbf{x,u})+\boldsymbol{\lambda}^Th(\mathbf{x,u}) \\
     &= \displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T) + \displaystyle\sum_{t=0}^{T-1}\lambda^T_{t+1}(f_t(x_t,u_t)-x_{t+1}) \\
@@ -1298,45 +1335,46 @@ Since $\mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda})= \displaystyle\su
     \end{bmatrix} = 0 \quad t=1,\dots,T-1 \\
     \nabla_1\mathcal{L}_t(x_t,\boldsymbol{\lambda}) = 0\qquad & \nabla\ell_T(x_T)-\lambda_T = 0
 \end{align*}
-Let us introduce some notation: 
+Let us introduce $A_{t}^{*}$ and $B_{t}^{*}$ that are the state and input matrix of the linearization of the dynamics around the optimal trajectory $(\mathbf{x}^*,\mathbf{u}^*)$:
 \begin{gather*} 
-    \nabla_1\ell_t(x_t^*,u_t^*) = a_t\in \R^n\\
-    \nabla_1f_t(x_t^*,u_t^*) = A_t^T\\
-    \nabla_2\ell_t(x_t^*,u_t^*) = b_t\in \R^n\\
-    \nabla_2f_t(x_t^*,u_t^*) = B_t^T
+    \nabla_1\ell_t(x_t^*,u_t^*) = a_t^*\in \R^n\\
+    \nabla_1f_t(x_t^*,u_t^*) = A_{t}^{*T} \quad \text{where } A_t^* = \left.\frac{\partial f_t(x_t,u_t)}{\partial x_t}\right|_{(x_t^*,u_t^*)} \\
+    \nabla_2\ell_t(x_t^*,u_t^*) = b_t^*\in \R^n\\
+    \nabla_2f_t(x_t^*,u_t^*) = B_{t}^{*T} \quad \text{where } B_t^* = \left.\frac{\partial f_t(x_t,u_t)}{\partial u_t}\right|_{(x_t^*,u_t^*)}
 \end{gather*}
 So we can rewrite the KKT conditions for unconstrained optimal control as:
 \begin{flalign*}
-    &\lambda_t^* = A_t^T\lambda_{t+1}^* + a_t \qquad t= T-1,\dots,1\\
-    &\lambda_T^* = \nabla\ell(x_T^*)\\
-    &B_t^T\lambda_{t+1}^* + b_t = 0 \qquad t=0,\dots,T-1 
+    &a_t^* + A_{t}^{*T}\lambda_{t+1}^* - \lambda_t^* = 0  \qquad t=T-1,\dots,1\\
+    &b_t + B_{t}^{*T}\lambda_{t+1}^* = 0 \qquad t=0,\dots,T-1 \\
+    &\nabla\ell_T(x_T^*) + \lambda_T^* = 0
 \end{flalign*}
 
+These equations form the basis for solving an optimal control problem using the KKT conditions. The process involves defining an iterative algorithm that starts with an initial guess of the input trajectory and then iterates through the following procedure (for a generic step \( k \)) until convergence is achieved.
+
 \subsection{Indirect methods for optimal control}
-Based on solving the optimality conditions: 
-\begin{itemize} % TODO look in recording
-    \item Guess some $u_t^0,\quad t= 0,\dots,T-1 \quad k=0$ 
-    \item run "forward" 
+Given an initial guess for the input trajectory $\mathbf{u}^k = \col(u_0^k,\ldots,u_{T-1}^k)$, the algorithm proceeds as follows:
+\begin{enumerate} 
+    \item \textbf{Run "forward"} 
         \[
-            x_{t+1}^0 = f_t(x_t^0,u_t^0) \quad x_0 = x_{\text{init}}
+            x_{t+1}^k = f_t(x_t^k,u_t^k), \quad x_0^k = x_{\text{init}}, \quad t=0,\ldots,T-1
         \]
-    \item run "backward"
+    \item \textbf{Run "backward"}
         \[
-            \lambda_t^0 = A_t^T\lambda_{t+1}^0 + a_t^0
+            \lambda_t^k = A_{t}^{kT}\lambda_{t+1}^k + a_t^k
         \]
-        starting from $\lambda_T^0 = \nabla \ell (x_T^0)$
-    \item given $\lambda_t^0 \quad t=1,\dots,T$ solve:
+        starting from $\lambda_T^k = \nabla \ell_T (x_T^k)$, to obtain $\lambda_t^k = col(\lambda_1^k,\ldots,\lambda_T^k)$
+    \item \textbf{Given $\lambda_t^k$ solve:}
         \[
-            \nabla_2\ell(x_t^0,u_t) + \nabla_2f(x_t^0,u_t)\lambda_{t+1}^0 = 0 \quad t=0,\dots,T-1
+            b_t + B_{t}^{*T}\lambda_{t+1}^* =\nabla_2\ell(x_t^0,u_t) + \nabla_2f(x_t^0,u_t)\lambda_{t+1}^0 = 0 \quad t=0,\dots,T-1
         \]
-        to get $u_{t}^1 \quad t=0,\dots,T-1$
-\end{itemize}
+        to get $u^{k+1}=\col(u_0^{k+1},\ldots,u_{T-1}^{k+1})$
+\end{enumerate}
 
 
 \section{KKT conditions for constrained optimal control}
 We look for a solution of the discrete-time optimal control problem
 \begin{align*}
-        \min_{x_0\in\R^n,\mathbf{x}\in\R^{nT},\mathbf{U}\in\R^{mT}} & \displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T) \\
+        \min_{x_0\in\R^n,\mathbf{x}\in\R^{nT},\mathbf{u}\in\R^{mT}} & \displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T) \\
         \text{subj. to } & x_{t+1} = f_t(x_t,u_t), \quad t=0,\dots,T-1\\
                         & r(x_0,x_T) = 0 \\
                         & g_t(x_t,u_t)\leq 0 ,\quad t=0,\dots,T-1
@@ -1350,19 +1388,20 @@ where
 \end{itemize}
 The Lagrangian function has the form 
 \begin{align*}
-    \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda},\boldsymbol{\mu}) =& \ell(\mathbf{x},\mathbf{u})+\boldsymbol{\lambda}_d^T h(\mathbf{x},\mathbf{u})+ \lambda_b^T r(x_0,x_T) + \mathbf{\mu}^Tg(\mathbf{x},\mathbf{u}) \\ 
+    \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda},\boldsymbol{\mu}) =& \ell(\mathbf{x},\mathbf{u})+\boldsymbol{\lambda}_d^T h(\mathbf{x},\mathbf{u})+ \lambda_b^T r(x_0,x_T) + \boldsymbol{\mu}^Tg(\mathbf{x},\mathbf{u}) \\ 
     =&\displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T) + \displaystyle\sum_{t=0}^{T-1}\lambda_{d,t+1}(f_t(x_t,u_t)-x_{t+1})+\lambda_b^Tr(x_0,x_T) + \displaystyle\sum_{t=0}^{T-1}\mu_t^Tg_t(x_t,u_t)\\
-    =&\displaystyle\sum_{t=0}^{T}\mathcal{L}_t(x_t,u_t,\boldsymbol{\lambda},\mathbf{\mu})
+    =&\displaystyle\sum_{t=0}^{T}\mathcal{L}_t(x_t,u_t,\boldsymbol{\lambda},\boldsymbol{\mu})
 \end{align*}
 where
 \begin{align*}
     \mathcal{L}_0(x_0,u_0,\boldsymbol{\lambda},\boldsymbol{\mu}) &= \ell_0(x_0,u_0)+\lambda_{d,1}^T f_0(x_0,u_0) + \lambda_{b,0}r_0(x_0)\\
-    \mathcal{L}_t(x_t,u_t,\boldsymbol{\lambda}) &= \ell_t(x_t,u_t)+\lambda_1^T f_t(x_t,u_t)-\lambda_tx_t+\mu_t^Tg_t(x_t,u_t)\\
+    \mathcal{L}_t(x_t,u_t,\boldsymbol{\lambda}) &= \ell_t(x_t,u_t)+\lambda_1^T f_t(x_t,u_t)-\lambda_tx_t+\mu_t^Tg_t(x_t,u_t) \qquad t=1,\dots,T-1\\
     \mathcal{L}_T(x_T,\boldsymbol{\lambda}) &= \ell_T(x_T) - \lambda_T^Tx_T + \lambda_{b,T}^Tr_T(x_T)
 \end{align*}
 and we assumed $r(x_0,x_T)=\col(r_0(x_0),r_T(x_T))$ and $\lambda_b = \col(\lambda_{b,0},\lambda_{b,T})$.
 
-Let $(\mathbf{x}^*,\mathbf{u}^*)$ be a regular point for the dynamics constraints and an optimal (state-input) trajectory. Then there exists $\boldsymbol{\lambda}^*$ such that $\nabla \mathcal{L}(\mathbf{x}^*,\mathbf{u}^*,\boldsymbol{\lambda}^*)=0$ 
+Let $(\mathbf{x}^*,\mathbf{u}^*)$ be a regular point for the dynamics constraints and an optimal (state-input) trajectory. 
+Then there exists $\boldsymbol{\lambda}^*$ and $\boldsymbol{\mu}^*>0$ such that $\nabla \mathcal{L}(\mathbf{x}^*,\mathbf{u}^*,\boldsymbol{\lambda}^*)=0$ + complementary slackness conditions.
 
 Let us explicitly write condition $\nabla_{(1,2)} \mathcal{L}(\mathbf{x}^*,\mathbf{u}^*,\boldsymbol{\lambda}^*,\boldsymbol{\mu}^*) = 0 $ 
 \[
@@ -1393,23 +1432,9 @@ Since $\mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda}^*,\boldsymbol{\mu}
 \end{align*}
 for $(x_t,u_t,\lambda_t,\mu_t) = (x_t^*,u_t^*,\lambda_t^*,\mu_t^*)$
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\chapter{Linear Quadratic (LQ) optimal control}
+\chapter{Linear Quadratic (LQ) Optimal Control}
 
 Consider a linear quadratic optimal control problem as: 
 \begin{align*}
