@@ -20,3 +20,12 @@
 script.sh
 *lazygit
 .vscode
+
+# Unchanged directories
+DAS/
+IPCV/
+LEDS/
+MSMS/
+RTOS/
+Optimization-ML/
+Robotics/
