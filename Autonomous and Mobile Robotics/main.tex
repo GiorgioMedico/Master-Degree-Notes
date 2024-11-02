@@ -1,0 +1,84 @@
+\documentclass[openany]{book}
+
+% Basic packages
+\usepackage{amsmath, amsthm, graphicx, amsfonts, float, bm}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+
+% Page geometry
+\usepackage{geometry}
+\geometry{
+ a4paper,
+ total={170mm,237mm},
+ left=20mm,
+ top=30mm,
+}
+
+% Hyperlinks and headers
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{\thepage}
+\setlength{\footskip}{50pt}
+
+% Image path
+\graphicspath{ {./images/} }
+
+% Custom commands and operators
+\newcommand\at[2]{\left.#1\right|_{#2}}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\col}{col}
+\DeclareMathOperator{\des}{des}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\notimplies}{%
+\mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\deriv}[1]{\displaystyle\frac{d}{d #1}}
+\newcommand{\traj}{(\bar{\mathbf{x}},\bar{\mathbf{u}})}
+
+% Theorem environments
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newtheorem*{notation}{Notation}
+\newtheorem*{corollary}{Corollary}
+
+% Custom boxes for definitions and notes
+\newcommand{\definitionbox}[1]{
+\begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=Definition]
+ #1
+\end{tcolorbox}
+}
+\newcommand{\note}[1]{
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Note]
+ #1
+\end{tcolorbox}
+}
+
+\title{Autonomous and Mobile Robotics}
+\author{Giorgio Medico and Carlo Gervasi}
+\date{fall semester 2024}
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+
+
+\end{document}
