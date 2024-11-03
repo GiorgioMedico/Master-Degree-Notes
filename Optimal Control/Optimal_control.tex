@@ -1445,23 +1445,36 @@ Consider a linear quadratic optimal control problem as:
 We assume $Q_t=Q_t^T\geq 0,\ $ for $ t=0,\dots,T-1$, $Q_T = Q_T^T \geq 0$, and $R_t=R_t^T > 0 \ $ for $t=0,\dots,T-1$
 
 \section{First order optimality condition}
+
+\textbf{Recall} the first order necessary and sufficient conditions for $(\mathbf{x}^*,\mathbf{u}^*)$ to be an optimal trajectory $\exists \boldsymbol{\lambda}^*$ such that:
+\begin{align*}
+    x^*_{t+1} &= f_t(x^*_t, u^*_t) & t &= 0,\ldots,T-1 \\
+    \lambda^*_t &= \nabla_1 f_t(x^*_t, u^*_t)\lambda^*_{t+1} + \nabla_1 \ell_t(x^*_t, u^*_t) & t &= T-1,\ldots,1 \\
+    0 &= \nabla_2 f_t(x^*_t, u^*_t)\lambda^*_{t+1} + \nabla_2 \ell_t(x^*_t, u^*_t) & t &= 0,\ldots,T-1
+\end{align*}
+$\text{with } x^*_0 = x_{\text{init}} \text{ and } \lambda^*_T = \nabla\ell_T(x^*_T).$\\
+In the case of the LQ problem becomes:
 \begin{gather*}
     \nabla_1f_t(x_t,u_t) = A_t^T\\
     \nabla_1\ell(x_t,u_t) = \nabla_1(\displaystyle\frac{1}{2}x_t^TQ_tx_t+\displaystyle\frac{1}{2}u_t^TR_tu_t)=Q_tx_t\\
     \nabla_2f_t(x_t,u_t) = B_t^T\\
     \nabla_2\ell_t(x_t,u_t) = R_tu_t\\
 \end{gather*}
-therefore 
+Therefore :
 \begin{gather*}
-    \lambda_t^* = A_t^T\lambda_{t+1}^* + Q_tx_t^* \quad t= T-1,\dots,0\\
-    \lambda_T^* = Q_Tx_T^* \\
-    B_t^T\lambda_{t+1}^* + R_tu_t^* = 0 \quad t=0,\dots,T-1
+    x^*_{t+1} = A_tx^*_t + B_tu^*_t \quad t=0,\dots,T-1\\
+    \lambda_t^* = A_t^T\lambda_{t+1}^* + Q_tx_t^* \quad t=T-1,\dots,0\\
+    0 = B_t^T\lambda_{t+1}^* + R_tu_t^* \quad t=0,\dots,T-1
 \end{gather*}
+$\text{with } x^*_0 = x_{\text{init}} \text{ and } \lambda^*_T = Q_Tx^*_T.$
+
 \begin{remark}
 second order optimality conditions 
 \[
     y^T\nabla^2_{(1,2)(1,2)}\mathcal{L}(\mathbf{x}^*,\mathbf{u}^*,\boldsymbol{\lambda}^*,)y \geq 0
 \]
+
+\section{LQ problem: Optimal solution}
 For vectors $y$ satisfying the "linear approximation of the constraint". The hessian turns out as 
 \[
     \begin{bmatrix}
