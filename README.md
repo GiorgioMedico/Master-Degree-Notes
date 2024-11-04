@@ -69,7 +69,7 @@ Per lavorare con LaTeX, si consiglia l'utilizzo di uno dei seguenti editor:
 
 - Su Ubuntu, potrebbe essere necessario installare anche un editor LaTeX:
   ```bash
-  sudo apt-get install texmaker
+  sudo apt-get install texstudio
   ```
   
 - Su macOS con MacTeX, viene installato automaticamente TeXShop come editor
