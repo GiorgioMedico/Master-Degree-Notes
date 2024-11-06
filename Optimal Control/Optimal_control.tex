@@ -1445,6 +1445,13 @@ We assume $Q_t=Q_t^T\geq 0,\ $ for $ t=0,\dots,T-1$, $Q_T = Q_T^T \geq 0$, and $
 
 \section{First order optimality condition}
 
+Considering the optimal control problem
+\begin{align*}
+        \min_{\substack{x_1,\dots,x_T \\ u_0,\dots,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1}\displaystyle \ell_t(x_t,u_t) + \ell_T(x_T)\\
+        \text{subj. to } & x_{t+1} = f(x_t,u_t) \quad t=0,\dots,T-1\\
+                        &x_0 = x_{\text{init}}
+\end{align*}
+
 \textbf{Recall} the first order necessary and sufficient conditions for $(\mathbf{x}^*,\mathbf{u}^*)$ to be an optimal trajectory $\exists \boldsymbol{\lambda}^*$ such that:
 \begin{align*}
     x^*_{t+1} &= f_t(x^*_t, u^*_t) & t &= 0,\ldots,T-1 \\
@@ -1460,128 +1467,181 @@ In the case of the LQ problem becomes:
     \nabla_2\ell_t(x_t,u_t) = R_tu_t\\
 \end{gather*}
 Therefore :
-\begin{gather*}
-    x^*_{t+1} = A_tx^*_t + B_tu^*_t \quad t=0,\dots,T-1\\
-    \lambda_t^* = A_t^T\lambda_{t+1}^* + Q_tx_t^* \quad t=T-1,\dots,0\\
-    0 = B_t^T\lambda_{t+1}^* + R_tu_t^* \quad t=0,\dots,T-1
-\end{gather*}
+\begin{align*}
+    x^*_{t+1} &= A_t x^*_t + B_t u^*_t \quad t=0,\dots,T-1\\
+    \lambda_t^* &= A_t^T \lambda_{t+1}^* + Q_t x_t^* \quad t=T-1,\dots,0\\
+    0 &= B_t^T \lambda_{t+1}^* + R_t u_t^* \quad t=0,\dots,T-1
+\end{align*}
 $\text{with } x^*_0 = x_{\text{init}} \text{ and } \lambda^*_T = Q_Tx^*_T.$
 
 \begin{remark}
-second order optimality conditions 
+    Note that $\lambda_t^*$ follows a "backward" update rule for the components of $\lambda$, with $\lambda_T = Q_Tx_T$.
+\end{remark}
+
+\begin{remark}
+$A_t$ and $B_t$ are the Jacobians of $f_t(x_t,u_t)$ with respect to $x_t$ and $u_t$ respectively:
+\[
+    \nabla f_t(x_t,u_t) = \begin{bmatrix}
+        \nabla_1f_t(x_t,u_t) & \nabla_2f_t(x_t,u_t)
+    \end{bmatrix} = \begin{bmatrix}
+        A_t & B_t
+    \end{bmatrix}^T = \begin{bmatrix}
+        \frac{\partial f_t(x_t,u_t)}{\partial x_t} & \frac{\partial f_t(x_t,u_t)}{\partial u_t}
+    \end{bmatrix}^T
+\]
+\end{remark}
+
+\begin{remark}
+Second order optimality conditions:
 \[
     y^T\nabla^2_{(1,2)(1,2)}\mathcal{L}(\mathbf{x}^*,\mathbf{u}^*,\boldsymbol{\lambda}^*,)y \geq 0
 \]
+\end{remark}
+\begin{remark}
+    For vectors $y$ satisfying the "linear approximation of the constraint". The hessian turns out as 
+    \[
+        \begin{bmatrix}
+            Q_1 & & &  0\\
+                & \ddots & & & \\ 
+            0 & & & Q_n
+        \end{bmatrix}
+    \]    
+\end{remark}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{LQ problem: Optimal solution}
-For vectors $y$ satisfying the "linear approximation of the constraint". The hessian turns out as 
+\subsubsection{One Possible Way in Finding the Optimal Solution (Open Loop)}
+
+Having that $R_t > 0$ is always invertible, we can always write $u_t^* = -R_t^{-1}B_t^T\lambda_{t+1}^*$ for $t=0,...,T-1$ and then write the (equivalent to the previous necessary and sufficient conditions) linear system:
+
 \[
     \begin{bmatrix}
-        Q_1 & & &  0\\
-            & \ddots & & & \\ 
-        0 & & & Q_n
-    \end{bmatrix}
+        x_{t+1}^* \\ \lambda_t^*
+    \end{bmatrix} = \begin{bmatrix}
+        A_t & -B_tR_t^{-1}B_t^T \\ Q_t & R_t
+    \end{bmatrix} \begin{bmatrix}
+        x_t^* \\ \lambda_{t+1}^*
+    \end{bmatrix} \quad t\in[0,T)
 \]
-\end{remark}
-Because $R_t>0$ it is invertible, we can write 
+with $x_0^* = x_{\text{init}}$ and $\lambda_T^* = Q_Tx_T^*$
+
+This linear discrete-time system, which is in a so-called Hamiltonian form, has the peculiarity to involve two dynamics, one forward in time (for $x_t^*$) and one backward in time (for $\lambda_{t+1}^*$), respectively for $t$ from 0 to T-1 (for $x_t^*$) and for $t$ from T-1 back to 0 (for $\lambda_{t+1}^*$), with a fixed initial condition for $x_t^*$ and a fixed initial (in a sense) condition for $\lambda_{t+1}^*$ that depends on the final value for $x_t$ (two initial conditions with a dynamic in between).
+
+Solving a system like that is possible (it's the so-called "two points boundary value problem") BUT in this case leads us to an $u_t^* = -R_t^{-1}B_t^T\lambda_{t+1}^*$ open-loop solution (suboptimal).
+
+\subsubsection{Linear Dependence Between \texorpdfstring{$\lambda^*$}{λ*} and \texorpdfstring{$x^*$}{x*}}
+
+The fact that it's definable a linear system that involves only the optimal state trajectory $x^*$ and the optimal set of Lagrange multipliers $\lambda^*$ indicates that between them there MUST be a linear dependence: $\lambda_t^* = P_tx_t^*$
+
+Having for sure that such a relation exists and holds $\forall t=1...T$ (notice anyway that $\lambda$ has components for $t=1...T$ and $x$ for $t=0...T-1$ BUT also $x_T$ is defined), the way to compute $P_t$ $\forall t=1...T-1$ can be found by enveloping the computation $A_t^TP_{t+1}x_{t+1}^* + Q_tx_t^*$ (substituting $x_{t+1}^*$ and within inside it also $u_t^*$) and imposing it to be the same as $P_tx_t^*$ (notice in fact that $\lambda_{t+1}^* = P_{t+1}x_{t+1}^* \Rightarrow A_t^TP_{t+1}x_{t+1}^* + Q_tx_t^* = A_t^T\lambda_{t+1}^* + Q_tx_t^* = \lambda_t^* = P_tx_t^*$): this will bring to a relation $P_t = P_t(P_{t+1})$ and so $P_t$ $\forall t=1...T-1$ can be computed in an iterative way backward in time from $P_T = Q_T$ (recalling $\lambda_T^* = Q_Tx_T^*$). Notice: $P_t \geq 0$.
+
+\section{LQ problem: Optimal solution}
+
+Starting from $B_t^T\lambda_{t+1}^* + R_tu_t^* = 0$, ($R_t>0$ it is invertible) we can write:
 \[
     u_t^* = -R_t^{-1}B_t^T\lambda_{t+1}^*
 \]
-Introducing a matrix $P_t=P_t^T \geq 0$, it can be proven that 
+
+Introducing a matrix $P_t = P_t^T \geq 0$, it can be proven that
 \[
     \lambda_t^* = P_tx_t^*
 \]
-Assuming that it holds for some $t\leq T-1$, then we have 
+where $P_t \geq 0$ is defined $\forall t=1...T$.
+
+Assuming that it holds for some $t \leq T-1$, then we have
 \[
     u_t^* = -R_t^{-1}B_t^TP_{t+1}x_{t+1}^*
 \]
-Now, considering the constraint represented by the dynamics 
+
+Now, considering the constraint represented by the dynamics:
 \[
-    u_t^* = -R_t^{-1}B_t^TP_{t+1}(A_tx_t^*+B_tu_t^*)
+    u_t^* = -R_t^{-1}B_t^TP_{t+1}(A_tx_t^* + B_tu_t^*)
 \]
-Solving by $u^*_t$ yields 
+
+Solving for $u_t^*$ it follows:
 \[
-    u_t^* = -(R_t+B_t^Tp_{t+1}B_t)^{-1}B_t^TP_{t+1}A_tx^*_t \quad t=0,\dots,T-1
+    u_t^* = -(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_tx_t^* \quad t = 0,\ldots,T-1
 \]
-we get 
-\begin{gather*}
-    u_t^* = -R_t^{-1}B_t^Tp_{t+1}x_{t+1}^* \\
-    = -R_t^{-1}B_t^TP_{t+1}(A_tx_t^*+B_tu_t^*)
-\end{gather*}
-we multiply both sides by $R_t$: 
-\begin{gather*}
-    R_tu_t^* = -B_t^TP_{t+1}(A_tx_t^*+B_tu_t^*)\\
-    R_tu_t^* = -B_t^TP_{t+1}A_tx_t^*-B_t^TP_{t+1}B_tu_t^*\\
-    (R_t+B_t^TP_{t+1}B_t)u_t^* = -B_t^TP_{t+1}A_tx_t^*
-\end{gather*}
-The matrix on the left is clearly positive definite, therefore: 
+
+\begin{remark}
+We have found that the optimal input is not just an open loop function of time BUT it's a feedback-defined quantity, function of the optimal state.
+\end{remark}
+
+We thus obtain:
+\begin{align*}
+    x_{t+1}^* &= A_tx_t^* + B_tu_t^* \\
+    &= A_tx_t^* - B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_tx_t^*
+\end{align*}
+
+Multiplying both sides with $A_t^TP_{t+1}$ we obtain:
 \[
-    u_t^* = -(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_tx_t^*
+    A_t^T\underbrace{P_{t+1}x_{t+1}^*}_{\lambda_{t+1}^*} = A_t^TP_{t+1}A_tx_t^* - A_t^TP_{t+1}B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_tx_t^*
 \]
-which we can write as 
+
+Adding $Q_tx_t^*$ to both sides and collecting $x_t^*$, we obtain:
 \[
-    u_t^* = K_t^*x_t^*
+    \underbrace{A_t^T\lambda_{t+1}^* + Q_tx_t^*}_{\lambda_t^*} = \underbrace{\left[A_t^TP_{t+1}A_t - A_t^TP_{t+1}B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t + Q_t\right]}_{P_t}x_t^*
 \]
-that is, the optimal control is a state feedback with gain $-(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}$
-\[
-    x_{t+1}^* = A_tx_t^*-B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_tx_t^*
-\]
-which we can rewrite as 
-\[
-    x_{t+1}^* = (A_t-B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t)x_t^*
-\]
-which is a closed loop system. We multiply both sides by $P_{t+1}$ and obtain 
-\[
-    P_{t+1}x_{t+1}^* = P_{t+1}(A_t-B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t)x_t^*
-\]
-On the left side of the equation we have obtained $\lambda_{t+1}^*$
-\[
-    \lambda_{t+1}^* =P_{t+1}(A_t-B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t)x_t^*
-\]
-Remembering that $\lambda_t^* = A_t^T\lambda_{t+1}^*+Q_tx_t^*$ we multiply both sides by $A_t^T$ and then add $Q_tx^*_t$ and obtain 
-\[
-    A_t^T\lambda_{t+1}^*+Q_tx_t^*=A_t^TP_{t+1}(A_t-B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t)x_t^* + Q_tx_t^*
-\]
-and because 
 \[
     \lambda_t^* = P_tx_t^*
 \]
-then 
+where we have used the first-order necessary condition $\lambda_t^* = A_t^T\lambda_{t+1}^* + Q_tx_t^*$.
+
+Starting from the terminal condition $P_T = Q_T$, matrix $P_t$ can be computed by:
 \[
-    P_tx_t^* = [A_t^TP_{t+1}(A_t-B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t)+Q_t]x_t^*
+    P_t = A_t^TP_{t+1}A_t - A_t^TP_{t+1}B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t + Q_t
 \]
-so 
+
+Defining the gain matrix $K_t^*$ as:
 \[
-    P_tx_t^* = \left[A_t^TP_{t+1}A_t-A_t^TP_{t+1}B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t+Q_t\right]x_t^*
+    K_t^* = -(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t
 \]
-from which 
-\begin{equation}\label{Riccati}
-    P_t = A_t^TP_{t+1}A_t-A_t^TP_{t+1}B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t+Q_t
-\end{equation}
-because $\lambda_T^*=Q_Tx_T^*$ we have that 
-\[
-    P_T = Q_T
-\]
-Therefore, by propagating equation \eqref{Riccati} back in time, $P_t$ can be calculated. Equation \eqref{Riccati} is called difference Riccati equation
-\begin{itemize}
-    \item gains $K_t^*$ can be precomputed offline and then used for different $x_0$ 
-    \item It can be shown that if $T\to\infty$ the gains $K_t^*$ converge and asymptotically stabilize the system
-\end{itemize}
+
+the optimal control law for the linear quadratic problem is:
+\begin{align*}
+    x_{t+1}^* &= A_tx_t^* + B_tu_t^* & t &= 0,\ldots,T-1 & x_0 &= x_{\text{init}} \\
+    u_t^* &= K_t^*x_t^* & t &= 0,\ldots,T-1
+\end{align*}
+
+where $P_t$ is obtained by backward integration:
+\begin{align*}
+    P_T &= Q_T \\
+    P_t &= A_t^TP_{t+1}A_t - A_t^TP_{t+1}B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t + Q_t \quad t = T-1,\ldots,0
+\end{align*}
+which is known as the Difference Riccati equation.
+
+\begin{remark}
+The optimal control law $u_t^*$ is a state feedback controller. Notice that the obtained solution (feedback control law) has a similar structure to Kalman filtering; indeed, it can be shown that optimal control problem and optimal estimation problem are one the dual of the other.
+\end{remark}
+
+\begin{remark}
+Therefore, by propagating the Riccati equation back in time, $P_t$ can be calculated. The Riccati equation is called difference Riccati equation
+    \begin{itemize}
+        \setlength{\itemsep}{0pt}
+        \item gains $K_t^*$ can be precomputed offline and then used for different $x_0$ 
+        \item It can be shown that if $T\to\infty$ the gains $K_t^*$ converge and asymptotically stabilize the system
+    \end{itemize}
+\end{remark}
+
 \subsubsection{Other formulations of the Riccati equation}
+
 The usual Riccati recursion reads:
 \[
-    P_t = Q_t + A_t^TP_{t+1}A_t - A_t^TP_{t+1}B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t
+    P_t = Q_t + A_t^TP_{t+1}A_t - A_t^TP_{t+1}B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t
 \]
-by exploiting the matrix inversion lemma\footnote{$(A+BC)^{-1} = A^{-1}-A^{-1}B(I+CA^{-1}B)^{-1}CA^{-1}$}, we can write: 
+
+By exploiting the matrix inversion lemma [$(A+BC)^{-1} = A^{-1}-A^{-1}B(I+CA^{-1}B)^{-1}CA^{-1}$], we can write:
 \begin{align*}
-    P_t &= Q_t + A_t^TP_{t+1}A_t - A_t^TP_{t+1}B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t\\
-    P_t &= Q_t + A_t^TP_{t+1}(I-B_t(R_t+B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1})A_t\\
-    P_t &= Q_t + A_t^TP_{t+1}(I-B_t((I+B_t^TP_{t+1}B_tR_t^{-1})R_t)^{-1}B_t^TP_{t+1})A_t\\
-    P_t &= Q_t + A_t^TP_{t+1}(I-B_tR_t^{-1}(I+B_t^TP_{t+1}B_tR_t^{-1})^{-1}B_t^TP_{t+1})A_t\\
-    P_t &= Q_t + A_t^TP_{t+1}(I-B_tR_t^{-1}B_t^TP_{t+1})A_t\\
-    P_t &= Q_t + A_t^T(I-B_tR_t^{-1}B_t^TP_{t+1})P_{t+1}A_t
+    P_t &= Q_t + A_t^TP_{t+1}A_t - A_t^TP_{t+1}B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1}A_t\\
+    &= Q_t + A_t^TP_{t+1}(I-B_t(R_t + B_t^TP_{t+1}B_t)^{-1}B_t^TP_{t+1})A_t\\
+    &= Q_t + A_t^TP_{t+1}(I-B_t((I+B_t^TP_{t+1}B_tR_t^{-1})R_t)^{-1}B_t^TP_{t+1})A_t\\
+    &= Q_t + A_t^TP_{t+1}(I-B_tR_t^{-1}(I+B_t^TP_{t+1}B_tR_t^{-1})^{-1}B_t^TP_{t+1})A_t\\
+    &= Q_t + A_t^T(I+P_{t+1}BR_t^{-1}B_t^T)^{-1}P_{t+1}A_t
 \end{align*}
+
+\begin{remark}
+This alternative formulation of the Riccati equation is numerically more stable compared to the standard form.
+\end{remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Infinite horizion LQ optimal control}
 Consider the infinite-horizon optimal control problem
 \begin{align*}
