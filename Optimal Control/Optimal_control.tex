@@ -1641,8 +1641,9 @@ By exploiting the matrix inversion lemma [$(A+BC)^{-1} = A^{-1}-A^{-1}B(I+CA^{-1
 This alternative formulation of the Riccati equation is numerically more stable compared to the standard form.
 \end{remark}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Infinite horizion LQ optimal control}
+Let's now study, for time evolving up to infinity, the "individuated" optimal feedback control law and whether it stabilizes and steers the state to zero.\\
 Consider the infinite-horizon optimal control problem
 \begin{align*}
         \min_{\substack{x_1,x_2,\dots \\ u_0,u_1,\dots}} & \displaystyle\sum_{t=0}^{\infty}\displaystyle\frac{1}{2}\left[x_t^TQx_t+u_t^TRu_t\right] \\
@@ -1657,7 +1658,26 @@ where
     \item $Q\in\R^{n\times n}$ and $Q=Q^T\geq 0$
     \item $R\in\R^{m\times m}$ and $R=R^T> 0$
 \end{itemize}
-We assume the pair $(A,B)$ is controllable and the pair $(A,C)$ with $Q=C^TC$ is observable
+
+\begin{remark}
+The pair $(A,B)$ is controllable and the pair $(A,C)$, with $Q=C^TC$, is observable.
+\end{remark}
+
+\begin{remark}
+The controllability assumption guarantees a finite cost. Indeed, if the system is controllable, there exists a sequence driving the state to zero in finite time, so that the cost is finite.
+\end{remark}
+
+\begin{remark}
+Once the horizon is infinite, we have the possibility of the cost diverging to infinity, and we need to introduce some suppositions in order that a possibility for that cost function to be finite surely exists.
+\end{remark}
+
+\begin{remark}
+This control law has been proven to be asymptotically stabilizing - a remarkable result as we have managed to stabilize a time-variant linear system!
+\end{remark}
+
+\subsubsection{More about Dante's Inferno}
+
+We assume the pair $(A,B)$ is controllable and the pair $(A,C)$ with $Q=C^TC$ is observable.\\
 Let us write 
 \[
     y_t=Cx_t
@@ -1683,80 +1703,131 @@ Let the pair $(A,B)$ be controllable and the pair $(A,C)$ with $Q=C^TC$ be obser
             P_\infty = Q+A^TP_\infty A-A^TP\infty B(R+B^TP_\infty B)^{-1}B^TP_\infty A
         \]
         which is called \emph{Algebraic Riccati Equation }
-        \item the optimal control is a feedback of the state given by:
-            \begin{flalign*}
-                & K^* = -(R+B^TP_\infty B)^{-1}(B^TP_\infty A)\\
-                & u_t^* = K^*x^*_t\\
-                & x_{t+1}^* = Ax_t^*+Bu_t^* \quad t=1,2,\dots \quad x_0^* = X_{\text{init}}
-            \end{flalign*}
+    \item the optimal control is a feedback of the state given by:
+        \begin{flalign*}
+            & K^* = -(R+B^TP_\infty B)^{-1}(B^TP_\infty A)\\
+            & u_t^* = K^*x^*_t\\
+            & x_{t+1}^* = Ax_t^*+Bu_t^* \quad t=1,2,\dots \quad x_0^* = x_{\text{init}}
+        \end{flalign*}
+        and it asymptotically stabilizes the system (It's called Linear Quadratic Regulator).
 \end{itemize}
 \remark The observability of $(A,C)$ guardantees that if the stage cost goes to zero, then the state trajectory goes to zero.
 
+\subsubsection{Linear Quadratic Regulator $u_t = K_t^*x_t$ for LTV Systems}
+
+It can be demonstrated that considering the time-varying system
+\[
+    x_{t+1} = A_tx_t + B_tu_t
+\]
+under the conditions introduced in the previous slides, if the time horizon is sent to infinity $(T\to+\infty)$ then the optimal feedback $K_t^*$ (as introduced before), for $t\geq 0$, is exponentially stabilizing if $x_{t+1} = (A_t + B_tK_t^*)x_t$ is exponentially stable (alias $A_t + B_tK_t^*$ is Hurwitz).
+
+\begin{remark}
+Note that for linear systems "exponentially stable" simply means "asymptotically stable".
+\end{remark}
+
+\begin{remark}
+So the said controller is stabilizing also in the LTV case (not only LTI).
+\end{remark}
+
+\subsubsection{The Role of the Controllability Assumption - Demonstration}
+
+Let's consider a linear time-invariant system: $x_{t+1} = Ax_t + Bu_t$
+
+Having $(A,B)$ controllable means that $\forall x_0 \exists \bar{u}$ : $\bar{x}$ associated to $\bar{u}$ has $\bar{x}_T = 0$.
+Then, if $\bar{x}_T = 0$ then $\bar{u}_t = 0 \: \forall t \geq T \Rightarrow \bar{x}_t = 0 \: \forall t \geq T$
+
+Under these hypothesis:
+\[
+    \ell(\bar{x},\bar{u}) = \sum_{t=0}^{+\infty}\frac{1}{2}(\bar{x}_t^TQ\bar{x}_t + \bar{u}_t^TR\bar{u}_t) = \sum_{t=0}^{T-1}\frac{1}{2}(\bar{x}_t^TQ\bar{x}_t + \bar{u}_t^TR\bar{u}_t)
+\]
+which is both a finite cost and also lower bounded by zero, alias, an optimal solution indeed surely exists!
+
+\subsubsection{The Role of the Observability Assumption - Demonstration}
+
+Let's consider a linear time-invariant system: $x_{t+1} = Ax_t + Bu_t$
+
+Considering $y_t = Cx_t$ with $C$ defined such that $Q = C^TC$, then we can write:
+\[
+    \ell(\bar{x},\bar{u}) = \sum_{t=0}^{+\infty}\frac{1}{2}(\bar{x}_t^TQ\bar{x}_t + \bar{u}_t^TR\bar{u}_t) = \sum_{t=0}^{+\infty}\frac{1}{2}(\bar{x}_t^TC^TC\bar{x}_t + \bar{u}_t^TR\bar{u}_t)
+\]
+meaning that in general the cost depends on the output $y$ and it's in general possible having them bounded but with the state trajectory diverging (recall that the output depends in general only on the observable state, not the unobservable one, that is totally uncorrelated with it). The observability of $(A,C)$ guarantees that it is not possible this situation, is not possible for the cost to be bounded if the state trajectory diverges (alias $\bar{x}$ diverging $\Rightarrow$ cost diverging, unfeasible).
+
 \section{Affine LQR}
-Consider a LQR problem with affine cost and affine dynamics 
+
+\subsection{Problem Formulation}
+Consider a LQR problem with affine cost and affine dynamics:
 \begin{align*}
     \min_{\substack{x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1} \begin{bmatrix}
         q_t \\ r_t
     \end{bmatrix}^T \begin{bmatrix}
         x_t \\ u_t
-    \end{bmatrix}  + \begin{bmatrix}
+    \end{bmatrix} + \frac{1}{2}\begin{bmatrix}
         x_t \\ u_t
     \end{bmatrix}^T \begin{bmatrix}
         Q_t & S_t^T \\ S_t & R_t
     \end{bmatrix} \begin{bmatrix}
         x_t \\ u_t
-    \end{bmatrix} + q_t^Tx_T + x_T^TQ_Tx_T\\ 
-    \text{subj. to } & x_{t+1} = A_tx_t + B_tu_t + c_t \quad t = 0,\dots,T-1 
+    \end{bmatrix} + q_T^Tx_T + \frac{1}{2}x_T^TQ_Tx_T\\
+    \text{subj. to } & x_{t+1} = A_tx_t + B_tu_t + c_t \quad t = 0,\dots,T-1
 \end{align*}
-where $Q_t=Q_t^T\geq 0$, $R_t=R_t^T>0$, $S_t$ such that the problem is convex, i.e. $Q_t-S_t^TR_t^{-1}S_t\geq 0$
+where:
+\begin{itemize}
+    \item $Q_t\in\R^{n_x\times n_x}$ and $Q_t = Q_t^T \geq 0$ for all $t = 0,\dots,T$
+    \item $R_t\in\R^{n_u\times n_u}$ and $R_t = R_t^T > 0$ for all $t = 0,\dots,T-1$
+    \item $S_t\in\R^{n_u\times n_x}$ such that the problem is convex\footnote{Namely, $Q_t - S_t^TR_t^{-1}S_t$ positive semi-definite.}
+\end{itemize}
 
-This problem can be conveniently solved by augmenting the state as 
+\subsection{Solution via State Augmentation}
+It can be conveniently solved by augmenting the state as:
 \[
     \tilde{x}_t := \begin{bmatrix}
         1 \\ x_t
     \end{bmatrix}
 \]
-we can rewrite the cost and system matrices as 
-\[
-    \tilde{Q}_t := \begin{bmatrix}
-        0 & q_t^T \\ q_t  & Q_t
-    \end{bmatrix} \quad \tilde{S}_t := \begin{bmatrix}
+
+We can rewrite the cost and system matrices as:
+\begin{align*}
+    \tilde{Q}_t &:= \begin{bmatrix}
+        0 & q_t^T \\ q_t & Q_t
+    \end{bmatrix} & \tilde{S}_t &:= \begin{bmatrix}
         r_t & S_t
-    \end{bmatrix} \quad \tilde{R}_t := R_t \quad \tilde{A}_t := \begin{bmatrix}
+    \end{bmatrix} & \tilde{R}_t &:= R_t \\
+    \tilde{A}_t &:= \begin{bmatrix}
         1 & 0 \\ c_t & A_t
-    \end{bmatrix} \quad \tilde{B}_t := \begin{bmatrix}
+    \end{bmatrix} & \tilde{B}_t &:= \begin{bmatrix}
         0 \\ B_t
     \end{bmatrix}
-\]
-Then, we solve the associated LQR problem 
+\end{align*}
+
+Then, we solve the associated LQR problem:
 \begin{align*}
-    \min_{\substack{x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1}  \begin{bmatrix}
+    \min_{\substack{\tilde{x}_1,\dots,\tilde{x}_T\\u_0,\dots,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1}\frac{1}{2}\begin{bmatrix}
         \tilde{x}_t \\ u_t
     \end{bmatrix}^T \begin{bmatrix}
         \tilde{Q}_t & \tilde{S}_t^T \\ \tilde{S}_t & \tilde{R}_t
     \end{bmatrix} \begin{bmatrix}
         \tilde{x}_t \\ u_t
-    \end{bmatrix} + \tilde{x}_T^TQ_T\tilde{x}_T\\ 
-    \text{subj. to } & \tilde{x}_{t+1} = \tilde{A}_t\tilde{x}_t + \tilde{B}_tu_t  \quad t = 0,\dots,T-1 \\
-    & x_0 = x_{\text{init}}
+    \end{bmatrix} + \frac{1}{2}\tilde{x}_T^T\tilde{Q}_T\tilde{x}_T\\
+    \text{s.t. } & \tilde{x}_{t+1} = \tilde{A}_t\tilde{x}_t + \tilde{B}_tu_t \quad t = 0,\dots,T-1\\
+    & x_0 = x^0
 \end{align*}
-The optimal solution of the problem reads 
+
+\subsection{Optimal Solution}
+The optimal solution of the problem reads:
 \begin{align*}
-    u_t^* &= K_t^*x_t^* + \sigma_t^*\\ 
+    u_t^* &= K_t^*x_t^* + \sigma_t^* & t &= 0,\dots,T-1\\
     x_{t+1}^* &= A_tx_t^* + B_tu_t^*
 \end{align*}
-where 
+where:
 \begin{align*}
-    K_t^* &= -(R_t+B_t^TP_{t+1}B_t)^{-1}(S_t+B_t^TP_{t+1}A_t)\\ 
-    \sigma_t^* &= -(R_t+B_t^TP_{t+1}B_t)^{-1}(r_t+B_t^Tp_{t+1}+B_t^TP_{t+1}c_t)\\
+    K_t^* &= -(R_t + B_t^TP_{t+1}B_t)^{-1}(S_t + B_t^TP_{t+1}A_t)\\
+    \sigma_t^* &= -(R_t + B_t^TP_{t+1}B_t)^{-1}(r_t + B_t^Tp_{t+1} + B_t^TP_{t+1}c_t)\\
+    p_t &= q_t + A_t^Tp_{t+1} + A_t^TP_{t+1}c_t - {K_t^*}^T(R_t + B_t^TP_{t+1}B_t)\sigma_t^*\\
+    P_t &= Q_t + A_t^TP_{t+1}A_t - {K_t^*}^T(R_t + B_t^TP_{t+1}B_t)K_t^*
 \end{align*}
-\begin{align*}
-    p_t &= q_t + A_t^TP_{t+1} + A_t^TP_{t+1}C_t + {K_t^*}^T(R_t+B_t^TP_{t+1}B_t)\sigma_t^*\\
-    P_T &= Q_t + A_t^TP_{t+1}A_t - {K_t^*}^*T(R_t+B_t^TP_{t+1}B_t)K_t^*
-\end{align*}
-with $P_T = Q_T$ and $p_T = q_T$
+with $p_T = q_T$ and $P_T = Q_T$.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Optimality Conditions for Unconstrained Optimal Control via Shooting}
 
