@@ -79,102 +79,110 @@
 \maketitle
 \tableofcontents
 
-\chapter{Control of Mobile Robots}
+\part{Mobile Robot Control}
+
+\chapter{Configuration Space and Constraints}
 
 \section{Configuration Space}
-\begin{definition}
-The configuration space of a mobile robot has dimensions equal to the number of parameters needed to uniquely describe the configuration of the robot. It is heavily dependent on the structure of the considered robot and is equivalent to the Joint Space for manipulators.
-\end{definition}
 
-For different robot types, we have:
+The configuration space represents the complete description of a mobile robot's position and orientation. It has the following key characteristics:
+
 \begin{itemize}
-    \item Unicycle: $q = [x \; y \; \theta]^T \in \R^2 \times S$
-    \item Bicycle: $q = [x \; y \; \theta \; \gamma]^T \in \R^2 \times S^2$
+    \item Its dimensions equal the number of parameters needed to uniquely describe the configuration of a mobile robot
+    \item It is heavily dependent on the structure of the considered robot
+    \item It is equivalent to the Joint Space for manipulators
+\end{itemize}
+
+Two important examples of configuration spaces are:
+
+\begin{itemize}
+    \item Unicycle:
+        \begin{equation}
+            q = [x \; y \; \theta]^T \in \R^2 \times S
+        \end{equation}
+        
+    \item Bicycle:
+        \begin{equation}
+            q = [x \; y \; \theta \; \gamma]^T \in \R^2 \times S^2
+        \end{equation}
 \end{itemize}
 
 \section{Constraints}
 
-\subsection{Fundamental Definitions}
+\definitionbox{A constraint is any condition imposed on a material system that prevents it from assuming a generic position and/or act of motion.}
 
-\begin{definition}[Constraint]
-A constraint is any condition imposed on a material system that prevents it from assuming a generic position and/or act of motion.
-\end{definition}
+\definitionbox{A material system is subject to holonomic constraints if finite relations between the coordinates of the system are present (position constraints) or if differentiable/integrable relations between the coordinates of the system are present.}
 
-\begin{definition}[Holonomic Constraint]
-A material system is subject to holonomic constraints if finite relations between the coordinates of the system are present (position constraints) or if differentiable/integrable relations between the coordinates of the system are present.
-\end{definition}
+\definitionbox{A constraint is said to be non-holonomic if the differential relation between the coordinates is not reducible to finite form.}
 
-\begin{definition}[Non-holonomic Constraint]
-A constraint is said to be non-holonomic if the differential relation between the coordinates is not reducible to finite form.
-\end{definition}
+\section{Non-Holonomic Constraints}
 
-\subsection{Non-Holonomic Constraints}
+A fundamental simplifying assumption in mobile robotics is that each wheel rolls without slipping. This introduces several important characteristics:
 
-Under the simplifying assumption that each wheel rolls without slipping, we can state that:
 \begin{itemize}
     \item Each wheel introduces a non-holonomic constraint since it does not allow normal translations to the rolling direction
-    \item The wheel constraints the instant robot mobility, without typically reducing the configuration space (e.g., parallel parking)
+    \item The wheel constrains the instant robot mobility, without typically reducing the configuration space (e.g., parallel parking)
 \end{itemize}
 
-Without constraints, the system is described by:
+Without constraints, the general motion equations are:
 \begin{equation}
     \begin{cases}
-    \dot{x} = v_t \cos\theta + v_n \cos(\theta + \frac{\pi}{2}) \\
-    \dot{y} = v_t \sin\theta + v_n \sin(\theta + \frac{\pi}{2})
+        \dot{x} = v_t \cos \theta + v_n \cos(\theta + \frac{\pi}{2}) \\
+        \dot{y} = v_t \sin \theta + v_n \sin(\theta + \frac{\pi}{2})
     \end{cases}
 \end{equation}
 
-Since there is no slipping in normal direction ($v_n = 0$):
+Since there is no slipping in the normal direction ($v_n = 0$), this reduces to:
 \begin{equation}
     \begin{cases}
-    \dot{x} = v_t \cos\theta \\
-    \dot{y} = v_t \sin\theta
+        \dot{x} = v_t \cos \theta \\
+        \dot{y} = v_t \sin \theta
     \end{cases}
-    \Leftrightarrow \tan\theta = \frac{\dot{y}}{\dot{x}}
-    \Leftrightarrow [\dot{x}\sin\theta - \dot{y}\cos\theta = 0]
+    \;\; \Leftrightarrow \;\;
+    \tan \theta = \frac{\dot{y}}{\dot{x}}
+    \;\; \Leftrightarrow \;\;
+    \dot{x} \sin \theta - \dot{y} \cos \theta = 0
 \end{equation}
 
-This last equation represents the mobility constraint.
+The last equation represents the mobility constraint.
 
-\section{Pfaffian Form of Constraints}
+\section{Constraints in Pfaffian Form}
 
-The constraints can be expressed in different forms:
+Constraints can be expressed in different forms:
 \begin{itemize}
-    \item Constraint vector equation: $a(q)\dot{q} = 0$ (1 wheel)
-    \item Constraints matrix equation: $A(q)\dot{q} = 0$ ($N$ wheels)
+    \item Constraint vector equation for a single wheel: $a(q)\dot{q} = 0$
+    \item Constraints matrix equation for N wheels: $A(q)\dot{q} = 0$
 \end{itemize}
 
-A constraint that can be written as $A(q)\dot{q} = 0$ is said to be in Pfaffian form.
-
-\begin{definition}[Non-Holonomic Constraint Properties]
-A non-holonomic constraint:
+A constraint that can be written as $A(q)\dot{q} = 0$ is said to be in Pfaffian form. For non-holonomic constraints:
 \begin{itemize}
-    \item Cannot be fully integrated
-    \item Cannot be written in the configuration space
-    \item Does not restrict the space of configurations but the instant robot mobility
+    \item They cannot be fully integrated
+    \item They cannot be written in the configuration space
+    \item They do not restrict the space of configurations but rather the instant robot mobility
 \end{itemize}
-\end{definition}
 
 \subsection{Admissible Speeds}
-Admissible speeds may be generated by a matrix $G(q)$ such that:
+The admissible speeds may be generated by a matrix $G(q)$ such that:
 \begin{equation}
-    \text{Im}(G(q)) = \text{Ker}(A(q)), \quad \forall q \in C
+    \text{Im}(G(q)) = \text{Ker}(A(q)), \;\; \forall q \in C
 \end{equation}
-where $C$ is the Configuration Space.
+where $C$ represents the Configuration Space.
 
-\section{Kinematic Model of a WMR}
+\chapter{Kinematic Models of Mobile Robots}
 
-\subsection{General Formulation}
-The general kinematic model can be written as:
+\section{General Kinematic Model}
+
+\subsection{Basic Formulation}
+The general kinematic model of a wheeled mobile robot (WMR) can be expressed as:
 \begin{equation}
     \dot{q} = G(q)v
 \end{equation}
 
-This formulation:
+This model:
 \begin{itemize}
-    \item Represents the allowable directions of motion in the configuration space
+    \item Represents the allowable directions of motion in the configuration space (allowable velocities)
     \item Binds speeds in the operational space with speeds in the configuration space
-    \item Is required to deal with common problems in mobile robotics:
+    \item Is essential for solving common mobile robotics problems:
     \begin{itemize}
         \item Trajectory planning
         \item Control (High level)
@@ -184,151 +192,854 @@ This formulation:
 
 \section{Unicycle Model}
 
-\begin{definition}
-A unicycle is a vehicle with a single adjustable wheel with configuration described by $q = [x \; y \; \theta]^T$
-\end{definition}
+\definitionbox{A unicycle is a vehicle with a single adjustable wheel. The configuration is described by $q = [x \; y \; \theta]^T$}
 
-The constraint equation is:
+\subsection{Constraints and Pfaffian Form}
+The unicycle is subject to the constraint:
 \begin{equation}
-    \dot{x}\sin\theta - \dot{y}\cos\theta = 0
+    \dot{x} \sin \theta - \dot{y} \cos \theta = 0
 \end{equation}
 
-In Pfaffian Form:
+In Pfaffian form, $A(q)\dot{q} = 0$ with:
 \begin{equation}
-    A(q)\dot{q} = 0 \text{ with } A(q) = [\sin\theta, -\cos\theta, 0]
+    \begin{cases}
+        A(q) = [\sin \theta, -\cos \theta, 0] \\
+        q = [x \; y \; \theta]^T
+    \end{cases}
 \end{equation}
 
-The kernel of $A(q)$ is:
+The kernel of $A(q)$ provides the admissible velocities:
 \begin{equation}
-    \text{Ker}(A(q)) = \text{span}\left\{\begin{bmatrix}\cos\theta \\ \sin\theta \\ 0\end{bmatrix}, \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix}\right\} = \text{Im}(G(q))
+    \text{Ker}(A(q)) = \text{span}\left\{\begin{bmatrix}\cos \theta\\\sin \theta\\0\end{bmatrix}, \begin{bmatrix}0\\0\\1\end{bmatrix}\right\} = \text{Im}(G(q))
 \end{equation}
 
 \subsection{Kinematic Model}
-The unicycle kinematic model is:
+The complete unicycle kinematic model is:
 \begin{equation}
-    \dot{q} = \begin{bmatrix}\cos\theta \\ \sin\theta \\ 0\end{bmatrix}v + \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix}\omega = \begin{bmatrix}\cos\theta & 0 \\ \sin\theta & 0 \\ 0 & 1\end{bmatrix}\begin{bmatrix}v \\ \omega\end{bmatrix}
+    \dot{q} = \begin{bmatrix}\cos \theta\\\sin \theta\\0\end{bmatrix}v + \begin{bmatrix}0\\0\\1\end{bmatrix}\omega = \begin{bmatrix}\cos \theta & 0\\\sin \theta & 0\\0 & 1\end{bmatrix}\begin{bmatrix}v\\\omega\end{bmatrix}
 \end{equation}
 
-Where:
+where:
 \begin{itemize}
-    \item $v$: linear velocity of the contact point between wheel and ground
-    \item $\omega$: angular velocity of the robot
+    \item $v$: linear velocity of the contact point between wheel and ground (product of wheel angular velocity and radius)
+    \item $\omega$: angular velocity of the robot around the vertical axis
 \end{itemize}
 
-\section{Control Architecture}
+The configuration can be modified by controlling inputs $v$ and $\omega$.
 
-\subsection{Control Scheme Components}
-The control architecture consists of:
+\subsection{Practical Implementations}
+Due to stability issues with the original unicycle design, two main equivalent structures are commonly used:
+
+\subsubsection{Synchronized Drive Model}
+\begin{itemize}
+    \item Uses adjustable parallel wheels
+    \item Control inputs: $[v \; \omega]^T$
+    \item Configuration: $[x \; y \; \theta]^T$ represents position of any chosen point and robot orientation
+\end{itemize}
+
+\subsubsection{Differential Drive Model}
+\begin{itemize}
+    \item Uses two wheels separately controlled
+    \item Includes a passive wheel for static support
+    \item Configuration: $[x \; y \; \theta]^T$ represents position of the wheelbase midpoint and robot orientation
+\end{itemize}
+
+\subsection{Differential Drive Kinematics}
+Key parameters:
+\begin{itemize}
+    \item $\omega_R$: right wheel speed
+    \item $\omega_L$: left wheel speed
+    \item $d$: wheelbase
+    \item $r$: wheel radius
+\end{itemize}
+
+The model with inputs $\omega_R, \omega_L$ is:
+\begin{equation}
+    \begin{bmatrix}v\\\omega\end{bmatrix} = \begin{bmatrix}\frac{r}{2} & \frac{r}{2}\\\frac{r}{d} & -\frac{r}{d}\end{bmatrix}\begin{bmatrix}\omega_R\\\omega_L\end{bmatrix}
+\end{equation}
+
+In state space:
+\begin{equation}
+    \dot{q} = \begin{bmatrix}\dot{x}\\\dot{y}\\\dot{\theta}\end{bmatrix} = \begin{bmatrix}\cos \theta & 0\\\sin \theta & 0\\0 & 1\end{bmatrix}\begin{bmatrix}\frac{r}{2} & \frac{r}{2}\\\frac{r}{d} & -\frac{r}{d}\end{bmatrix}\begin{bmatrix}\omega_R\\\omega_L\end{bmatrix}
+\end{equation}
+
+\section{Bicycle Kinematic Model}
+
+\definitionbox{A bicycle is a vehicle having a caster (adjustable wheel) and a fixed wheel with their rotation axes perpendicular to the longitudinal plane. We consider only the case with front-wheel steering.}
+
+The configuration is described by:
+\begin{equation}
+    q = \begin{bmatrix}x\\y\\\theta\\\gamma\end{bmatrix}
+\end{equation}
+
+\subsection{Constraints}
+The system is subject to two constraints, one for each wheel:
+\begin{equation}
+    \begin{cases}
+        \dot{x}_f \sin(\theta + \gamma) - \dot{y}_f \cos(\theta + \gamma) = 0\\
+        \dot{x}_r \sin(\theta) - \dot{y}_r \cos(\theta) = 0
+    \end{cases}
+\end{equation}
+
+where $(x_f, y_f)$ represents the front wheel contact point and $(x_r, y_r)$ the rear wheel contact point, related by:
+\begin{equation}
+    \begin{cases}
+        x_f = x_r + L\cos\theta\\
+        y_f = y_r + L\sin\theta
+    \end{cases}
+\end{equation}
+
+The kinematic constraints in Pfaffian form are:
+\begin{equation}
+    A(q) = \begin{bmatrix}
+        \sin\theta & -\cos\theta & 0 & 0\\
+        \sin(\theta + \gamma) & -\cos(\theta + \gamma) & -L\cos\gamma & 0
+    \end{bmatrix}
+\end{equation}
+
+\subsection{Complete Kinematic Model}
+The bicycle kinematic model with control inputs $v$ (linear traction velocity) and $\omega$ (angular velocity of steering) is:
+\begin{equation}
+    \dot{q} = \begin{bmatrix}
+        \cos\theta\cos\gamma \\
+        \sin\theta\cos\gamma \\
+        \frac{1}{L}\sin\gamma \\
+        0
+    \end{bmatrix}v + \begin{bmatrix}
+        0 \\
+        0 \\
+        0 \\
+        1
+    \end{bmatrix}\omega
+\end{equation}
+
+\section{Swedish Wheel Kinematics}
+
+The Swedish wheel allows decomposition of velocity into two components:
+\begin{equation}
+    v = v_w\hat{x}_w + v_r(\hat{x}_w\cos\alpha + \hat{y}_w\sin\alpha)
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $v_w\hat{x}_w$ is the driven component
+    \item $v_r(\hat{x}_w\cos\alpha + \hat{y}_w\sin\alpha)$ is the rolling component
+\end{itemize}
+
+This can be rewritten as:
+\begin{equation}
+    v = (v_w + v_r\cos\alpha)\hat{x}_w + v_r\hat{y}_w\sin\alpha = v_x\hat{x}_w + v_y\hat{y}_w
+\end{equation}
+
+The relationships between velocities are:
+\begin{equation}
+    \begin{cases}
+        v_r = v_y/\sin\alpha\\
+        v_w = v_x - v_y\cot\alpha\\
+        \omega = v_w/R
+    \end{cases}
+\end{equation}
+
+For a vehicle with multiple Swedish wheels, the velocity at each wheel contact point is:
+\begin{equation}
+    {}^B v_i = {}^B v_B + {}^B\omega\hat{z}_B \times {}^B p_i
+\end{equation}
+
+where:
+\begin{itemize}
+    \item ${}^B v_B = \sqrt{\dot{x}^2 + \dot{y}^2}$ is the desired body velocity
+    \item ${}^B\omega = \dot{\theta}$ is the angular rate
+    \item ${}^B p_i$ are the wheel contact points
+\end{itemize}
+
+
+\chapter{Robot Control Architecture}
+
+\section{Elementary Motion Tasks}
+
+There are three fundamental types of motion tasks for mobile robots:
+
+\begin{enumerate}
+    \item Point-to-Point Transfer
+    \begin{itemize}
+        \item Example: parallel parking
+        \item Movement from initial pose to final pose
+        \item No specific path requirements
+    \end{itemize}
+
+    \item Trajectory Following (no time constraints)
+    \begin{itemize}
+        \item Geometric specification using parameter $s$
+        \item Robot must follow a specific spatial path
+        \item Timing of the motion is not critical
+    \end{itemize}
+
+    \item Trajectory Tracking (with time constraints)
+    \begin{itemize}
+        \item Time-based specification using parameter $t$
+        \item Robot must be at specific points at specific times
+        \item Both spatial and temporal accuracy required
+    \end{itemize}
+\end{enumerate}
+
+\section{Control System Architecture}
+
+The control system of a mobile robot consists of several interconnected components:
+
+\subsection{Main Components}
 
 \begin{itemize}
-    \item \textbf{Actuators:} DC motors, stepper motors
-    \item \textbf{End-Effector:} General purpose tool, gripper, hand
-    \item \textbf{Sensors:}
-    \begin{itemize}
-        \item Proprioceptive: encoder, gyro
-        \item Exteroceptive: bumpers, rangefinders (infrared, ultrasonic), laser, vision (mono, stereo)
-    \end{itemize}
-    \item \textbf{Control:}
-    \begin{itemize}
-        \item Low-level control
-        \item High-level control
-    \end{itemize}
+    \item \textbf{Task Planning}
+        \begin{itemize}
+            \item Generates reference trajectory $q_{ref}$
+            \item Considers mission objectives and constraints
+        \end{itemize}
+        
+    \item \textbf{High-Level Control}
+        \begin{itemize}
+            \item Processes error signals
+            \item Generates control commands
+        \end{itemize}
+        
+    \item \textbf{Low-Level Control}
+        \begin{itemize}
+            \item Interfaces with actuators
+            \item Implements basic motion commands
+        \end{itemize}
+        
+    \item \textbf{Actuation System}
+        \begin{itemize}
+            \item DC motors, stepper motors
+            \item Converts control signals to physical motion
+        \end{itemize}
+        
+    \item \textbf{End-Effector}
+        \begin{itemize}
+            \item General purpose tools
+            \item Grippers, hands
+        \end{itemize}
 \end{itemize}
+
+\subsection{Sensor Systems}
+
+The robot utilizes two types of sensors:
+
+\subsubsection{Proprioceptive Sensors}
+Internal state measurement devices:
+\begin{itemize}
+    \item Encoders
+    \item Gyroscopes
+\end{itemize}
+
+\subsubsection{Exteroceptive Sensors}
+Environmental measurement devices:
+\begin{itemize}
+    \item Bumpers
+    \item Rangefinders (infrared, ultrasonic)
+    \item Laser scanners
+    \item Vision systems (mono, stereo)
+\end{itemize}
+
+\section{Control Hierarchy}
 
 \subsection{Low-Level Control}
-Key characteristics:
 \begin{itemize}
-    \item Uses high-gain PI controllers to control robot motors
-    \item Deals only with robot actuators control according to high-level control instructions
-    \item Makes the robot a purely kinematic system when gains are high enough
+    \item Implements high-gain PI controllers for motor control
+    \item Ensures robot follows desired speed profile
+    \item Handles only actuator control based on high-level instructions
+    \item Makes robot behave as a purely kinematic system when gains are sufficiently high
 \end{itemize}
+
+\note{The low-level control system deals exclusively with the robot actuators and is not affected by the non-holonomic constraints introduced by the wheels.}
 
 \subsection{High-Level Control}
-Main features:
+
+Core functions:
 \begin{itemize}
-    \item Processes and computes signals for low-level controller using sensor data
-    \item Views robot as a purely kinematic system
-    \item Uses speed control signals for mobile robots
+    \item Processes and computes signals for low-level controller
+    \item Uses sensor data for feedback
+    \item Treats robot as a purely kinematic system
+    \item Generates speed control signals
 \end{itemize}
 
-\section{Motion Control}
+\section{Control Challenges}
+The control system must address several key challenges:
 
-\subsection{Problem Statement}
-Given a trajectory or desired configuration, design a control law that leads the robot to:
+\subsection{Low-Level Control Challenges}
 \begin{itemize}
-    \item Reach the desired configuration
-    \item Follow the trajectory (high-level control)
+    \item Internal loop control for robot actuation
+    \item Implementation of PI control for electric drives (linear systems)
+    \item Management of motor dynamics
 \end{itemize}
 
-Key aspects:
+\subsection{High-Level Control Challenges}
 \begin{itemize}
-    \item Uses kinematic model for motion control
-    \item Assumes kinematic inputs act directly on configuration variables
-    \item For unicycle and bicycle, control inputs are $v$ and $\omega$
+    \item Definition of motion and behavior based on task requirements
+    \item Integration of kinematic model constraints
+    \item Handling of wheel constraints
+    \item Control of nonlinear and complex system dynamics
 \end{itemize}
 
-\subsection{Control Problems}
+\note{The overall control architecture must seamlessly integrate both levels while respecting the robot's physical constraints and achieving the desired motion objectives.}
 
-\subsubsection{Configuration Regulation}
-The robot must reach a desired configuration:
-\begin{equation}
-    q_d = [x_d, y_d, \theta_d]^T
-\end{equation}
-starting from an initial configuration:
-\begin{equation}
-    q_0 = [x_0, y_0, \theta_0]^T
-\end{equation}
+\chapter{Motion Control Strategies}
 
-\subsubsection{Trajectory Following and Tracking}
-The robot must asymptotically follow a desired Cartesian trajectory $[x_d(t), y_d(t)]^T$ from initial configuration $q_0 = [x_0, y_0, \theta_0]^T$ with:
+\section{Motion Control Problem}
+
+\definitionbox{Given a trajectory or a desired configuration, the motion control problem involves designing a control law that leads the robot to the desired configuration or to follow the trajectory (high-level control).}
+
+Key characteristics:
 \begin{itemize}
-    \item \textbf{Trajectory Following:} depends on parameter $s$ (geometric specifications)
-    \item \textbf{Trajectory Tracking:} depends on time $t$ (timing specifications)
+    \item Control uses the kinematic model
+    \item Kinematic inputs act directly on configuration variables
+    \item For unicycle and bicycle models, control inputs are $v$ and $\omega$
+    \item Direct torque control on wheels is typically not possible due to low-level control loop
 \end{itemize}
 
-\section{Trajectory Planning}
+\section{Control Problem Categories}
 
-\subsection{Space-time Separation}
-For a trajectory $q(t), t \in [t_i, t_f]$ from initial configuration $q(t_i) = q_i$ to final configuration $q(t_f) = q_f$, we can decompose into:
+\subsection{Configuration Regulation}
+The robot must reach a desired configuration starting from an initial configuration:
 \begin{itemize}
-    \item A path $q(s)$, with $\frac{dq(s)}{ds} \neq 0, \forall s$
-    \item A motion law $s = s(t)$, with $s_i \leq s \leq s_f$
+    \item Initial: $q_0 = [x_0 \; y_0 \; \theta_0]^T$
+    \item Desired: $q_d = [x_d \; y_d \; \theta_d]^T$
 \end{itemize}
 
-Where:
+\subsection{Trajectory Control}
+The robot must asymptotically follow a desired Cartesian trajectory $[x_d(t), y_d(t)]^T$ from initial configuration $q_0 = [x_0 \; y_0 \; \theta_0]^T$. Two variants:
+
+\begin{enumerate}
+    \item \textbf{Trajectory Following}
+        \begin{itemize}
+            \item Depends on geometric parameter $s$
+            \item No time constraints
+        \end{itemize}
+        
+    \item \textbf{Trajectory Tracking}
+        \begin{itemize}
+            \item Depends on time parameter $t$
+            \item Timing specifications must be met
+        \end{itemize}
+\end{enumerate}
+
+\section{Point-to-Point Motion Control}
+
+\subsection{Moving to a Point}
+Objective: Move to goal point $(x^*, y^*)$
+
+Control law:
+\begin{itemize}
+    \item Robot velocity proportional to distance from goal:
+        \begin{equation}
+            v^* = K_v\sqrt{(x^* - x)^2 + (y^* - y)^2}, \quad K_v > 0
+        \end{equation}
+    
+    \item Steering angle points to goal:
+        \begin{equation}
+            \theta^* = \text{atan2}(y^* - y, x^* - x)
+        \end{equation}
+    
+    \item Proportional steering control:
+        \begin{equation}
+            \gamma = K_h(\theta^* - \theta), \quad K_h > 0
+        \end{equation}
+\end{itemize}
+
+\note{Since $\{\theta^*, \theta\} \in S$, these are not real numbers but angles on the unit circle.}
+
+\subsection{Line Following}
+Objective: Follow line $ax + by + c = 0$
+
+Control strategy:
+\begin{enumerate}
+    \item Distance minimization:
+        \begin{equation}
+            \alpha_d = -K_d d, \quad K_d > 0, \quad d = \frac{ax + by + c}{\sqrt{a^2 + b^2}}
+        \end{equation}
+    
+    \item Heading angle alignment:
+        \begin{equation}
+            \alpha_h = K_h(\theta^* - \theta), \quad K_h > 0, \quad \theta^* = \text{atan}\left(-\frac{a}{b}\right)
+        \end{equation}
+    
+    \item Combined control law:
+        \begin{equation}
+            \gamma = \alpha_d + \alpha_h
+        \end{equation}
+\end{enumerate}
+
+\section{Pose Control}
+
+\subsection{Moving to a Specific Pose}
+Objective: Drive robot to pose $(x^*, y^*, \theta^*)$
+
+Transformation to polar coordinates:
 \begin{equation}
     \begin{cases}
-    s(t_i) = s_i \\
-    s(t_f) = s_f
+        \rho = \sqrt{(x^* - x)^2 + (y^* - y)^2} \\
+        \alpha = \text{atan2}(y^* - y, x^* - x) - \theta \\
+        \beta = -\theta - \alpha + \theta^*
     \end{cases}
 \end{equation}
 
-And $s$ is monotonic: $\dot{s}(t) \geq 0$
-
-\subsection{Differential Flatness Planning}
-\begin{definition}
-A nonlinear dynamic system $\dot{x} = f(x) + g(x)u$ has the property of differential flatness if there exists a set of outputs $y$ (called flat) such that the system's state $x$ and input $u$ can be expressed algebraically as functions of $y$ and its derivatives:
+System dynamics:
 \begin{equation}
-    \begin{cases}
-    x = x(y, \dot{y}, \ddot{y}, ..., y^{(r)}) \\
-    u = u(y, \dot{y}, \ddot{y}, ..., y^{(r)})
-    \end{cases}
-\end{equation}
-\end{definition}
-
-For the unicycle model, the Cartesian coordinates are flat outputs, and:
-\begin{equation}
-    \begin{cases}
-    x' = \tilde{v}\cos\theta \\
-    y' = \tilde{v}\sin\theta \\
-    \theta' = \tilde{\omega}
-    \end{cases}
+    \begin{bmatrix}
+        \dot{\rho} \\
+        \dot{\alpha} \\
+        \dot{\beta}
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        -\cos\alpha & 0 \\
+        \frac{\sin\alpha}{\rho} & -1 \\
+        -\frac{\sin\alpha}{\rho} & 0
+    \end{bmatrix}
+    \begin{bmatrix}
+        v \\ \omega
+    \end{bmatrix}
 \end{equation}
 
-The orientation is given by:
+Control law:
+\begin{equation}
+    \begin{cases}
+        v = k_\rho\rho \\
+        \omega = k_\alpha\alpha + k_\beta\beta
+    \end{cases}
+\end{equation}
+
+Stability conditions:
+\begin{itemize}
+    \item $k_\rho > 0$
+    \item $k_\beta < 0$
+    \item $k_\alpha - k_\rho > 0$
+\end{itemize}
+
+\section{Input-Output State Feedback Linearization}
+
+\subsection{Basic Concept}
+Define point B outside wheels axle for vehicle control:
+\begin{equation}
+    \begin{cases}
+        x_b = x_r + b\cos\theta_r \\
+        y_b = y_r + b\sin\theta_r
+    \end{cases}, \quad b \neq 0
+\end{equation}
+
+Benefits:
+\begin{itemize}
+    \item Point B has no constraints
+    \item Can move instantly in any direction
+    \item Allows lateral motion relative to vehicle direction
+\end{itemize}
+
+\subsection{Control System}
+Decoupled inputs:
+\begin{equation}
+    \begin{cases}
+        \dot{x}_b = v_{x,b} \\
+        \dot{y}_b = v_{y,b}
+    \end{cases}
+\end{equation}
+
+System dynamics:
+\begin{equation}
+    \begin{cases}
+        \dot{x}_b = \dot{x}_r - b\omega\sin\theta_r = v\cos\theta_r - b\omega\sin\theta_r \\
+        \dot{y}_b = \dot{y}_r + b\omega\cos\theta_r = v\sin\theta_r + b\omega\cos\theta_r
+    \end{cases}
+\end{equation}
+
+Matrix form:
+\begin{equation}
+    \begin{bmatrix}
+        \dot{x}_b \\ \dot{y}_b
+    \end{bmatrix} =
+    \begin{bmatrix}
+        \cos\theta_r & -b\sin\theta_r \\
+        \sin\theta_r & b\cos\theta_r
+    \end{bmatrix}
+    \begin{bmatrix}
+        v \\ \omega
+    \end{bmatrix}
+\end{equation}
+
+\subsection{Trajectory Tracking}
+For trajectory $(x_d(\cdot), y_d(\cdot))$, tracking control law:
+\begin{equation}
+    \begin{cases}
+        \dot{x}_b = v_{x,b} = \dot{x}_d + K_1(x_d - x_b) \\
+        \dot{y}_b = v_{y,b} = \dot{y}_d + K_2(y_d - y_b)
+    \end{cases}
+\end{equation}
+
+Error dynamics:
+\begin{equation}
+    \begin{cases}
+        e_x = x_d - x_b \\
+        e_y = y_d - y_b
+    \end{cases}
+    \Rightarrow
+    \begin{cases}
+        \dot{e}_x + K_1e_x = 0 \\
+        \dot{e}_y + K_2e_y = 0
+    \end{cases}
+    \Rightarrow
+    \begin{cases}
+        e_x \to 0 \\
+        e_y \to 0
+    \end{cases}
+\end{equation}
+
+\section{Trajectory Following}
+
+\subsection{Time-Based Following}
+Objective: Follow sequence of points $(x^*(t), y^*(t))$
+
+Control strategy:
+\begin{itemize}
+    \item Maintain distance $d^*$ behind pursuit point:
+        \begin{equation}
+            e = \sqrt{(x^* - x)^2 + (y^* - y)^2} - d^*
+        \end{equation}
+    
+    \item PI velocity controller:
+        \begin{equation}
+            v^* = K_he + K_i\int e\,dt
+        \end{equation}
+    
+    \item Steering control:
+        \begin{equation}
+            \gamma = K_h(\theta^* - \theta), \quad K_h > 0, \quad \theta^* = \text{atan2}(y^* - y, x^* - x)
+        \end{equation}
+\end{itemize}
+
+\note{The integral term is necessary to provide nonzero velocity when tracking error is zero.}
+
+\chapter{Motion Planning}
+
+\section{Planning Problem}
+
+\definitionbox{The motion planning problem involves determining a trajectory in the configuration space to take the robot from an initial configuration to a final configuration, where both configurations must be feasible.}
+
+Key requirements:
+\begin{itemize}
+    \item Initial and final configurations (boundary conditions) must be compatible with kinematic constraints
+    \item All points along the trajectory must respect kinematic constraints
+\end{itemize}
+
+\definitionbox{A trajectory is not feasible if it requires the robot to perform motion incompatible with its kinematic constraints. For example, a unicycle cannot perform lateral translation.}
+
+\section{Space-Time Trajectory Separation}
+
+\subsection{Problem Formulation}
+Plan trajectory $q(t), t \in [t_i, t_f]$ that takes robot from:
+\begin{itemize}
+    \item Initial configuration: $q(t_i) = q_i$
+    \item Final configuration: $q(t_f) = q_f$
+\end{itemize}
+
+The trajectory $q(t)$ can be decomposed into:
+\begin{enumerate}
+    \item Path $q(s)$ with $\frac{dq(s)}{ds} \neq 0, \forall s$
+    \item Motion law $s = s(t)$, where $s_i \leq s \leq s_f$, with:
+        \begin{equation}
+            \begin{cases}
+                s(t_i) = s_i \\
+                s(t_f) = s_f \\
+                \dot{s}(t) \geq 0 \text{ (monotonic)}
+            \end{cases}
+        \end{equation}
+\end{enumerate}
+
+\note{A typical choice for $s$ is the curvilinear abscissa along the path, with $s_i = 0$ and $s_f = L$.}
+
+\subsection{Mathematical Analysis}
+Space-time separation of trajectory:
+\begin{equation}
+    \dot{q} = \frac{dq}{dt} = \frac{dq}{ds}\dot{s} = q'\dot{s}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $q'$ is tangent to path in configuration space for growing $s$
+    \item $\dot{s}$ modulates the speed along the path
+\end{itemize}
+
+From Pfaffian form of non-holonomic constraints:
+\begin{equation}
+    \begin{cases}
+        A(q)\dot{q} = A(q)q'\dot{s} = 0 \\
+        \dot{s} > 0, \forall t \in [t_i, t_f]
+    \end{cases}
+    \Rightarrow A(q)q' = 0
+\end{equation}
+
+A feasible path satisfies:
+\begin{equation}
+    q' = G(q)\tilde{u}
+\end{equation}
+
+\section{Control Input Generation}
+
+\subsection{Planning Problem}
+Given:
+\begin{itemize}
+    \item Geometric path with known inputs $\tilde{u}$
+    \item Motion law $s(t)$ defining path speed
+\end{itemize}
+
+Problem: How to combine these to obtain robot control inputs?
+
+\subsection{Mathematical Derivation}
+\begin{equation}
+    \begin{aligned}
+        q &= G(q)u \\
+        q' &= G(q)\tilde{u}(s) \\
+        \frac{dq}{ds}\dot{s} &= G(q)\tilde{u}(s)\dot{s} \\
+        \dot{q} &= G(q)\tilde{u}(s)\dot{s} \\
+        \dot{q} &= G(q)u(t)
+    \end{aligned}
+\end{equation}
+
+Therefore:
+\begin{equation}
+    \tilde{u}(s)\dot{s} = u(t)
+\end{equation}
+
+\section{Unicycle Path Planning}
+
+\subsection{Feasibility Conditions}
+For the unicycle, non-holonomic constraints imply:
+\begin{equation}
+    [sin \theta \; -\cos \theta \; 0]q' = x'\sin \theta - y'\cos \theta = 0
+\end{equation}
+
+This means Cartesian speed must align with motion direction (no lateral slip).
+
+Feasible paths are given by:
+\begin{equation}
+    \begin{cases}
+        x' = \tilde{v}\cos \theta \\
+        y' = \tilde{v}\sin \theta \\
+        \theta' = \tilde{\omega}
+    \end{cases}
+\end{equation}
+
+Kinematic inputs derived from geometric ones:
+\begin{equation}
+    \begin{cases}
+        v(t) = \tilde{v}\dot{s} \\
+        \omega(t) = \tilde{\omega}\dot{s}
+    \end{cases}
+\end{equation}
+
+\section{Differential Flatness Planning}
+
+\definitionbox{A generic nonlinear dynamic system $\dot{x} = f(x) + g(x)u$ has the property of differential flatness if there exists a set of outputs $y$, called flat, such that the system's state $x$ and input $u$ can be expressed algebraically as functions of $y$ and a finite number of its derivatives:
+\begin{equation}
+    \begin{cases}
+        x = x(y, \dot{y}, \ddot{y}, \ldots, y^{(r)}) \\
+        u = u(y, \dot{y}, \ddot{y}, \ldots, y^{(r)})
+    \end{cases}
+\end{equation}}
+
+\subsection{Application to Mobile Robots}
+The Cartesian coordinates of unicycle and bicycle are flat outputs.
+
+For unicycle geometric model:
+\begin{equation}
+    \begin{cases}
+        x' = \tilde{v}\cos \theta \\
+        y' = \tilde{v}\sin \theta \\
+        \theta' = \tilde{\omega}
+    \end{cases}
+\end{equation}
+
+Orientation from flat outputs:
 \begin{equation}
     \theta = \theta(x', y') = \arctan(y'/x') + k\pi, \quad k = 0,1
 \end{equation}
 
+\note{The two possible choices for $\theta$ correspond to forward ($k=0$) or backward ($k=1$) motion. If initial orientation is assigned, then $k$ is determined.}
+
+\subsection{Trajectory Generation}
+From kinematic model:
+\begin{equation}
+    \begin{cases}
+        \tilde{v}(s) = \pm\sqrt{x'(s)^2 + y'(s)^2} \\
+        \tilde{\omega}(s) = \frac{y''(s)x'(s) - x''(s)y'(s)}{x'(s)^2 + y'(s)^2}
+    \end{cases}
+\end{equation}
+
+Final control inputs:
+\begin{equation}
+    \begin{cases}
+        v(t) = \tilde{v}(s)\dot{s}(t) \\
+        \omega(t) = \tilde{\omega}(s)\dot{s}(t)
+    \end{cases}
+\end{equation}
+
+\subsection{Path Planning Example}
+For unicycle path from $q_i = [x_i \; y_i \; \theta_i]$ to $q_f = [x_f \; y_f \; \theta_f]$:
+
+Use cubic polynomial:
+\begin{equation}
+    \begin{aligned}
+        x(s) &= s^3x_f - (s-1)^3x_i + \alpha_x s^2(s-1) + \beta_x s(s-1)^2 \\
+        y(s) &= s^3y_f - (s-1)^3y_i + \alpha_y s^2(s-1) + \beta_y s(s-1)^2
+    \end{aligned}
+\end{equation}
+
+Boundary conditions:
+\begin{equation}
+    \begin{cases}
+        x(0) = x_i & x(1) = x_f \\
+        y(0) = y_i & y(1) = y_f \\
+        x'(0) = k_i\cos\theta_i & x'(1) = k_f\cos\theta_f \\
+        y'(0) = k_i\sin\theta_i & y'(1) = k_f\sin\theta_f
+    \end{cases}
+\end{equation}
+
+where $k_i, k_f > 0$ are free parameters representing initial and final geometric speeds.
+
+Parameters computed as:
+\begin{equation}
+    \begin{bmatrix}
+        \alpha_x \\ \alpha_y
+    \end{bmatrix} =
+    \begin{bmatrix}
+        k\cos\theta_f - 3x_f \\
+        k\sin\theta_f - 3y_f
+    \end{bmatrix}, \quad
+    \begin{bmatrix}
+        \beta_x \\ \beta_y
+    \end{bmatrix} =
+    \begin{bmatrix}
+        k\cos\theta_i + 3x_i \\
+        k\sin\theta_i + 3y_i
+    \end{bmatrix}
+\end{equation}
+
+with $k_i = k_f = k$ chosen for simplicity.
+
+
+\part{Mobile Robotics Navigation}
+
+\chapter{Navigation Fundamentals}
+
+\section{Introduction to Navigation}
+
+\definitionbox{Navigation (IEEE Standard 172-1983): The process of directing a vehicle so as to reach the intended destination.}
+
+This definition establishes the fundamental purpose of robot navigation - to enable autonomous movement from one point to another. The core challenge lies in developing reliable methods for a robot to:
+\begin{itemize}
+    \item Determine its current position
+    \item Plan a path to the goal
+    \item Execute the planned motion while avoiding obstacles
+\end{itemize}
+
+\section{Interaction with the Environment}
+
+Robots frequently need to operate in unknown or partially known environments containing both static and dynamic obstacles. To navigate safely and effectively, robots must:
+
+\begin{enumerate}
+    \item Perceive and understand their environment through onboard sensors
+    \item Recognize and locate obstacles in their path
+    \item Plan and execute collision-free trajectories
+\end{enumerate}
+
+\subsection{Key Requirements}
+For successful navigation in real-world environments, robots need:
+\begin{itemize}
+    \item Reliable sensing systems to detect obstacles
+    \item Algorithms to process sensor data and identify potential hazards
+    \item Motion planning capabilities to generate safe paths
+    \item Control systems to execute planned movements accurately
+\end{itemize}
+
+\section{Navigation Approaches}
+
+There are two fundamental approaches to robot navigation:
+
+\subsection{Reactive Navigation}
+\begin{itemize}
+    \item Does not require a complete map of the environment
+    \item Decisions are made based on current sensor readings
+    \item Similar to biological systems like insects
+    \item Can handle dynamic environments and unexpected obstacles
+    \item Limited to simpler behaviors and local decision-making
+\end{itemize}
+
+\subsection{Map-Based Navigation}
+\begin{itemize}
+    \item Uses a representation of the environment (map)
+    \item Enables global path planning
+    \item Can find optimal routes
+    \item Requires accurate localization
+    \item More computationally intensive
+    \item May struggle with dynamic environments
+\end{itemize}
+
+\note{The choice between reactive and map-based navigation often depends on the specific application requirements, environment characteristics, and available computational resources.}
+
+\section{Navigation System Components}
+A complete navigation system typically includes:
+\begin{itemize}
+    \item Perception: Sensors to gather information about the environment
+    \item Localization: Methods to determine the robot's position
+    \item Planning: Algorithms to generate paths to the goal
+    \item Control: Systems to execute the planned motion
+    \item Obstacle Avoidance: Strategies to prevent collisions
+\end{itemize}
+
+These components work together to enable the robot to navigate safely and efficiently from its current position to a desired destination, while avoiding obstacles and adapting to environmental changes.
+
+
+
+
+
+
+
+
+
+
+
 
 \end{document}
+
+
+
+Chapter 1: Navigation Fundamentals
+- Slides 2-4 from Mobile_Robotics_Navigation.pdf 
+
+Chapter 2: Reactive Navigation
+- Braitenberg Vehicle & Bug Algorithms: Slides 5-15
+- Potential Fields: Slides 16-20
+
+Chapter 3: Map-Based Navigation
+- Distance Transform: Slides 21-22
+- Dijkstra's Algorithm & A*: Slides 23-24
+- D* Algorithm: Slides 25-59 (extensive coverage of D* examples)
+
+Chapter 4: Roadmap Methods
+- Voronoi Roadmap: Slide 60
+- Probabilistic Roadmap Method (PRM): Slides 61-63
+- Rapidly-Exploring Random Tree (RRT): Slides 64-69
+
+Chapter 5: Robot Localization
+- Dead Reckoning & Odometry: Slides 70-82
+- Pose Estimation: Slides 83-87
+
+Chapter 6: Mapping and SLAM
+- Map Building: Slides 88-94
+- SLAM Implementation: Slides 95-99
+- Laser-Based Mapping: Slides 100-101
+
+Chapter 7: Monte Carlo Localization
+- Algorithm and Implementation: Slides 102-108
+- Examples and Results: Slides 109-112
+
+
+divide these slides into chapters, afterwards I will ask you to transform it into a latex file, you have to be complete and accurate
+
+In latex using the preamble attached, be complete and precise
