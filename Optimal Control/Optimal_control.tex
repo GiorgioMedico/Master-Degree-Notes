@@ -88,6 +88,8 @@
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
 \newtheorem*{notation}{Notation}
+\newtheorem*{assumption}{Assumption}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Document Information
@@ -1827,96 +1829,276 @@ where:
 \end{align*}
 with $p_T = q_T$ and $P_T = Q_T$.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \chapter{Optimality Conditions for Unconstrained Optimal Control via Shooting}
+\section{Recall: Discrete-time Control System }
+We consider nonlinear, discrete-time systems described by
+\[
+    x_{t+1} = f_t(x_t, u_t) \qquad t \in \mathbb{N}_0
+\]
+where $x_t \in \mathbb{R}^n$ and $u_t \in \mathbb{R}^m$ are the state and the input of the system at time $t$.
 
-Let us consider the NL, D-T system dynamics 
-\[
-    x_{t+1} = f_t(x_t,u_t) \quad t=0,\dots,T-1 \quad x_0 \text{ given}
-\]
-and let us suppose we have an input sequence $u_0,\dots,u_{T-1}$. We have: 
-\begin{flalign*}
-    & x_1 =f_0(x_0,u_0) = \tilde{\Phi}_1(\mathbf{u}) \\
-    &  x_2 = f_1(x_1,u_1) = f_1(f_0(x_0,u_0),u_1) = \tilde{\Phi}_2(\mathbf{u}) \\
-    & \vdots \\
-    & x_t = \tilde{\Phi}_t(\mathbf{u}) \qquad t=0,\dots,T-1
-    & \vdots \\
-    & x_T = \tilde{\Phi}_{T}(\mathbf{u}) \qquad t=0,\dots,T-1
-\end{flalign*}
-Idea: express the state $x_t$ at each $t=1,\dots,T$ as a function of the input sequence $\mathbf{u}$ unly. For all $t$ we can introduce a map $\Phi_t:\R^m \to \R^n$ such that 
-\[
-    x_t := \Phi_t(\mathbf{u})
-\]
-compact notation
-\[
-    \Phi(\mathbf{u}) = \col(\Phi_1(\mathbf{u}),\dots,\Phi_T(\mathbf{u}))
-\]
-so that 
-\[
-    \mathbf{x} = \Phi(\mathbf{u})
-\]
-Note: Given any arbitrary $\bar{u}_0,\dots,\bar{u}_{T-1}$, we have that $\Phi_{t+1}(\bar{\mathbf{u}}) = f_t(\Phi_t(\bar{\mathbf{u}}),u_t)$ by construction. This is equivalent to the equality constraint for the optimal control problem.
+\subsubsection{Notation}
+We use $\mathbf{x} \in \mathbb{R}^{nT}$ and $\mathbf{u} \in \mathbb{R}^{mT}$ to denote, respectively, the stack of the states $x_t$ for all $t \in 1,\ldots,T$ and the inputs $u_t$ for all $t \in 0,\ldots,T-1$, that is
+\begin{align*}
+    \mathbf{x} &:= \col(x_1,\ldots,x_T) \\
+    \mathbf{u} &:= \col(u_0,\ldots,u_{T-1})
+\end{align*}
+where $\col(x_1,\ldots,x_T)$ is the (column) vector with components $x_1,\ldots,x_T$.
 
-\section{Reduced optimal control problem}\label{shoot}
-We can rewrite the optimal control problem as 
-\[
-    \min_{\mathbf{u}\in\R^{mT}} \displaystyle\sum_{t=0}^{T-1}\ell_t(\Phi_t(\mathbf{u}),u_t)+\ell_T(\Phi_T(\mathbf{u}))
-\]
-as noted before, the equality constraint is satisfied by construction, making this an unconstrained optimization problem. We can rewrite it compactly as 
-\[
-    \min_{\mathbf{u}\in\R^{mT}}\ell(\Phi(\mathbf{u}),\mathbf{u})
-\]
-and by defining $J(\mathbf{u}):=\ell(\Phi(\mathbf{u}),\mathbf{u})$
-\[
-    \min_{\mathbf{u}\in\R^{mT}} J(\mathbf{u}):
-\]
-This goes by the name of \emph{reduced} or \emph{condensed optimal control problem}. The procedure of writing $\mathbf{x}$ as a function of $\mathbf{u}$ and then plugging it into the optimal control problem is called shooting.
+\section{Recall: System Trajectories}
+We start by introducing the definition of trajectory of a (possibly) nonlinear, discrete-time control system.
+
+\begin{definition}
+A pair $(\bar{\mathbf{x}}, \bar{\mathbf{u}}) \in \mathbb{R}^{nT} \times \mathbb{R}^{mT}$ is called a \emph{trajectory} of the system if its components satisfy the constraint represented by the dynamics for all $t \in 0,\ldots,T-1$. In particular, $\bar{\mathbf{x}}$ is the state trajectory, while $\bar{\mathbf{u}}$ is the input trajectory.
+\end{definition}
+
 \begin{remark}
-    if we consider path input constraints 
-    \begin{align*}
-        g_0(u_0)\leq 0 \\
-        \vdots \\
-        g_{T-1}(u_{T-1})\leq 0 
-    \end{align*}
-    the problem becomes 
-    \begin{align*}
-        \min_{\mathbf{u}\in\R^{mT}} & J(\mathbf{u}) \\
-        \text{subj to } & g_0(u_0)\leq 0 \\
-        & \vdots \\
-        & g_{T-1}(u_{T-1})\leq 0 
-    \end{align*}
+It will be sometimes useful to refer to a generic pair $(\boldsymbol{\alpha}, \boldsymbol{\mu}) \in \mathbb{R}^{nT} \times \mathbb{R}^{mT}$ with $\boldsymbol{\alpha} := \col(\alpha_1,\ldots,\alpha_T)$ and $\boldsymbol{\mu} := \col(\mu_0,\ldots,\mu_{T-1})$ as a state-input curve. Notice that a curve $(\boldsymbol{\alpha}, \boldsymbol{\mu})$ is not necessarily a trajectory, i.e., it does not necessarily satisfy the dynamics.
 \end{remark}
+
+Let us rewrite the nonlinear dynamics as an implicit equality constraint $h : \mathbb{R}^{nT} \times \mathbb{R}^{mT} \to \mathbb{R}^{nT}$:
+\[
+    h(\mathbf{x}, \mathbf{u}) := \begin{bmatrix}
+        f_t(x_0, u_0) - x_1 \\
+        \vdots \\
+        f_t(x_{T-1}, u_{T-1}) - x_T
+    \end{bmatrix}
+\]
+so that a curve $(\bar{\mathbf{x}}, \bar{\mathbf{u}})$ is a trajectory if it satisfies the (possibly nonlinear) equality constraint
+\[
+    h(\bar{\mathbf{x}}, \bar{\mathbf{u}}) = 0.
+\]
+
 \begin{remark}
-     if we have constraints of the type 
-     \begin{align*}
-         &g_0(x_0,u_0)\leq 0\\
-         &\vdots \\
-         &g_{T-1}(x_{T-1},u_{T-1})\leq 0\\
-     \end{align*}
-     They can be rewritten as functions of $x_0$ and $\mathbf{u}$ only, however $\Phi(\cdot)$ must be explicitly known
+Recall that a nonlinear equality constraint is a nonconvex constraint.
+\end{remark}
+
+\subsection{Recall: Trajectory Manifold}
+We can now define the trajectory manifold $\mathcal{T} \subset \mathbb{R}^{nT} \times \mathbb{R}^{mT}$ of the system.
+
+\begin{definition}
+The trajectory manifold $\mathcal{T} \subset \mathbb{R}^{nT} \times \mathbb{R}^{mT}$ is defined as
+\[
+    \mathcal{T} := \{(\mathbf{x}, \mathbf{u}) \in \mathbb{R}^{nT} \times \mathbb{R}^{mT} \mid h(\mathbf{x}, \mathbf{u}) = 0\}.
+\]
+\end{definition}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{manifold}
+    \caption{Trajectory manifold $\mathcal{T}$}
+\end{figure}
+
+\begin{remark}
+It can be shown that the tangent space to the trajectory manifold at a given trajectory (point), denoted as $T_{(\bar{\mathbf{x}},\bar{\mathbf{u}})}\mathcal{T}$, is represented by the set of trajectories satisfying the linearization of the nonlinear dynamics $f_t(\cdot,\cdot)$ about the trajectory $(\bar{\mathbf{x}}, \bar{\mathbf{u}})$.
+\end{remark}
+
+\section{Recall: Unconstrained Optimal Control Problem (D-T)}
+
+We look for a solution of the discrete-time optimal control problem
+\begin{align}
+    \min_{\mathbf{x}\in\mathbb{R}^n,\mathbf{u}\in\mathbb{R}^m} & \sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T) \\
+    \text{subj.to } & x_{t+1} = f_t(x_t,u_t), \quad t \in 0,\ldots,T-1
+\end{align}
+with given initial condition $x_0 = x^0 \in \mathbb{R}^n$, where $\ell_t : \mathbb{R}^n \times \mathbb{R}^m \to \mathbb{R}$ is the so-called stage cost while $\ell_T : \mathbb{R}^n \to \mathbb{R}$ is the terminal cost.
+
+\begin{assumption}
+Functions $\ell_t(\cdot,\cdot)$, $\ell_T(\cdot)$, $f_t(\cdot,\cdot)$ are twice continuously differentiable, i.e., they are class $\mathcal{C}^2$.
+\end{assumption}
+
+\subsection{Recall: Compact Notation}
+Consider the discrete-time system $x_{t+1} = f_t(x_t,u_t)$. We can introduce the compact notation
+\[
+    \mathbf{x} := \begin{bmatrix}
+        x_1 \\ \vdots \\ x_T
+    \end{bmatrix} \qquad
+    \mathbf{u} := \begin{bmatrix}
+        u_0 \\ \vdots \\ u_{T-1}
+    \end{bmatrix}
+\]
+which lets us write compactly the cost function as
+\[
+    \ell(\mathbf{x},\mathbf{u}) := \sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T)
+\]
+and the equality constraint represented by the dynamics
+\[
+    h(\mathbf{x},\mathbf{u}) := \begin{bmatrix}
+        f_t(x_0,u_0)-x_1 \\
+        \vdots \\
+        f_t(x_{T-1},u_{T-1})-x_T
+    \end{bmatrix}
+\]
+
+\section{Recall: Equality Constrained Optimization}
+In light of this compact notation, we can rewrite the optimal control problem as
+\begin{align*}
+    \min_{\mathbf{x}\in\mathbb{R}^{nT},\mathbf{u}\in\mathbb{R}^{mT}} & \ell(\mathbf{x},\mathbf{u})\\
+    \text{subj.to } & h(\mathbf{x},\mathbf{u})=0
+\end{align*}
+where $\ell : \mathbb{R}^{nT} \times \mathbb{R}^{mT} \to \mathbb{R}$ and $h : \mathbb{R}^{nT} \times \mathbb{R}^{mT} \to \mathbb{R}^{nT}$.
+This is a constrained nonlinear optimization problem with decision variable $(\mathbf{x},\mathbf{u})$.
+
+\section{Recall: Optimality Conditions}
+Let $z^*$ be a regular local minimum of the equality-constrained minimization problem:
+\begin{align*}
+    \min_{z\in\mathbb{R}^n} & \ell(z)\\
+    \text{subj.to } & h(z)=0
+\end{align*}
+where $\ell : \mathbb{R}^n \to \mathbb{R}$ and $h : \mathbb{R}^n \to \mathbb{R}^n$.
+Then
+\[
+    \nabla\ell(z^*) + \nabla h(z^*)\lambda^* = 0, \quad h(z^*) = 0
+\]
+which can be written as
+\[
+    \nabla\mathcal{L}(z^*,\lambda^*) = \begin{bmatrix}
+        \nabla\ell(z^*) + \nabla h(z^*)\lambda^* \\
+        h(z^*)
+    \end{bmatrix} = 0
+\]
+
+\begin{remark}
+If you have doubts go back to Part ``Equality and Inequality Constrained Optimization''.
+\end{remark}
+
+
+\section{Shooting Method in Optimal Control}
+
+\subsection{State Expression via Input Sequence}
+Consider a discrete-time system with dynamics
+\[
+    x_{t+1} = f_t(x_t, u_t), \quad x_0 = x^0
+\]
+where $x_0 = x^0$ is a given initial condition and $\mathbf{u} = \col(u_0,\ldots,u_T)$ is the input sequence.
+
+The key idea of the shooting method is to express each state $x_t$ at time $t = 1,\ldots,T$ as a function of only the input sequence $\mathbf{u}$. This leads to:
+
+\begin{align*}
+    x_1 &= f_0(x_0, u_0) := \phi_1(\mathbf{u})\\
+    x_2 &= f_1(f_0(x_0, u_0), u_1) := \phi_2(\mathbf{u})\\
+    &\vdots\\
+    x_t &= f_{t-1}(f_{t-2}(\ldots, u_{t-2}), u_{t-1}) := \phi_t(\mathbf{u})\\
+    &\vdots\\
+    x_T &= f_{T-1}(f_{T-2}(\ldots, u_{T-2}), u_{T-1}) := \phi_T(\mathbf{u})
+\end{align*}
+
+\subsection{Compact Notation}
+For all $t$, we can define a map $\phi_t: \mathbb{R}^m \to \mathbb{R}^n$ such that:
+\[
+    x_t := \phi_t(\mathbf{u})
+\]
+
+This allows us to write in compact notation:
+\[
+    \phi(\mathbf{u}) = \col(\phi_1(\mathbf{u}),\ldots,\phi_T(\mathbf{u}))
+\]
+leading to:
+\[
+    \mathbf{x} = \phi(\mathbf{u})
+\]
+
+\begin{remark}
+Given an input sequence $\mathbf{u}$, the equality constraint $\phi_{t+1}(\mathbf{u}) = f_t(\phi_t(\mathbf{u}), u_t)$ is satisfied by construction, as the system dynamics are embedded within the definition of $\phi$. This is equivalent to the equality constraint for the optimal control problem.
+\end{remark}
+
+\section{Reduced Optimal Control Problem}
+
+\subsection{Problem Reformulation}
+We can define a reduced cost function:
+\begin{align*}
+    J(\mathbf{u}) &:= \sum_{t=0}^{T-1}\ell_t(\phi_t(\mathbf{u}), u_t) + \ell_T(\phi_T(\mathbf{u}))\\
+    &= \ell(\phi(\mathbf{u}), \mathbf{u})
+\end{align*}
+
+This allows us to recast the optimal control problem into its reduced (or condensed) form:
+\[
+    \min_{\mathbf{u}\in\mathbb{R}^{mT}} J(\mathbf{u})
+\]
+which is an unconstrained optimization problem with cost function $J: \mathbb{R}^{mT} \to \mathbb{R}$ where the optimization variable is only the input sequence $\mathbf{u} \in \mathbb{R}^{mT}$.
+
+\begin{remark}
+This is an unconstrained optimization problem in $\mathbf{u}$ with a $\mathcal{C}^2$ cost function. The cost function $J(\mathbf{u})$ inherits from the original optimal control problem both its smoothness properties and its nonconvexity.
+\end{remark}
+
+\subsection{Extension to Constrained Cases}
+The reduced formulation can be extended to handle various types of constraints:
+
+\subsubsection{Input Path Constraints}
+If we consider input path constraints of the form:
+\begin{align*}
+    g_0(u_0) &\leq 0 \\
+    &\vdots \\
+    g_{T-1}(u_{T-1}) &\leq 0
+\end{align*}
+The problem becomes:
+\begin{align*}
+    \min_{\mathbf{u}\in\mathbb{R}^{mT}} \quad & J(\mathbf{u}) \\
+    \text{subject to} \quad & g_t(u_t) \leq 0, \quad t = 0,\ldots,T-1
+\end{align*}
+
+\subsubsection{State-Input Path Constraints}
+For constraints involving both states and inputs:
+\begin{align*}
+    g_0(x_0,u_0) &\leq 0\\
+    &\vdots \\
+    g_{T-1}(x_{T-1},u_{T-1}) &\leq 0
+\end{align*}
+These can be rewritten as functions of $x_0$ and $\mathbf{u}$ only by substituting $x_t = \phi_t(\mathbf{u})$. However, this requires $\phi(\cdot)$ to be explicitly known.
+
+\begin{remark}
+The shooting method refers to this procedure of expressing $\mathbf{x}$ as a function of $\mathbf{u}$ and substituting it into the optimal control problem, effectively reducing the number of optimization variables.
 \end{remark}
 
 \section{Algorithms for optimal control problem solution}
-We can apply the gradient method, i.e. 
+
+\subsection{Recall: Optimality Conditions for Unconstrained Optimization}
+
+\subsubsection{First Order Necessary Condition (FNC)}
+Let $\mathbf{u}^*$ be an unconstrained local minimum of $J: \mathbb{R}^{mT} \to \mathbb{R}$ and assume that $J$ is continuously differentiable ($\mathcal{C}^1$) in $B(\mathbf{u}^*, \epsilon)$ for some $\epsilon > 0$. Then:
 \[
-    \mathbf{u}^{k+1}=\mathbf{u}^k-\gamma\nabla J(\mathbf{u}^k)
+    \nabla J(\mathbf{u}^*) = 0
 \]
-We can formally write the expression of $\nabla J(\mathbf{u})=\nabla \ell(\Phi(\mathbf{u}),\mathbf{u})$ by using the chain rule of differentiation. 
-Consider\[
-    J(\mathbf{u}) = \ell(\phi(\mathbf{u}),\mathbf{u})
-\]
-Suppose $\mathbf{u}\in\R$, we have: 
+
+\begin{remark}
+To find this unconstrained local minimum, we can implement a gradient method, i.e., iteratively refine the solution according to:
 \[
-    \displaystyle\frac{d}{d\mathbf{u}}J(\bar{\mathbf{u}}) = \at{\displaystyle\frac{\partial\ell(\mathbf{x},\mathbf{u})}{\partial\mathbf{x}}}{\substack{\mathbf{x} = \phi(\bar{\mathbf{u}})\\ \mathbf{u} = \bar{\mathbf{u}}}}\at{\displaystyle\frac{\partial\phi(\mathbf{u})}{\partial\mathbf{u}}}{\mathbf{u} = \bar{\mathbf{u}}} + \at{\displaystyle\frac{\partial\ell(\mathbf{x},\mathbf{u})}{\partial\mathbf{u}}}{\substack{\mathbf{x} = \phi(\bar{\mathbf{u}})\\ \mathbf{u} = \bar{\mathbf{u}}}}
+    \mathbf{u}^{k+1} = \mathbf{u}^k - \gamma\nabla J(\mathbf{u}^k)
 \]
-In general, we have $\mathbf{u}\in\R^{mT}$, Therefore
+where $\gamma > 0$ is the step size.
+\end{remark}
+
+\subsubsection{Important Notation Distinctions}
+For clarity, we distinguish between:
+\begin{itemize}
+    \item $\mathbf{u}^k$ denotes the input sequence $\mathbf{u} \in \mathbb{R}^{mT}$ at iteration $k$ of the optimization
+    \item $u_t$ denotes the input $u \in \mathbb{R}^m$ at time $t$ in the dynamics
+    \item $u_t^k$ denotes the input $u \in \mathbb{R}^m$ at time $t$ at iteration $k$ of the optimization algorithm
+\end{itemize}
+
+\subsection{Expression of \texorpdfstring{$\nabla J(\mathbf{u})$}{Expression of the gradient of J(u)}}
+We can formally write the expression of $\nabla J(\mathbf{u}) = \nabla \ell(\phi(\mathbf{u}), \mathbf{u})$ by using the chain rule of differentiation.
+
+Consider
 \[
-    \nabla J(\mathbf{u}) = \nabla\phi(\mathbf{u})\nabla_1\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_2\ell(\phi(\mathbf{u}),\mathbf{u})
+    J(\mathbf{u}) = \ell(\phi(\mathbf{u}), \mathbf{u})
 \]
-However, notice that the calculation of $\nabla J(\mathbf{u})$ requires $\nabla\phi(\mathbf{u})$, which may be difficult to compute.
+
+For the scalar case $\mathbf{u} \in \mathbb{R}$, we have:
 \[
-    \nabla\Phi(\mathbf{u}) = \nabla \begin{bmatrix}
+    \frac{d}{d\mathbf{u}}J(\bar{\mathbf{u}}) = \left.\frac{\partial \ell(\mathbf{x}, \mathbf{u})}{\partial \mathbf{x}}\right|_{\substack{\mathbf{x}=\phi(\bar{\mathbf{u}})\\ \mathbf{u}=\bar{\mathbf{u}}}} \cdot \left.\frac{\partial \phi(\mathbf{u})}{\partial \mathbf{u}}\right|_{\mathbf{u}=\bar{\mathbf{u}}} + \left.\frac{\partial \ell(\mathbf{x}, \mathbf{u})}{\partial \mathbf{u}}\right|_{\substack{\mathbf{x}=\phi(\bar{\mathbf{u}})\\ \mathbf{u}=\bar{\mathbf{u}}}} \cdot \underbrace{\frac{\partial \mathbf{u}}{\partial \mathbf{u}}}_{=1}
+\]
+
+In the general case where $\mathbf{u} \in \mathbb{R}^{mT}$, this extends to:
+\[
+    \nabla J(\mathbf{u}) = \nabla\phi(\mathbf{u})\nabla_1\ell(\phi(\mathbf{u}), \mathbf{u}) + \nabla_2\ell(\phi(\mathbf{u}), \mathbf{u})
+\]
+
+\begin{remark}
+However, notice that the calculation of $\nabla J(\mathbf{u})$ requires $\nabla\phi(\mathbf{u})$ which may be difficult to compute.
+\[
+    \nabla\phi(\mathbf{u}) = \nabla \begin{bmatrix}
         \Phi_{1,1}(\mathbf{u})\\
         \Phi_{1,2}(\mathbf{u})\\
         \vdots \\
@@ -1926,13 +2108,15 @@ However, notice that the calculation of $\nabla J(\mathbf{u})$ requires $\nabla\
     \end{bmatrix}
 \]
 \[
-    \nabla\Phi(\mathbf{u}) = \begin{bmatrix}
+    \nabla\phi(\mathbf{u}) = \begin{bmatrix}
         \displaystyle\frac{\partial \Phi_{1,1}}{\partial u_0} & \displaystyle\frac{\partial \Phi_{1,2}}{\partial u_0} & \cdots & \displaystyle\frac{\partial \Phi_{T,n}}{\partial u_0}\\
         \vdots & \vdots & \ddots & \vdots \\
         \displaystyle\frac{\partial \Phi_{1,1}}{\partial u_{T-1}} & \displaystyle\frac{\partial \Phi_{1,2}}{\partial u_{T-1}} &\cdots & \displaystyle\frac{\partial \Phi_{T,n}}{\partial u_{T-1}}
     \end{bmatrix}
 \]
 where $\Phi_{t,j}:\R^{mT}\to \R$, therefore the above matrix is a matrix of scalars.
+\end{remark}
+
 Let us introduce an auxiliary function $\mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda}):\R^{nT}\times \R^{mT} \times\R^{nT}\to \R$ given by 
 \[
     \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda})=\ell(\mathbf{x},\mathbf{u})+h(\mathbf{x},\mathbf{u})^T\boldsymbol{\lambda}
@@ -1945,21 +2129,21 @@ where $\boldsymbol{\lambda}\in\R^{nT}$ is a "costate vector" and
          f_{T-1}(x_{T-1}u_{T-1})-x_T
     \end{bmatrix}
 \]
-To compute $\nabla J(\mathbf{u})$ let us evaluate $\mathcal{L}(\cdot)$ for $\mathbf{x} = \Phi(\mathbf{u})$. Since $h(\Phi(\mathbf{u},)\mathbf{u})=0$ it holds that 
+To compute $\nabla J(\mathbf{u})$ let us evaluate $\mathcal{L}(\cdot)$ for $\mathbf{x} = \phi(\mathbf{u})$. Since $h(\phi(\mathbf{u},)\mathbf{u})=0$ it holds that 
 \[
-    \mathcal{L}(\Phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}) = J(\mathbf{u}) \quad \forall \lambda\in\R^{nT}
+    \mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}) = J(\mathbf{u}) \quad \forall \lambda\in\R^{nT}
 \]
 Therefore 
 \[
-    \nabla \mathcal{L}(\Phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}) = \nabla J(\mathbf{u}) \quad \forall \boldsymbol{\lambda}
+    \nabla_u \mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}) = \nabla J(\mathbf{u}) \quad \forall \boldsymbol{\lambda}
 \]
 hence we can write 
 \[
-    \nabla J (\mathbf{u}) = \nabla\Phi(\mathbf{u})(\nabla_1\ell(\Phi(\mathbf{u}),\mathbf{u})+\nabla_1 h(\Phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda})+\nabla_2\ell(\Phi(\mathbf{u}),\mathbf{u})+\nabla_2 h(\Phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda}
+    \nabla J (\mathbf{u}) = \nabla\phi(\mathbf{u})(\nabla_1\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_1 h(\phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda})+\nabla_2\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_2 h(\phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda}
 \]
 which holds for every $\boldsymbol{\lambda}$. Therefore, for a given $\mathbf{u}$, we can cleverly select $\boldsymbol{\lambda}=\boldsymbol{\lambda}(\mathbf{u})$ such that: 
 \[
-    \nabla_1\ell(\Phi(\mathbf{u}),\mathbf{u})+\nabla_1h(\Phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda}(\mathbf{u}) = 0
+    \nabla_1\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_1h(\phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda}(\mathbf{u}) = 0
 \]
 which leads to 
 \[
@@ -1971,34 +2155,35 @@ By recalling that
 \]
 We have
 \[
-    \nabla J(\mathbf{u}) = \nabla\phi(\mathbf{u})\nabla_1\mathcal{L}(\Phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda})+\nabla_2\mathcal{L}(\Phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda})
+    \nabla J(\mathbf{u}) = \nabla\phi(\mathbf{u})\nabla_1\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda})+\nabla_2\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda})
 \]
 so that choosing $\boldsymbol{\lambda} = \boldsymbol{\lambda}(\mathbf{u})$ such that
 \[
-    \nabla_1\mathcal{L}(\Phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}(\mathbf{u})) = 0
+    \nabla_1\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}(\mathbf{u})) = 0
 \]
 it holds 
 \[
-    \nabla J(\mathbf{u}) = \nabla_2\mathcal{L}(\Phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}(\mathbf{u}))
+    \nabla J(\mathbf{u}) = \nabla_2\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}(\mathbf{u}))
 \]
 
 
-
-
-\subsection{First order necessary condition for optimality}
-Let $\mathbf{u}^*$ be a local minimum with $\mathbf{x}^* = \Phi(\mathbf{u}^*)$ 
+\section{First order necessary condition for optimality}
+Let $\mathbf{u}^*$ be a local minimum with $\mathbf{x}^* = \phi(\mathbf{u}^*)$ 
 Then
 \[
     \nabla J(\mathbf{u^*}) = 0
 \]
 that is, if there exists a $\boldsymbol{\lambda}^*$ such that 
 \[
-    \nabla_1\mathcal{L}(\Phi(\mathbf{u}^*),\mathbf{u}^*,\boldsymbol{\lambda}^*)=0
+    \nabla_1\mathcal{L}(\phi(\mathbf{u}^*),\mathbf{u}^*,\boldsymbol{\lambda}^*)=0
 \]
 it holds 
 \[
-    \nabla_2\mathcal{L}(\Phi(\mathbf{u}^*),\mathbf{u}^*,\boldsymbol{\lambda}^*)=0
+    \nabla_2\mathcal{L}(\phi(\mathbf{u}^*),\mathbf{u}^*,\boldsymbol{\lambda}^*)=0
 \]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection[Explicit computation of the gradient of the shooting cost function]{Explicit computation of $\nabla J(\mathbf{u})$}
 \[
     \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda}) = \displaystyle\sum_{t=0}^{T-1}[\ell_t(x_t,u_t)+\lambda_{t+1}^T f_t(x_t,u_t)-\lambda_{t+1}x_{t+1}]+\ell_T(x_T)% = \displaystyle\sum_{t=0}^{T-1}(x_t,u_t)
