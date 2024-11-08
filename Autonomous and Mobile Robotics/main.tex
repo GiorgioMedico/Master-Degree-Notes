@@ -8,6 +8,8 @@
 \usepackage{amssymb}
 \usepackage{enumitem}
 \usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{xcolor}
 \usepackage[most]{tcolorbox}
 
@@ -994,8 +996,992 @@ A complete navigation system typically includes:
 
 These components work together to enable the robot to navigate safely and efficiently from its current position to a desired destination, while avoiding obstacles and adapting to environmental changes.
 
+\chapter{Reactive Navigation}
+
+\section{Braitenberg Vehicles}
+
+\subsection{Basic Concept}
+Braitenberg vehicles, introduced by Valentino Braitenberg (Bolzano, 1924), represent a fundamental approach to reactive navigation. These vehicles demonstrate how simple sensor-motor connections can produce complex behaviors.
+
+\definitionbox{A Braitenberg vehicle uses a simple neural network to process sensor signals on the left and right sides of the robot and applies the results directly to the motors.}
+
+\subsection{Mathematical Model}
+The vehicle's behavior is governed by two key equations:
+
+\begin{enumerate}
+    \item Vehicle speed:
+    \begin{equation}
+        v = 2 - s_R - s_L
+    \end{equation}
+    where $s_R$ and $s_L$ are the right and left sensor readings respectively.
+    
+    \item Steering angle:
+    \begin{equation}
+        \gamma = k(s_R - s_L)
+    \end{equation}
+\end{enumerate}
+
+\note{At the goal position, where $s_R = s_L = 1$, the velocity becomes zero. When the sensor readings are equal, the robot moves straight ahead.}
+
+\section{Bug Algorithms}
+
+\subsection{Fundamental Principles}
+
+Bug algorithms represent a class of reactive navigation methods based on the following principles:
+
+\begin{itemize}
+    \item Use of eteroceptive sensors (bumpers, range finders) to detect obstacles
+    \item Simple behavior switching based on sensor inputs
+    \item No requirement for global map knowledge
+\end{itemize}
+
+\subsection{Simplifying Assumptions}
+The basic bug algorithms operate under the following assumptions:
+\begin{itemize}
+    \item Robot is modeled as a material point (no orientation control)
+    \item Robot is equipped with a touch sensor
+    \item Robot knows its position and the goal position at all times
+\end{itemize}
+
+\subsection{Bug Algorithm 1}
+
+The algorithm alternates between two behaviors:
+
+\subsubsection{Motion to Goal}
+From a leave-point, the robot:
+\begin{itemize}
+    \item Moves along the m-line (line connecting leave-point to goal)
+    \item Continues until either reaching goal or hitting an obstacle
+    \item At obstacle contact, switches to boundary following
+\end{itemize}
+
+\subsubsection{Boundary Following}
+When hitting an obstacle:
+\begin{itemize}
+    \item Circumnavigates the obstacle until returning to hit-point
+    \item Determines closest point to goal along obstacle perimeter
+    \item Moves to this point (new leave-point)
+    \item Returns to motion to goal behavior
+\end{itemize}
+
+\begin{algorithmic}[1]
+\State $i=1$; $q_L^0 = q_{start}$
+\While{True}
+    \Repeat
+        \State from $q_L^{i-1}$, move toward $q_{goal}$
+    \Until{$q_{goal}$ is reached or obstacle hit in $q_H^i$}
+    \If{$q_{goal}$ is reached}
+        \State Exit
+    \EndIf
+    \Repeat
+        \State follow obstacle's border
+    \Until{$q_{goal}$ is reached or $q_H^i$ is reached}
+    \State determine $q_L^i$ on perimeter with minimal distance from $q_{goal}$
+    \State go to $q_H^i$
+    \If{m-line from $q_L^i$ crosses obstacle at $q_H^i$}
+        \State report no solution
+        \State Exit
+    \EndIf
+    \State $i = i + 1$
+\EndWhile
+\end{algorithmic}
+
+\subsection{Bug Algorithm 2}
+
+Key differences from Bug 1:
+\begin{itemize}
+    \item Uses fixed m-line (segment connecting start to goal)
+    \item More opportunistic in leaving obstacles
+    \item Generally more efficient for simple obstacles
+\end{itemize}
+
+\begin{algorithmic}[1]
+\State $i=1$; $q_L^0 = q_{start}$
+\While{True}
+    \Repeat
+        \State from $q_L^{i-1}$, move toward $q_{goal}$ on m-line
+    \Until{$q_{goal}$ is reached or obstacle hit in $q_H^i$}
+    \State turn left or right
+    \Repeat
+        \State follow obstacle's border
+    \Until{$q_{goal}$ reached or $q_H^i$ reached or}
+    \State new m-line point m found where:
+    \State 1. $m \neq q_H^i$ 
+    \State 2. $d(m,q_{goal}) < d(q_H^i,q_{goal})$
+    \State 3. path to $q_{goal}$ is clear
+    \State set $q_L^{i+1} = m$
+    \State $i = i + 1$
+\EndWhile
+\end{algorithmic}
+
+\section{Potential Fields}
+
+\subsection{Basic Concept}
+The potential field approach extends reactive navigation to systems with multiple degrees of freedom and enables real-time path modification.
+
+\definitionbox{
+Potential function: $U: \mathbb{R}^m \rightarrow \mathbb{R}$ with gradient
+$\nabla U(q) = \left[\frac{\partial U(q)}{\partial q_1} \ldots \frac{\partial U(q)}{\partial q_n}\right]^T$
+}
+
+\subsection{Components}
+The total potential field consists of:
+
+\subsubsection{Attractive Potential}
+\begin{itemize}
+    \item $U_{att}(q)$ has minimum at $q_{goal}$
+    \item Attracts robot to goal
+    \item Possible choice: $U_{att} = \frac{1}{2}K_a\Delta(q,q_{goal})$
+    \item Gradient: $\nabla U_{att} = K_a(q - q_{goal})$
+\end{itemize}
+
+\subsubsection{Repulsive Potential}
+\begin{equation}
+U_{rep} = \sum_{i=1}^{N_{obst}} U_{rep}^i(q)
+\end{equation}
+
+For each obstacle:
+\begin{equation}
+U_{rep}^i(q) = 
+\begin{cases}
+\frac{1}{2}K_r^i(\frac{1}{d_i(q)} - \frac{1}{q^*})^2 & d_i(q) \leq q^* \\
+0 & d_i(q) > q^*
+\end{cases}
+\end{equation}
+
+\subsection{Control Law}
+The robot's motion is governed by:
+\begin{equation}
+\dot{q}(t) = -\nabla U(q)
+\end{equation}
+where $U(q) = U_{att}(q) + U_{rep}(q)$
+
+\subsection{Limitations}
+\begin{itemize}
+    \item Local minima can trap the robot
+    \item Not a complete planning method
+    \item Solutions:
+    \begin{itemize}
+        \item Best first algorithm
+        \item Randomized best first algorithm
+        \item Noise addition
+        \item Escape window algorithm
+    \end{itemize}
+\end{itemize}
 
 
+\chapter{Map-Based Navigation}
+
+\section{Distance Transform}
+
+\definitionbox{The distance transform converts a binary matrix into another matrix where each element's value represents its distance from the nearest nonzero pixel in the original matrix.}
+
+\subsection{Basic Concept}
+The distance transform starts with:
+\begin{itemize}
+    \item An initial matrix of zeros
+    \item A single nonzero element marking the goal
+    \item Iterative computation of distances
+\end{itemize}
+
+\subsection{Distance Metrics}
+Two common distance metrics are used:
+
+\begin{enumerate}
+    \item Euclidean distance:
+    \begin{equation}
+        d = \sqrt{\Delta_x^2 + \Delta_y^2}
+    \end{equation}
+    
+    \item Manhattan (City Block) distance:
+    \begin{equation}
+        d = |\Delta_x| + |\Delta_y|
+    \end{equation}
+\end{enumerate}
+
+\subsection{Computational Complexity}
+The algorithm is computationally intensive:
+\begin{itemize}
+    \item Each iteration: $O(N^2)$ complexity
+    \item Number of iterations: At least $O(N)$
+    \item Total complexity: $O(N^3)$ where N is the map dimension
+\end{itemize}
+
+\section{Graph Search Algorithms}
+
+\subsection{Dijkstra's Algorithm}
+
+\subsubsection{Basic Characteristics}
+\begin{itemize}
+    \item Forward search from start to goal
+    \item Objective function $f(n) = g(n)$
+    \item $g(n)$ represents cost from start
+\end{itemize}
+
+\note{Dijkstra's algorithm always finds the optimal path but explores nodes in all directions.}
+
+\subsection{A* Algorithm}
+
+\subsubsection{Core Concepts}
+\definitionbox{A* is an informed search algorithm that uses an evaluation function $f(n) = g(n) + h(n)$ where $g(n)$ is the cost from start and $h(n)$ is a heuristic estimate of cost to goal.}
+
+Key components:
+\begin{itemize}
+    \item Operating cost function $g(n)$: Actual cost traversed
+    \item Heuristic function $h(n)$: Estimated cost to goal
+    \item Admissible heuristic: Never overestimates actual path cost
+\end{itemize}
+
+\subsubsection{Data Structures}
+A* maintains two lists:
+\begin{itemize}
+    \item Open list (O): Stores nodes for expansion
+    \item Closed list (C): Stores already explored nodes
+\end{itemize}
+
+\subsubsection{Algorithm Implementation}
+\begin{algorithmic}[1]
+\State Initialize open list with start node
+\While{Open list not empty}
+    \State Get node n with lowest f(n) from open list
+    \If{n is goal}
+        \State Return path
+    \EndIf
+    \State Move n to closed list
+    \ForAll{neighbors m of n}
+        \If{m not in closed list}
+            \If{m not in open list}
+                \State Add m to open list
+            \Else
+                \If{g(n) + c(n,m) < g(m)}
+                    \State Update m's parent to n
+                    \State Update g(m) and f(m)
+                \EndIf
+            \EndIf
+        \EndIf
+    \EndFor
+\EndWhile
+\State Return failure
+\end{algorithmic}
+
+\section{D* Algorithm}
+
+\subsection{Introduction}
+\definitionbox{D* (Dynamic A*) is a path planning algorithm that supports incremental replanning when arc costs change during execution.}
+
+Key features:
+\begin{itemize}
+    \item Functionally equivalent to A* replanner
+    \item Initially plans using Dijkstra's algorithm
+    \item Caches intermediate data for efficient replanning
+    \item More efficient than A* for complex environments
+    \item Handles local changes without complete replanning
+\end{itemize}
+
+\subsection{State Representation}
+Each cell in the map contains:
+\begin{itemize}
+    \item Cost (distance to goal)
+    \item Backpointer to neighboring cell closest to goal
+    \item State $t \in \{NEW, OPEN, CLOSED\}$
+\end{itemize}
+
+\subsection{Arc Costs}
+\begin{itemize}
+    \item Clear cells: Cost = 1 (horizontal/vertical), 1.4 (diagonal)
+    \item Obstacle cells: Cost = 10000 (effectively infinite)
+\end{itemize}
+
+\subsection{Key Functions}
+For a state X and neighbor Y:
+
+\begin{equation}
+c(X,Y) = \text{arc cost from Y to X}
+\end{equation}
+
+\begin{equation}
+b(X) = Y \text{ indicates backpointer of X to Y}
+\end{equation}
+
+\begin{equation}
+h(X) = \text{path cost estimate}
+\end{equation}
+
+\begin{equation}
+k(X) = \text{smallest value of h(X) since X was placed on open list}
+\end{equation}
+
+\subsection{Algorithm States}
+\subsubsection{Raise States}
+A state X is called a raise state when:
+\begin{equation}
+h(X) > k(X)
+\end{equation}
+
+\subsubsection{Lower States}
+A state X is called a lower state when:
+\begin{equation}
+h(X) = k(X)
+\end{equation}
+
+\subsection{Core Algorithm}
+\begin{algorithmic}[1]
+\State Initialize all states as NEW
+\State Set goal state cost to zero and state to OPEN
+\While{Open list not empty}
+    \State Get state X with minimum k value
+    \If{k(X) < h(X)}
+        \ForAll{neighbors Y of X}
+            \If{$h(Y) \leq k(X)$ and $h(X) > h(Y) + c(X,Y)$}
+                \State $b(X) = Y$
+                \State $h(X) = h(Y) + c(X,Y)$
+            \EndIf
+        \EndFor
+    \EndIf
+    \ForAll{neighbors $Y$ of $X$}
+        \If{$Y$ is NEW or conditions for update met}
+            \State Update $Y$'s backpointer and cost
+            \State Add $Y$ to open list
+        \EndIf
+    \EndFor
+\EndWhile
+\end{algorithmic}
+
+\subsection{Replanning}
+When an obstacle is detected:
+\begin{enumerate}
+    \item Increase transition costs to obstacle cell
+    \item Add affected cells to open list
+    \item Process cells in order of increasing k values
+    \item Update path costs and backpointers
+    \item Continue until reaching current robot position
+\end{enumerate}
+
+\note{D* is particularly efficient because most path costs remain unchanged after encountering obstacles, allowing focused updates only where needed.}
+
+
+\chapter{Roadmap Methods}
+
+\section{Voronoi Roadmap}
+
+\definitionbox{A Voronoi roadmap is a path planning approach based on thinning or skeletonization of free space, creating paths that maintain maximum clearance from obstacles.}
+
+Key characteristics:
+\begin{itemize}
+   \item Computationally expensive iterative algorithm
+   \item Illustrates principles of finding paths through free space
+   \item Creates paths equidistant from nearby obstacles
+   \item Ensures maximum clearance for robot navigation
+\end{itemize}
+
+\section{Probabilistic Roadmap Method (PRM)}
+
+\subsection{Basic Concept}
+PRM is a sampling-based planning method consisting of two phases:
+\begin{enumerate}
+   \item Learning (preprocessing) phase
+   \item Query phase
+\end{enumerate}
+
+\subsection{Learning Phase}
+During this phase, the algorithm:
+\begin{itemize}
+   \item Samples the configuration space sparsely
+   \item Connects nearest neighbors with straight-line paths
+   \item Verifies connections for collision-free movement
+   \item Creates a network (graph) with:
+   \begin{itemize}
+       \item Minimal number of disjoint components
+       \item No cycles (tree structure)
+   \end{itemize}
+\end{itemize}
+
+\note{A key advantage of PRM is that relatively few points need to be tested to verify that points and paths between them are obstacle-free.}
+
+\subsection{Connection Strategies}
+For connecting nodes:
+\begin{itemize}
+   \item Connect to k-nearest neighbors
+   \item Check path feasibility
+   \item Maintain connection if collision-free
+   \item Reject connection if path intersects obstacles
+\end{itemize}
+
+\subsection{Query Phase}
+To find a path:
+\begin{enumerate}
+   \item Connect start point to closest roadmap node
+   \item Find minimum cost route through roadmap
+   \item Connect to node closest to goal
+   \item Generate final path to goal point
+\end{enumerate}
+
+\section{Rapidly-Exploring Random Tree (RRT)}
+
+\subsection{Introduction}
+\definitionbox{RRT is a sampling-based algorithm that builds a space-filling tree by incrementally growing towards randomly selected points while considering the system's motion model.}
+
+Key features:
+\begin{itemize}
+   \item Accounts for vehicle motion constraints
+   \item Uses probabilistic methods like PRM
+   \item Computes paths over fixed time intervals
+   \item Considers discrete velocity values
+   \item Handles both forward and backward motion
+   \item Incorporates steering angle limits
+\end{itemize}
+
+\subsection{Configuration Space}
+Each node represents a configuration:
+\begin{equation}
+q \in \mathbb{R}^2 \times S
+\end{equation}
+
+represented by a 3-dimensional vector:
+\begin{equation}
+q \sim (x, y, \theta)
+\end{equation}
+
+\subsection{Algorithm Implementation}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Initial configuration $q_{init}$, number of vertices K, incremental distance $\Delta q$
+\State \textbf{Output:} RRT graph G
+\State G.init($q_{init}$)
+\For{k = 1 to K}
+   \State $q_{rand} \leftarrow$ RAND\_CONF(C)
+   \State $q_{near} \leftarrow$ NEAREST\_VERTEX($q_{rand}$, G)
+   \State $q_{new} \leftarrow$ NEW\_CONF($q_{near}$, $q_{rand}$, $\Delta q$)
+   \State G.add\_vertex($q_{new}$)
+   \State G.add\_edge($q_{near}$, $q_{new}$)
+\EndFor
+\State \Return G
+\end{algorithmic}
+
+\subsection{Obstacle Handling}
+RRT handles obstacles through simple rules:
+\begin{itemize}
+   \item Discard $q_{rand}$ if it lies within an obstacle
+   \item Reject $q_{near}$ if path to $q_{rand}$ intersects obstacle
+   \item Result: collision-free, driveable roadmap
+\end{itemize}
+
+\subsection{Implementation Parameters}
+For bicycle model implementation:
+\begin{itemize}
+   \item Velocity: $\pm 1$ m/s
+   \item Steering angle limits: $\pm 0.5$ rad
+   \item Integration period: 1 s
+   \item Initial configuration: $(0,0,0)$
+\end{itemize}
+
+\subsection{Node Representation}
+\begin{itemize}
+   \item Each node indicated by marker in 3D configuration space
+   \item Represents vehicle pose $(x,y,\theta)$
+   \item Connected by feasible motion paths
+   \item Forms tree structure expanding through free space
+\end{itemize}
+
+\subsection{Advantages}
+\begin{itemize}
+   \item Naturally respects motion constraints
+   \item Efficient exploration of configuration space
+   \item Simple obstacle avoidance implementation
+   \item Handles complex vehicle dynamics
+   \item Suitable for real-time planning
+\end{itemize}
+
+\note{RRT is particularly effective for systems with differential constraints and high-dimensional configuration spaces.}
+
+\chapter{Robot Localization}
+
+\section{Introduction}
+
+\definitionbox{"In order to get somewhere we need to know where we are" - this fundamental principle underlies the process of localization, which is essential for robot navigation.}
+
+Historical context:
+\begin{itemize}
+   \item Localization predates modern technology (GPS only since 1995)
+   \item Traditional navigation methods rely on dead reckoning and landmarks
+   \item Modern systems combine multiple approaches for robustness
+\end{itemize}
+
+\section{Dead Reckoning}
+
+\definitionbox{Dead reckoning is the estimation of location based on estimated speed, direction, and time of travel with respect to a previous position estimate.}
+
+\subsection{Basic Principles}
+\begin{itemize}
+   \item Integrates motion measurements over time
+   \item Requires initial position knowledge
+   \item Accumulates errors over distance
+   \item Forms basis for basic odometry
+\end{itemize}
+
+\section{Odometry}
+
+\definitionbox{Odometry is a technique to estimate the pose of a wheeled vehicle based on information from sensors which measure the space covered by the wheels and the angle of steering (if present).}
+
+\subsection{System Requirements}
+\begin{itemize}
+   \item Knowledge of robot state (absolute position) for feedback control
+   \item Incremental encoders on wheels for rotation measurement
+   \item Runtime estimation procedure for actual position
+\end{itemize}
+
+\subsection{Unicycle Model Example}
+Control inputs:
+\begin{equation}
+\begin{cases}
+\dot{x} = v \cos \theta \\
+\dot{y} = v \sin \theta \\
+\dot{\theta} = \omega
+\end{cases}
+\end{equation}
+
+Assumptions:
+\begin{itemize}
+   \item Constant inputs during each sampling interval
+   \item Known configuration $q(t_k) = q_k$ at time instant $t_k$
+   \item Inputs $v_k = v(t_k)$, $\omega_k = \omega(t_k)$ applied in $t \in [t_k, t_{k+1})$
+   \item Sampling period $T_s = t_{k+1} - t_k$
+\end{itemize}
+
+\subsection{Integration Methods}
+
+\subsubsection{Euler Method}
+\begin{equation}
+\begin{cases}
+x_{k+1} = x_k + v_k T_s \cos \theta_k \\
+y_{k+1} = y_k + v_k T_s \sin \theta_k \\
+\theta_{k+1} = \theta_k + \omega_k T_s
+\end{cases}
+\end{equation}
+
+Characteristics:
+\begin{itemize}
+   \item Error in $x_{k+1}, y_{k+1}$ computation due to constant $\theta_k$ assumption
+   \item Correct for straight paths
+   \item Error decreases with smaller $T_s$
+   \item $\theta_{k+1}$ computation is exact
+\end{itemize}
+
+\subsubsection{Runge-Kutta Method (Second Order)}
+\begin{equation}
+\begin{cases}
+x_{k+1} = x_k + v_k T_s \cos(\theta_k + \frac{\omega_k T_s}{2}) \\
+y_{k+1} = y_k + v_k T_s \sin(\theta_k + \frac{\omega_k T_s}{2}) \\
+\theta_{k+1} = \theta_k + \omega_k T_s
+\end{cases}
+\end{equation}
+
+Improvements:
+\begin{itemize}
+   \item Uses mean value of $\theta_k$ for improved accuracy
+   \item Reduced error in position computation
+   \item Error still decreases with smaller $T_s$
+   \item $\theta_{k+1}$ computation remains exact
+\end{itemize}
+
+\subsubsection{Precise Reconstruction}
+\begin{equation}
+\begin{cases}
+x_{k+1} = x_k + \frac{v_k}{\omega_k}(\sin \theta_{k+1} - \sin \theta_k) \\
+y_{k+1} = y_k - \frac{v_k}{\omega_k}(\cos \theta_{k+1} - \cos \theta_k) \\
+\theta_{k+1} = \theta_k + \omega_k T_s
+\end{cases}
+\end{equation}
+
+Where:
+\begin{equation}
+R = \frac{v_k}{\omega_k}
+\end{equation}
+represents the instantaneous radius of curvature at $t = t_k$
+
+\note{For rectilinear case $\omega_k = 0 \rightarrow R = \infty$, equations degenerate to match Euler and Runge-Kutta results.}
+
+\subsection{Practical Implementation}
+For actual sensor readings:
+\begin{equation}
+\Delta s = \frac{r}{2}(\Delta \phi_r + \Delta \phi_l)
+\end{equation}
+\begin{equation}
+\Delta \theta = \frac{r}{d}(\Delta \phi_r - \Delta \phi_l)
+\end{equation}
+
+Where:
+\begin{itemize}
+   \item $\Delta \phi_r, \Delta \phi_l$ are wheel rotation measurements
+   \item $\Delta s$ is elementary path length
+   \item $\Delta \theta$ is total orientation change
+   \item $v_k T_s = \Delta s$ and $\omega_k T_s = \Delta \theta$
+\end{itemize}
+
+\subsection{Error Sources and Limitations}
+Common problems:
+\begin{itemize}
+   \item Wheel slip
+   \item Poor kinematic parameter calibration
+   \item Numerical integration errors
+   \item Accumulating drift regardless of method
+   \item Limited reliability over long distances
+\end{itemize}
+
+\section{Pose Estimation}
+
+\subsection{Probability Density Function (PDF)}
+\begin{itemize}
+   \item Describes robot's estimated position probabilistically
+   \item PDF value not direct probability of position
+   \item Probability is volume under PDF region
+   \item Accounts for uncertainty in position estimate
+\end{itemize}
+
+\subsection{Next State Prediction}
+Configuration update including odometry:
+\begin{equation}
+\hat{q}\langle k + 1\rangle = f(\hat{q}\langle k\rangle, \hat{v}\langle k\rangle) = 
+\begin{bmatrix}
+\hat{x}\langle k\rangle + \hat{v}_d \cos \hat{\theta}\langle k\rangle \\
+\hat{y}\langle k\rangle + \hat{v}_d \sin \hat{\theta}\langle k\rangle \\
+\hat{\theta}\langle k\rangle + \hat{v}_\theta
+\end{bmatrix}
+\end{equation}
+
+\subsection{Noise Modeling}
+Odometry noise model:
+\begin{equation}
+\hat{v}\langle k\rangle = v\langle k\rangle + \delta, \quad \delta = [\delta_d \; \delta_\theta]^T \sim N(0, V)
+\end{equation}
+
+Covariance matrix:
+\begin{equation}
+V = 
+\begin{bmatrix}
+\sigma_d^2 & 0 \\
+0 & \sigma_\theta^2
+\end{bmatrix}
+\end{equation}
+
+\note{The diagonal covariance matrix indicates independent errors in distance and heading measurements.}
+
+\chapter{Mapping and SLAM}
+
+\section{Map Building Fundamentals}
+
+\subsection{Introduction}
+Until now, we have assumed the existence of a map. However, map building is a crucial capability for autonomous robots. The process involves:
+\begin{itemize}
+   \item Robot equipped with range and bearing sensors
+   \item Environment containing N landmarks
+   \item Creating map of landmark locations
+\end{itemize}
+
+\subsection{Initial Assumptions}
+For basic map building:
+\begin{itemize}
+   \item Robot knows its own location perfectly
+   \item State vector comprises M observed landmarks
+   \item Estimated coordinates form state vector:
+   \begin{equation}
+       \hat{q} = [x_1 \; y_1 \; x_2 \; y_2 \; \ldots \; x_M \; y_M]^T \in \mathbb{R}^{2M\times1}
+   \end{equation}
+\end{itemize}
+
+\section{Map Building Process}
+
+\subsection{Prediction Phase}
+For stationary landmarks:
+\begin{equation}
+   \hat{q}^+\langle k + 1\rangle = \hat{q}\langle k\rangle
+\end{equation}
+\begin{equation}
+   \hat{P}^+\langle k + 1\rangle = \hat{P}\langle k\rangle
+\end{equation}
+
+\subsection{Landmark Observation}
+Function g(·) gives observed landmark coordinates:
+\begin{equation}
+   g(q_v, z) = \begin{bmatrix}
+       x + r\cos(\theta + \beta) \\
+       y + r\sin(\theta + \beta)
+   \end{bmatrix}
+\end{equation}
+
+\subsection{State Vector Extension}
+For new landmarks:
+\begin{equation}
+   \hat{q}' = y(\hat{q}, z, q_v) = \begin{bmatrix}
+       \hat{q} \\
+       g(q_v, z)
+   \end{bmatrix}
+\end{equation}
+
+\subsection{Covariance Update}
+Covariance matrix extension:
+\begin{equation}
+   \hat{P}'\langle k\rangle = Y_z \begin{bmatrix}
+       \hat{P}\langle k\rangle & 0 \\
+       0 & \hat{W}
+   \end{bmatrix} Y_z^T
+\end{equation}
+
+Where insertion Jacobian:
+\begin{equation}
+   Y_z = \frac{\partial y}{\partial z} = \begin{bmatrix}
+       I_{n\times n} & 0_{n\times 2} \\
+       G_q & 0_{2\times n-3} & G_z
+   \end{bmatrix}
+\end{equation}
+
+\section{SLAM Implementation}
+
+\subsection{Problem Definition}
+\definitionbox{Simultaneous Localization and Mapping (SLAM) or Concurrent Mapping and Localization (CML) involves determining robot position while simultaneously building a map of the environment.}
+
+\subsection{State Vector}
+Combined state vector including vehicle pose and landmarks:
+\begin{equation}
+   \hat{q} = [x \; y \; \theta \; x_1 \; y_1 \; x_2 \; y_2 \; \ldots \; x_M \; y_M]^T \in \mathbb{R}^{2M+3\times1}
+\end{equation}
+
+\subsection{Covariance Structure}
+\begin{equation}
+   \hat{P} = \begin{bmatrix}
+       \hat{P}_{vv} & \hat{P}_{vm} \\
+       \hat{P}_{vm}^T & \hat{P}_{mm}
+   \end{bmatrix}
+\end{equation}
+
+Where:
+\begin{itemize}
+   \item $\hat{P}_{vv}$: Vehicle pose covariance
+   \item $\hat{P}_{mm}$: Map landmark position covariance
+   \item $\hat{P}_{vm}$: Vehicle-landmark correlation
+\end{itemize}
+
+\subsection{New Feature Updates}
+When observing new features:
+\begin{equation}
+   G_q = \frac{\partial g}{\partial q} = \begin{bmatrix}
+       1 & 0 & -r\sin(\hat{\theta} + \beta) \\
+       0 & 1 & r\cos(\hat{\theta} - \beta)
+   \end{bmatrix}
+\end{equation}
+
+\subsection{Observation Jacobian}
+For SLAM:
+\begin{equation}
+   H_q = \frac{\partial h}{\partial p_i}\bigg|_{w=0} = [H_q^v \; \cdots \; 0 \; \cdots \; H_{p_i} \; \cdots \; 0] \in \mathbb{R}^{2\times(2M+3)}
+\end{equation}
+
+\note{The Kalman gain matrix distributes innovation from landmark observations to update both vehicle pose and landmark positions.}
+
+\section{Laser-Based Mapping}
+
+\subsection{Basic Concept}
+\definitionbox{Laser-based mapping transforms laser scans into a global coordinate frame to build an occupancy grid map when robot pose is well-known through localization.}
+
+\subsection{Occupancy Grid}
+Map representation:
+\begin{itemize}
+   \item White cells: Free space
+   \item Black cells: Occupied space
+   \item Grey cells: Unknown areas
+   \item Typical cell size: 10 cm
+\end{itemize}
+
+\subsection{Implementation Process}
+\begin{enumerate}
+   \item Obtain laser scan data
+   \item Transform to global coordinates using robot pose
+   \item Update occupancy grid:
+   \begin{itemize}
+       \item Mark cells between robot and obstacle as free
+       \item Mark cells at obstacle distance as occupied
+       \item Leave unexplored cells as unknown
+   \end{itemize}
+   \item Integrate multiple scans over time
+\end{enumerate}
+
+\subsection{Key Requirements}
+For successful laser-based mapping:
+\begin{itemize}
+   \item Accurate robot localization
+   \item Precise laser sensor calibration
+   \item Proper scan registration
+   \item Efficient grid update algorithms
+\end{itemize}
+
+\subsection{Advantages and Limitations}
+Advantages:
+\begin{itemize}
+   \item Direct representation of free/occupied space
+   \item Simple integration of new measurements
+   \item Useful for path planning
+\end{itemize}
+
+Limitations:
+\begin{itemize}
+   \item Memory intensive for large environments
+   \item Resolution limited by cell size
+   \item Requires accurate pose estimation
+\end{itemize}
+
+\chapter{Monte Carlo Localization}
+
+\section{Introduction}
+
+\subsection{Motivation}
+Traditional estimation methods assume Gaussian error distributions for sensors. However:
+\begin{itemize}
+   \item Real sensors may have non-Gaussian distributions (e.g., Poisson)
+   \item Multi-modal distributions are common
+   \item Need for more flexible estimation approach
+\end{itemize}
+
+\definitionbox{Monte Carlo Localization (MCL) makes no assumptions about error distributions and maintains multiple hypotheses about the vehicle's state, weighted by their likelihood of matching sensor observations.}
+
+\section{Algorithm Components}
+
+\subsection{State Representation}
+\begin{itemize}
+   \item Maintains N particles $q_i, i \in [1,N]$
+   \item Each particle represents possible robot configuration
+   \item Weighted by likelihood $w_i$ of matching observations
+\end{itemize}
+
+\subsection{Core Phases}
+\begin{enumerate}
+   \item Initialization
+   \item Prediction
+   \item Innovation
+   \item Likelihood Computation
+   \item Normalization
+   \item Resampling
+\end{enumerate}
+
+\section{Algorithm Implementation}
+
+\subsection{Initialization}
+\begin{itemize}
+   \item Create N particles randomly distributed over configuration space
+   \item Assign initial weights: $w_i = 1/N$ for all particles
+\end{itemize}
+
+\subsection{Prediction}
+Update each particle state:
+\begin{equation}
+   \hat{q}_i^+\langle k+1 \rangle = f(\hat{q}_i\langle k \rangle, \hat{u}\langle k \rangle + \delta\langle k \rangle)
+\end{equation}
+where $\delta\langle k \rangle$ is random noise with unknown distribution.
+
+\subsection{Innovation}
+For observation $z^\#$ of landmark j with map coordinate $p_j$:
+\begin{equation}
+   v_i = z^\#\langle k+1 \rangle - h(\hat{q}_i^+\langle k+1 \rangle, p_j)
+\end{equation}
+
+\subsection{Likelihood Computation}
+Compute particle weights:
+\begin{equation}
+   w_i = e^{-v_i^T L^{-1}v_i} + w_0
+\end{equation}
+where:
+\begin{itemize}
+   \item $L$ is covariance-like matrix
+   \item $w_0 > 0$ ensures finite retention probability
+\end{itemize}
+
+\subsection{Normalization}
+Normalize weights:
+\begin{equation}
+   w_i' = \frac{w_i}{\sum_{i=1}^N w_i}
+\end{equation}
+
+\subsection{Resampling}
+Select particles based on normalized weights:
+\begin{equation}
+   \hat{q}\langle k+1 \rangle \leftarrow R(\hat{q}^+\langle k+1 \rangle, w)
+\end{equation}
+
+\section{Complete Algorithm}
+
+\begin{algorithmic}[1]
+\State \textbf{Input:} $\hat{Q}\langle k \rangle = \{\hat{q}_1\langle k \rangle, \cdots, \hat{q}_N\langle k \rangle\}$, $\hat{u}\langle k \rangle$, $z^\#\langle k+1 \rangle$
+\State \textbf{Output:} $\hat{Q}\langle k+1 \rangle$
+\State $\hat{Q}\langle k+1 \rangle = \bar{Q}\langle k+1 \rangle = \emptyset, W = 0$
+\For{i = 1 to N}
+   \State $\hat{q}_i^+\langle k+1 \rangle = f(\hat{q}_i\langle k \rangle, \hat{u}\langle k \rangle + \delta\langle k \rangle)$
+   \State $v_i = z^\#\langle k+1 \rangle - h(\hat{q}_i^+\langle k+1 \rangle, p_j)$
+   \State $w_i = e^{-v_i^T L^{-1}v_i} + w_0$
+   \State $W = W + w_i$
+\EndFor
+\For{i = 1 to N}
+   \State $w_i' = w_i/W$
+   \State $\bar{Q}\langle k+1 \rangle = \{\bar{Q}\langle k+1 \rangle, [\hat{q}_i^+\langle k+1 \rangle, w_i']\}$
+\EndFor
+\For{i = 1 to N}
+   \State draw $\hat{q}_i\langle k+1 \rangle$ from $\bar{Q}\langle k+1 \rangle$ with probability $\propto w_i'$
+   \State $\hat{Q}\langle k+1 \rangle = \{\hat{Q}\langle k+1 \rangle, \hat{q}_i\langle k+1 \rangle\}$
+\EndFor
+\State \Return $\hat{Q}\langle k+1 \rangle$
+\end{algorithmic}
+
+\section{Resampling Implementation}
+
+\subsection{Process}
+\begin{enumerate}
+   \item Normalize weights
+   \item Construct cumulative histogram: $c_j = \sum_{i=1}^j w_i'$
+   \item Draw uniform random number $r \in [0,1]$
+   \item Select particle based on where r falls in histogram
+   \item Repeat N times
+\end{enumerate}
+
+\note{Particles with larger weights occupy larger portions of the cumulative histogram, increasing their selection probability.}
+
+\section{Experimental Results}
+
+\subsection{Initialization Phase}
+\begin{itemize}
+   \item Uniform distribution of particles
+   \item Robot position unknown
+   \item All locations equally likely
+\end{itemize}
+
+\subsection{Motion Updates}
+\begin{itemize}
+   \item Particles move according to robot motion
+   \item Random noise added to particle motion
+   \item Distribution spreads due to uncertainty
+\end{itemize}
+
+\subsection{Sensor Updates}
+\begin{itemize}
+   \item Particles weighted by sensor measurement likelihood
+   \item Higher weights for particles matching observations
+   \item Distribution concentrates in likely regions
+\end{itemize}
+
+\subsection{Convergence}
+Experimental results show:
+\begin{itemize}
+   \item Initial high deviation in estimated path
+   \item Rapid convergence between timesteps 10-20
+   \item Elimination of particles far from true solution
+   \item Final accurate position estimation
+\end{itemize}
+
+\subsection{Performance Metrics}
+\begin{itemize}
+   \item True path (blue) vs. estimated path (red)
+   \item Particle deviation over time
+   \item Convergence rate
+   \item Estimation accuracy
+\end{itemize}
+
+\note{MCL combines the flexibility of particle representation with the efficiency of importance sampling to achieve robust localization in real-world environments.}
 
 
 
@@ -1009,37 +1995,13 @@ These components work together to enable the robot to navigate safely and effici
 
 
 
-Chapter 1: Navigation Fundamentals
-- Slides 2-4 from Mobile_Robotics_Navigation.pdf 
-
-Chapter 2: Reactive Navigation
-- Braitenberg Vehicle & Bug Algorithms: Slides 5-15
-- Potential Fields: Slides 16-20
-
-Chapter 3: Map-Based Navigation
-- Distance Transform: Slides 21-22
-- Dijkstra's Algorithm & A*: Slides 23-24
-- D* Algorithm: Slides 25-59 (extensive coverage of D* examples)
-
-Chapter 4: Roadmap Methods
-- Voronoi Roadmap: Slide 60
-- Probabilistic Roadmap Method (PRM): Slides 61-63
-- Rapidly-Exploring Random Tree (RRT): Slides 64-69
-
-Chapter 5: Robot Localization
-- Dead Reckoning & Odometry: Slides 70-82
-- Pose Estimation: Slides 83-87
-
-Chapter 6: Mapping and SLAM
-- Map Building: Slides 88-94
-- SLAM Implementation: Slides 95-99
-- Laser-Based Mapping: Slides 100-101
-
-Chapter 7: Monte Carlo Localization
-- Algorithm and Implementation: Slides 102-108
-- Examples and Results: Slides 109-112
 
 
-divide these slides into chapters, afterwards I will ask you to transform it into a latex file, you have to be complete and accurate
 
-In latex using the preamble attached, be complete and precise
+
+
+
+
+% divide these slides into chapters, afterwards I will ask you to transform it into a latex file, you have to be complete and accurate
+
+% In latex using the preamble attached, be complete and precise
