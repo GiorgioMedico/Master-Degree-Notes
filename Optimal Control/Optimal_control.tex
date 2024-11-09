@@ -2106,9 +2106,7 @@ However, notice that the calculation of $\nabla J(\mathbf{u})$ requires $\nabla\
         \Phi_{t,2}(\mathbf{u})\\
         \vdots
     \end{bmatrix}
-\]
-\[
-    \nabla\phi(\mathbf{u}) = \begin{bmatrix}
+= \begin{bmatrix}
         \displaystyle\frac{\partial \Phi_{1,1}}{\partial u_0} & \displaystyle\frac{\partial \Phi_{1,2}}{\partial u_0} & \cdots & \displaystyle\frac{\partial \Phi_{T,n}}{\partial u_0}\\
         \vdots & \vdots & \ddots & \vdots \\
         \displaystyle\frac{\partial \Phi_{1,1}}{\partial u_{T-1}} & \displaystyle\frac{\partial \Phi_{1,2}}{\partial u_{T-1}} &\cdots & \displaystyle\frac{\partial \Phi_{T,n}}{\partial u_{T-1}}
@@ -2117,53 +2115,75 @@ However, notice that the calculation of $\nabla J(\mathbf{u})$ requires $\nabla\
 where $\Phi_{t,j}:\R^{mT}\to \R$, therefore the above matrix is a matrix of scalars.
 \end{remark}
 
-Let us introduce an auxiliary function $\mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda}):\R^{nT}\times \R^{mT} \times\R^{nT}\to \R$ given by 
+
+Let us introduce an auxiliary function $\mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) : \mathbb{R}^{nT} \times \mathbb{R}^{mT} \times \mathbb{R}^{nT} \to \mathbb{R}$ given by
+
 \[
-    \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda})=\ell(\mathbf{x},\mathbf{u})+h(\mathbf{x},\mathbf{u})^T\boldsymbol{\lambda}
+\mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) = \ell(\mathbf{x}, \mathbf{u}) + h(\mathbf{x}, \mathbf{u})^T\boldsymbol{\lambda}
 \]
-where $\boldsymbol{\lambda}\in\R^{nT}$ is a "costate vector" and 
+
+where $\boldsymbol{\lambda} \in \mathbb{R}^{nT}$ is a "costate vector".
+
+To compute $\nabla J(\mathbf{u})$, let us evaluate $\mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda})$ for $\mathbf{x} = \phi(\mathbf{u})$. Since $h(\phi(\mathbf{u}), \mathbf{u}) = 0$, it holds that
+
 \[
-    h(\mathbf{x},\mathbf{u}) = \begin{bmatrix}
-         f_0(x_0,u_0)-x1\\
-         \vdots \\
-         f_{T-1}(x_{T-1}u_{T-1})-x_T
-    \end{bmatrix}
+\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}) = \ell(\phi(\mathbf{u}), \mathbf{u}) + h(\phi(\mathbf{u}), \mathbf{u})^T\boldsymbol{\lambda} = J(\mathbf{u})
 \]
-To compute $\nabla J(\mathbf{u})$ let us evaluate $\mathcal{L}(\cdot)$ for $\mathbf{x} = \phi(\mathbf{u})$. Since $h(\phi(\mathbf{u},)\mathbf{u})=0$ it holds that 
+
+for all $\boldsymbol{\lambda} \in \mathbb{R}^{nT}$. Therefore,
+
 \[
-    \mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}) = J(\mathbf{u}) \quad \forall \lambda\in\R^{nT}
+\nabla_{\mathbf{u}}\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}) = \nabla J(\mathbf{u}) \quad \forall \boldsymbol{\lambda}
 \]
-Therefore 
+
+\begin{remark}
+The function $\mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda})$ is a Lagrangian, but here it will be used in a different way as an auxiliary function to compute $\nabla J(\mathbf{u})$.
+\end{remark}
+
+\begin{remark}
+Recall that $\nabla_{\mathbf{u}}\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda})$ indicates the (total) gradient of the function $\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda})$ with respect to $\mathbf{u}$ (with $\boldsymbol{\lambda}$ independent of $\mathbf{u}$).
+\end{remark}
+
+Therefore, we can compute $\nabla J(\mathbf{u})$ as $\nabla \mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda})$ and use $\boldsymbol{\lambda}$ as a degree of freedom to be properly used to ease the computation.
+
+We can write:
+\begin{align*}
+\nabla J(\mathbf{u}) &= \nabla\phi(\mathbf{u})(\nabla_1\ell(\phi(\mathbf{u}), \mathbf{u}) + \nabla_1h(\phi(\mathbf{u}), \mathbf{u})\boldsymbol{\lambda}) \\
+&+ \nabla_2\ell(\phi(\mathbf{u}), \mathbf{u}) + \nabla_2h(\phi(\mathbf{u}), \mathbf{u})\boldsymbol{\lambda}
+\end{align*}
+
+which holds for every $\boldsymbol{\lambda}$. Therefore, for a given $\mathbf{u}$, we can cleverly select $\boldsymbol{\lambda} = \boldsymbol{\lambda}(\mathbf{u})$ such that:
+
 \[
-    \nabla_u \mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}) = \nabla J(\mathbf{u}) \quad \forall \boldsymbol{\lambda}
+\nabla_1\ell(\phi(\mathbf{u}), \mathbf{u}) + \nabla_1h(\phi(\mathbf{u}), \mathbf{u})\boldsymbol{\lambda}(\mathbf{u}) = 0
 \]
-hence we can write 
+
+which leads to:
+
 \[
-    \nabla J (\mathbf{u}) = \nabla\phi(\mathbf{u})(\nabla_1\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_1 h(\phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda})+\nabla_2\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_2 h(\phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda}
+\nabla J(\mathbf{u}) = \nabla_2\ell(\phi(\mathbf{u}), \mathbf{u}) + \nabla_2h(\phi(\mathbf{u}), \mathbf{u})\boldsymbol{\lambda}(\mathbf{u})
 \]
-which holds for every $\boldsymbol{\lambda}$. Therefore, for a given $\mathbf{u}$, we can cleverly select $\boldsymbol{\lambda}=\boldsymbol{\lambda}(\mathbf{u})$ such that: 
+
+By recalling that
 \[
-    \nabla_1\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_1h(\phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda}(\mathbf{u}) = 0
+\mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) = \ell(\mathbf{x}, \mathbf{u}) + \boldsymbol{\lambda}^Th(\mathbf{x}, \mathbf{u})
 \]
-which leads to 
+
+we have
 \[
-    \nabla J(\mathbf{u}) = \nabla_2\ell(\phi(\mathbf{u}),\mathbf{u})+\nabla_2 h(\phi(\mathbf{u}),\mathbf{u})\boldsymbol{\lambda}(\mathbf{u})
+\nabla J(\mathbf{u}) = \nabla\phi(\mathbf{u})\nabla_1\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}) + \nabla_2\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}),
 \]
-By recalling that 
-\[
-    \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda}) = \ell(\mathbf{x},\mathbf{u})+\boldsymbol{\lambda}^Th(\mathbf{x},\mathbf{u})
-\]
-We have
-\[
-    \nabla J(\mathbf{u}) = \nabla\phi(\mathbf{u})\nabla_1\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda})+\nabla_2\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda})
-\]
+
 so that choosing $\boldsymbol{\lambda} = \boldsymbol{\lambda}(\mathbf{u})$ such that
+
 \[
-    \nabla_1\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}(\mathbf{u})) = 0
+\nabla_1\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}(\mathbf{u})) = 0
 \]
-it holds 
+
+it holds
+
 \[
-    \nabla J(\mathbf{u}) = \nabla_2\mathcal{L}(\phi(\mathbf{u}),\mathbf{u},\boldsymbol{\lambda}(\mathbf{u}))
+\nabla J(\mathbf{u}) = \nabla_2\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}(\mathbf{u})).
 \]
 
 
@@ -2182,99 +2202,282 @@ it holds
     \nabla_2\mathcal{L}(\phi(\mathbf{u}^*),\mathbf{u}^*,\boldsymbol{\lambda}^*)=0
 \]
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection[Explicit computation of the gradient of the shooting cost function]{Explicit computation of $\nabla J(\mathbf{u})$}
+\subsection{Explicit computation of \texorpdfstring{$\nabla J(\mathbf{u})$}{Explicit computation of the gradient of J(u)}}
+
+Now we can compute explicitly $\nabla J(\mathbf{u})$. We have:
 \[
-    \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda}) = \displaystyle\sum_{t=0}^{T-1}[\ell_t(x_t,u_t)+\lambda_{t+1}^T f_t(x_t,u_t)-\lambda_{t+1}x_{t+1}]+\ell_T(x_T)% = \displaystyle\sum_{t=0}^{T-1}(x_t,u_t)
+\mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) = \underbrace{\sum_{t=0}^{T-1} \ell_t(x_t, u_t) + \ell_T(x_T)}_{\ell(\mathbf{x},\mathbf{u})} + \underbrace{\sum_{t=0}^{T-1} (f_t(x_t, u_t) - x_{t+1})^T\lambda_{t+1}}_{h(\mathbf{x},\mathbf{u})^T \boldsymbol{\lambda}}
 \]
-By writing out the sum we can easily calculate $\nabla_1\mathcal{L}(\phi(\mathbf{u},\mathbf{u},\mathbf{x}))=0$ for each $x_t$: 
-\begin{gather*}
-    \mathcal{L}(\mathbf{x},\mathbf{u},\boldsymbol{\lambda})= \ell_0(x_0,u_0)+ \lambda_1^Tf_0(x_0,u_0)-\lambda_1x_1+ \ell_1(x_1,u_1)+\lambda_2^Tf_1(x_1,u_1)-\lambda_2x_2+\dots\\
-    \nabla_t\ell_t(x_t,u_t)+\nabla_t f_t(x_t,u_t)\lambda_{t+1}- \lambda_t = 0\\
-    \nabla\ell_T(x_T) - \lambda_T = 0
-\end{gather*}
-which leads to 
+
+By calculating $\nabla_1\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}(\mathbf{u})) = 0$ for each $x_t$, we obtain:
 \begin{align*}
-    \lambda_T &= \nabla\ell_T(x_T)\\
-    \lambda_t &= \nabla_t\ell_t(x_t,u_t)+\nabla_t f_t(x_t,u_t)\lambda_{t+1}  \quad t = T-1,\dots,1
+\lambda_T &= \nabla\ell_T(x_T) \\
+\lambda_t &= \nabla_1\ell_t(x_t, u_t) + \nabla_1f_t(x_t, u_t)\lambda_{t+1} \qquad t = T-1,\ldots,1
 \end{align*}
+
 then
 \[
-    (\nabla J(u))_t = \nabla_2\ell_t(x_t,u_t)+\nabla_2f_t(x_t,u_t)\lambda_{t+1} 
+(\nabla J(\mathbf{u}))_t = \nabla_2\ell_t(x_t, u_t) + \nabla_2f_t(x_t, u_t)\lambda_{t+1} \qquad t = T-1,\ldots,0
 \]
-Notice we can write 
-\begin{flalign*}
-    & A_t^T = \nabla_1f(x_t,u_t)\\
-    & B_t^T = \nabla_2f(x_t,u_t) 
-\end{flalign*}  
-so that we can rewrite
+
+\subsubsection{Linear System Formulation}
+
+Consider the equations:
 \begin{align*}
-    \lambda_t &= A_t^T\lambda_t+1 + a_t\\
-    (\nabla J(u))_t &= B_t^T\lambda_{t+1}+b_t
+\lambda_t &= \nabla_1\ell_t(x_t, u_t) + \nabla_1f_t(x_t, u_t)\lambda_{t+1}, \quad t = T-1,\ldots,1, \quad \text{with } \lambda_T = \nabla\ell_T(x_T),\\
+(\nabla J(\mathbf{u}))_t &= \nabla_2\ell_t(x_t, u_t) + \nabla_2f_t(x_t, u_t)\lambda_{t+1} \quad t = T-1,\ldots,0
 \end{align*}
-so given $u_0,\dots,u_{T-1}$ and $x_1,\dots,x_T$ such that $x_{t+1}=f(x_t,u_t)$ we can compute $\lambda_T,\dots,\lambda_1$ running backwards. 
-\begin{remark}
-    $A_t\in\R^{n\times n}$ and $B_t\in\R^{n\times m}$ are the state and input matrices of the linearization of the system $x_{t+1} = f(x_t,u_t)$ about the trajectory $(\mathbf{x},\mathbf{u})$
-\end{remark}
+
+Notice that we can write:
+\begin{align*}
+A_t^T &= \nabla_1f_t(x_t, u_t),\\
+B_t^T &= \nabla_2f_t(x_t, u_t)
+\end{align*}
+
+where $A_t \in \mathbb{R}^{n\times n}$ and $B_t \in \mathbb{R}^{m\times n}$ are the state and input matrices of the linearization of the system $x_{t+1} = f(x_t, u_t)$ about the trajectory $(\mathbf{x}, \mathbf{u})$.
+
+Thus, we can rewrite:
+\begin{align*}
+\lambda_t &= A_t^T\lambda_{t+1} + a_t \qquad t = T-1,\ldots,1, \quad \text{with } \lambda_T = \nabla\ell_T(x_T)\\
+(\nabla J(\mathbf{u}))_t &= B_t^T\lambda_{t+1} + b_t \qquad t = T-1,\ldots,0
+\end{align*}
+
+where we have simply renamed $a_t = \nabla_1\ell_t(x_t, u_t)$ and $b_t = \nabla_2\ell_t(x_t, u_t)$ (with $a_t \in \mathbb{R}^n$ and $b_t \in \mathbb{R}^m$).
 
 \section{Optimality conditions for unconstrained optimal control}
-Optimality conditions for the optimal control problem can then be written as follows: let $(\mathbf{x}^*,\mathbf{u}^*)$ be an optimal (minimum) state-input trajectory. Then there exists $\boldsymbol{\lambda}$ such that
+
+Optimality conditions for optimal control can be written as follows. Let $(\mathbf{x}^*, \mathbf{u}^*)$ be an optimal (minimum) state-input trajectory. Then there exists $\boldsymbol{\lambda}^*$ such that:
+
 \begin{align*}
-    x_{t+1}^* & =f_t(x_t^*,u_t^*) \qquad &t = 0,\dots,T-1 \\
-    \lambda_t^* & = \nabla_1\ell_t(x_t^*,u_t^*)+\nabla_1f_t(x_t^*,u_t^*)\lambda^*_{t+1} & t=T-1,\dots,1    \\
-     0 & =  \nabla_2\ell_t(x_t^*,u_t^*)+\nabla_2f_t(x_t^*,u_t^*)\lambda_{t+1}^* & t = 0,\dots,T-1
+x_{t+1}^* &= f_t(x_t^*, u_t^*) & t &= 0,\ldots,T-1 \\
+\lambda_t^* &= \nabla_1\ell_t(x_t^*, u_t^*) + \nabla_1f_t(x_t^*, u_t^*)\lambda_{t+1}^* & t &= T-1,\ldots,1 \\
+0 &= \nabla_2\ell_t(x_t^*, u_t^*) + \nabla_2f_t(x_t^*, u_t^*)\lambda_{t+1}^* & t &= 0,\ldots,T-1
 \end{align*}
-with $x_0*=x_{\text{init}}$ and $\lambda_T^* = \nabla\ell_T(x_T^*)$. In order to find "stationary trajectories" we must solve the system of equations above in $(\mathbf{x},\mathbf{u},\boldsymbol{\lambda})$
+
+with $x_0^* = x_{\text{init}}$ and $\lambda_T^* = \nabla\ell_T(x_T^*)$.
+
+To find stationary trajectories, we need to solve this system of equations in $(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda})$.
+
+\begin{remark}
+It is worth noting that the system contains equations that move forward in time (the dynamics) and others that move backward in time (the costate equations). Additionally, there are algebraic equations $((\nabla J(\mathbf{u}))_t = 0)$ that may not have (in general) an explicit solution.
+\end{remark}
+
+
 
 \subsection{Hamiltonian function and optimality conditions}
-It is customary to write these conditions in terms of the \emph{Hamiltonian function}: 
+
+It is customary to write these conditions in terms of the Hamiltonian function:
+\begin{equation}
+H_t(x_t, u_t, \lambda_{t+1}) = \ell_t(x_t, u_t) + \lambda_{t+1}^T f_t(x_t, u_t)
+\end{equation}
+
+The first-order necessary conditions of optimality can be written as:
+\begin{equation}
+\nabla_2 H_t(x_t^*, u_t^*, \lambda_{t+1}^*) = 0 \qquad t = 0,\ldots,T-1,
+\end{equation}
+and
+\begin{equation}
+\lambda_t^* = \nabla_1 H_t(x_t^*, u_t^*, \lambda_{t+1}^*) \qquad t = 1,\ldots,T-1,
+\end{equation}
+with terminal condition
+\begin{equation}
+\lambda_T^* = \nabla\ell_T(x_T^*).
+\end{equation}
+
+\subsubsection{Principle of Optimality with the Hamiltonian}
+
+\begin{proposition}
+Let $(\mathbf{x}^*, \mathbf{u}^*)$ be a local (minimum) optimal trajectory. Then
 \[
-    H_t(x_t,u_t,\lambda_{t+1}) = \ell_t(x_t,u_t) + \lambda_{t+1}^T f(x_t,u_t)
+\nabla_2 H_t(x_t^*, u_t^*, \lambda_{t+1}^*) = 0 \qquad t = 0,\ldots,T-1
 \]
-The first-order necessary conditions of optimality can then be written in terms of the Hamiltonian, so that we get the following proposition:
-\begin{proposition}[First order conditions of optimality for an unconstrained optimal control problem]
-    Let $(\mathbf{x}^*,\mathbf{u}^*)$ be a local (minimum) optimal trajectory. Then 
-    \begin{align*}
-        &\nabla_2 H_t(x_t^*,u_t^*,\lambda_{t+1}^*) = 0 &t = 0,\dots,T-1\\
-    \end{align*}
-    where the costate vector $\boldsymbol{\lambda}^*$ is obtained from the adjoint equation 
-    \[
-        \lambda_t^* = \nabla_1 H_t(x_t^*,u_t^*,\lambda_{t+1}^*)  t=1,\dots,T-1
-    \]
-    with terminal condition
-    \[
-        \lambda_T^* = \nabla\ell_T(x_T^*)
-    \]
+where the costate vector $\boldsymbol{\lambda}^*$ is obtained from the adjoint equation
+\[
+\lambda_t^* = \nabla_1 H_t(x_t^*, u_t^*, \lambda_{t+1}^*) \qquad t = 1,\ldots,T-1
+\]
+with terminal condition
+\[
+\lambda_T^* = \nabla\ell_T(x_T^*).
+\]
 \end{proposition}
+
 \begin{remark}
-    Notice that we do note need to assume any "regularity" condition on the local optimal trajectory
+Notice that we do not need to assume any "regularity" condition on the local (minimum) optimal (state-input) trajectory.
 \end{remark}
-It is worth noting that the constraint due to the dynamics can be written as 
+
+\subsubsection{Remarks on Hamiltonian Function and Optimality Conditions}
+
+It is worth noting that the constraint due to the dynamics, $x_{t+1}^* = f(x_t^*, u_t^*)$, can be written as
 \[
-    x_{t+1}^* = \nabla_3H_t(x_t^*,u_t^*,\lambda_{t+1}^*)
+x_{t+1}^* = \nabla_3 H_t(x_t^*, u_t^*, \lambda_{t+1}^*).
 \]
+
 Thus denoting
 \[
-    \nabla H_t(x_t^*,u_t^*,\lambda_{t+1}^*) = \begin{bmatrix}
-        \nabla_1 H_t(x_t^*,u_t^*,\lambda_{t+1}^*)\\
-        \nabla_2 H_t(x_t^*,u_t^*,\lambda_{t+1}^*)\\
-        \nabla_3 H_t(x_t^*,u_t^*,\lambda_{t+1}^*)
-    \end{bmatrix}
+\nabla H_t(x_t^*, u_t^*, \lambda_{t+1}^*) = \begin{bmatrix}
+\nabla_1 H_t(x_t^*, u_t^*, \lambda_{t+1}^*) \\
+\nabla_2 H_t(x_t^*, u_t^*, \lambda_{t+1}^*) \\
+\nabla_3 H_t(x_t^*, u_t^*, \lambda_{t+1}^*)
+\end{bmatrix}
 \]
-The first-order necessary conditions of optimality can be compactly written as 
+
+the first-order necessary conditions of optimality can be compactly written as
 \[
-    \begin{bmatrix}
-        x_{t+1}^* \\ 0 \\ \lambda_t^* 
-    \end{bmatrix}  = \nabla H_t(x_t^*,u_t^*,\lambda_{t+1}^*) \quad t=0,\dots,T-1
+\begin{bmatrix}
+x_{t+1}^* \\ 0 \\ \lambda_t^*
+\end{bmatrix} = \nabla H_t(x_t^*, u_t^*, \lambda_{t+1}^*) \qquad t = 0,\ldots,T-1
 \]
-with the additional condition
+with the additional condition $\lambda_T^* = \nabla\ell_T(x_T^*)$.
+
+\section{Optimality with the Hamiltonian in Case of LQP}
+
+\begin{remark}
+Very important: notice that rewriting the generic Optimal Control Problem (OCP) in its reduced form and then searching for optimality brings us ("from a different way", in a sense) to the same results we've obtained previously just imposing the KKT conditions to the generic form of the problem; this is coherent and indeed pretty obvious, because we are always talking about the same problem expressed (and then solved) in different BUT totally equivalent ways!
+\end{remark}
+
+Indeed, let's consider a LQP a little bit generalized (with the classic assumptions), alias a generic case in which $q_t = 0 \, \forall t$, $r_t = 0 \, \forall t$, $q_T = 0$, $Q_T = 0$ (time-varying case).
+
+In this case, the Hamiltonian function is:
 \[
-    x_1^* = f(x_{\text{init}},u_0) \quad \text{and} \quad \lambda_T^* = \nabla\ell_T(x_T^*)
+H_t(x_t, u_t, \lambda_{t+1}) = \frac{1}{2}\begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix}^T \begin{bmatrix}
+Q_t & S_t^T \\ S_t & R_t
+\end{bmatrix}\begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix} + (A_tx_t + B_tu_t)\lambda_{t+1}
+\]
+
+We have:
+
+\begin{itemize}
+    \item $\lambda_t^* = \nabla_1 H_t(x_t, u_t, \lambda_{t+1})\big|_{\substack{x_t=x_t^*\\ u_t=u_t^*\\ \lambda_t=\lambda_t^*}} = Q_tx_t^* + S_t^Tu_t^* + A_t^T\lambda_{t+1}^* \quad \forall t=T-1...1, \lambda_T^* = Q_T$
+
+    \item $0 = \nabla_2 H_t(x_t, u_t, \lambda_{t+1})\big|_{\substack{x_t=x_t^*\\ u_t=u_t^*\\ \lambda_t=\lambda_t^*}} \Leftrightarrow 0 = S_tx_t^* + R_tu_t^* + B_t^T\lambda_{t+1}^* \Rightarrow u_t^* = -R_t^{-1}(S_tx_t^* + B_t^T\lambda_{t+1}^*) \quad \forall t=0...T-1, x_0 \text{ given}$
+
+    \item Exploiting $x_{t+1}^* = \nabla_3 H_t(x_t, u_t, \lambda_{t+1})\big|_{\substack{x_t=x_t^*\\ u_t=u_t^*\\ \lambda_t=\lambda_t^*}}$ we can find $P_t^*$ such that $\lambda_t^* = P_tx_t^*$
+\end{itemize}
+
+Then the problem can be easily solved (as already shown previously) finding $u_t^*$ as a function of $x_t$: $u_t^* = K_tx_t^*$ where $K_t = -(R_t + B_t^TP_tB_t)^{-1}(S_t + B_t^TP_tA_t)$.
+
+\section{Shooting Approach: LQ Optimal Control}
+
+\subsubsection{Part I: Cost Function and System Representation}
+We can compactly write the cost function as
+\[
+\ell(\mathbf{x}, \mathbf{u}) = \sum_{t=0}^{T-1} \frac{1}{2}\left[x_t^T Q_tx_t + u_t^T R_tu_t\right] + \frac{1}{2}x_T^TQ_Tx_T = \frac{1}{2}\mathbf{x}^T \mathcal{Q}\mathbf{x} + \frac{1}{2}\mathbf{u}^T \mathcal{R}\mathbf{u} + \frac{1}{2}x_0^TQ_0x_0
+\]
+where $\mathcal{Q}$ and $\mathcal{R}$ are block diagonal matrices collecting all the $Q_t$, $R_t$ respectively:
+\[
+\mathcal{Q} = \begin{bmatrix}
+Q_1 & 0 & \cdots & 0 \\
+0 & Q_2 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & Q_T
+\end{bmatrix}, \quad
+\mathcal{R} = \begin{bmatrix}
+R_1 & 0 & \cdots & 0 \\
+0 & R_2 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & R_T
+\end{bmatrix}
+\]
+
+It can be shown that the map $\mathbf{x} = \phi(\mathbf{u})$ can be written as
+\[
+\phi(\mathbf{u}) = X_0 + \Phi\mathbf{u}
+\]
+where $X_0 \in \mathbb{R}^{nT}$ is associated to the free evolution, while $\Phi \in \mathbb{R}^{nT \times mT}$ is a state-transition matrix.
+
+\begin{remark}
+It's always possible to have a form like that ALSO for NL time-variant systems, where the $\phi(\mathbf{u})$ function is an affine one given by the state free evolution and the state forced evolution!
+\end{remark}
+
+\subsubsection{LTI System Trajectories: \texorpdfstring{$\mathbf{x} = \phi(\mathbf{u})$}{x = phi(u)}}
+For the time invariant case, we can introduce the map $\phi_t(\mathbf{u}) = x_t$ defined as
+\[
+\phi_t(\mathbf{u}) = \underbrace{A^tx_0}_{\text{free evolution}} + \underbrace{[A^{t-1}B \quad A^{t-2}B \quad \cdots \quad B \quad 0 \quad \cdots \quad 0]}_{\text{forced evolution}}\mathbf{u}
+\]
+
+Therefore we have
+\[
+\mathbf{x} = \phi(\mathbf{u}) = \underbrace{\begin{bmatrix}
+A \\ A^2 \\ \vdots \\ A^T
+\end{bmatrix}x_0}_{X_0} + \underbrace{\begin{bmatrix}
+B & 0 & \cdots & 0 \\
+AB & B & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+A^{T-1}B & A^{T-2}B & \cdots & B
+\end{bmatrix}}_{\Phi}\mathbf{u}
+\]
+which can be written compactly as $\mathbf{x} = X_0 + \Phi\mathbf{u}$
+
+\subsubsection{Part II: Cost Function Reduction}
+Therefore, the cost function can be written as
+\begin{align*}
+\ell(\phi(\mathbf{u}), \mathbf{u}) &= \frac{1}{2}(X_0 + \Phi\mathbf{u})^T \mathcal{Q}(X_0 + \Phi\mathbf{u}) + \frac{1}{2}\mathbf{u}^T \mathcal{R}\mathbf{u} + \frac{1}{2}x_0^T Q_0x_0 \\
+&= \frac{1}{2}X_0^T \mathcal{Q}X_0 + \frac{1}{2}\mathbf{u}^T \Phi^T \mathcal{Q}\Phi\mathbf{u} + X_0^T \mathcal{Q}\Phi\mathbf{u} + \frac{1}{2}\mathbf{u}^T \mathcal{R}\mathbf{u} + \frac{1}{2}x_0^T Q_0x_0 \\
+&= \frac{1}{2}\mathbf{u}^T (\Phi^T \mathcal{Q}\Phi + \mathcal{R})\mathbf{u} + X_0^T \mathcal{Q}\Phi\mathbf{u} + \underbrace{\frac{1}{2}X_0^T \mathcal{Q}X_0 + \frac{1}{2}x_0^T Q_0x_0}_{\text{constant}}
+\end{align*}
+
+Since the constant term does not affect the minimizer, the optimal control problem can be written in its reduced form as
+\[
+\min_{\mathbf{u}} \frac{1}{2}\mathbf{u}^T (\Phi^T \mathcal{Q}\Phi + \mathcal{R})\mathbf{u} + X_0^T \mathcal{Q}\Phi\mathbf{u}
+\]
+
+\begin{remark}
+Notice that:
+\begin{itemize}
+    \item $Q_t = Q_t^T \geq 0 \,\forall t\in[0,T] \Rightarrow \mathcal{Q} \geq 0$
+    \item $R_t = R_t^T > 0 \,\forall t\in[0,T] \Rightarrow \mathcal{R} > 0$
+\end{itemize}
+$\Rightarrow$ the problem has an UNIQUE global solution $\mathbf{u}^* = -\frac{1}{2}(\Phi^T\mathcal{Q}\Phi+\mathcal{R})^{-1}\Phi^T\mathcal{Q}X_0$
+\end{remark}
+
+\subsection{Refresh: Optimality Conditions for QP}
+Let us consider a quadratic optimization problem
+\[
+\min_{z\in\mathbb{R}^n} z^TQ z + b^T z
+\]
+with $Q = Q^T \in \mathbb{R}^{n\times n}$ and $b \in \mathbb{R}^n$.
+
+\begin{remark}[Important]
+For a quadratic program necessary conditions of optimality are also sufficient and minima are global.
+\end{remark}
+
+If $z^*$ is a minimum then:
+\begin{itemize}
+    \item First-order necessary condition for optimality: $\nabla\ell(z^*) = 0 \implies 2Q z^* + b = 0$
+    \item Second-order necessary condition for optimality: $\nabla^2\ell(z^*) \geq 0 \implies 2Q \geq 0$
+\end{itemize}
+
+If $Q_t > 0$, then there exists a unique global minimum given by $z^* = -\frac{1}{2}Q^{-1}b$.
+
+\section{LQ Problem Optimality Conditions}
+
+Let us define the reduced cost
+\[
+J(\mathbf{u}) := \frac{1}{2}\mathbf{u}^T(\Phi^T\mathcal{Q}\Phi + \mathcal{R})\mathbf{u} + X_0^T\mathcal{Q}\Phi\mathbf{u}
+\]
+
+Since $(\Phi^T\mathcal{Q}\Phi + \mathcal{R}) > 0$, then $J(\mathbf{u})$ is a convex, positive-definite quadratic function.
+
+Therefore, the reduced problem can be written as
+\[
+\min_{\mathbf{u}} J(\mathbf{u})
+\]
+
+Being $J(\mathbf{u})$ convex and positive definite, first order necessary conditions are also sufficient.
+
+Then, $\mathbf{u}^*$ is the (unique) optimal solution if and only if
+\[
+\nabla J(\mathbf{u}^*) = 0
 \]
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Newton's method for Optimal Control}
 We look for a solution to the discrete-time optimal control problem 
