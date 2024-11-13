@@ -32,6 +32,9 @@
     bm          % Bold math symbols
 }
 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Graphics and Figures
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2478,6 +2481,335 @@ Then, $\mathbf{u}^*$ is the (unique) optimal solution if and only if
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Gradient Method for Optimal Control}
+
+\section{Unconstrained Optimal Control Problem (Discrete-Time)}
+We look for a solution of the discrete-time optimal control problem:
+\begin{align*}
+    \min_{\mathbf{x}\in\R^{nT},\mathbf{u}\in\R^{mT}} & \sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T)\\
+    \text{subj. to } & x_{t+1} = f_t(x_t,u_t), \quad t\in\{0,\dots,T-1\}
+\end{align*}
+with given initial condition $x_0 = x_{\text{init}} \in \R^n$, where $\ell_t:\R^n\times\R^m\to\R$ is the so-called stage cost while $\ell_T:\R^n\to\R$ is the terminal cost.
+
+\begin{assumption}
+Functions $\ell_t(\cdot,\cdot)$, $\ell_T(\cdot)$, $f_t(\cdot,\cdot)$ are twice continuously differentiable, i.e., they are class $\mathcal{C}^2$.
+\end{assumption}
+
+\section{Recall : Shooting Method}
+\subsection{Key Idea}
+Express the state $x_t$ at each $t\in\{0,\dots,T-1\}$ as a function of the input sequence $\mathbf{u}$ only.
+
+For all $t$ we can introduce a map $\phi_t:\R^{mT}\to\R^n$ such that:
+\[
+    x_t := \phi_t(\mathbf{u})
+\]
+
+Using compact notation:
+\[
+    \phi(\mathbf{u}) = \col(\phi_1(\mathbf{u}),\dots,\phi_T(\mathbf{u}))
+\]
+so that
+\[
+    \mathbf{x} = \phi(\mathbf{u})
+\]
+
+\begin{remark}
+Observe that, given an input sequence $\mathbf{u}$, the equality constraint $\phi_{t+1}(\mathbf{u}) = f_t(\phi_t(\mathbf{u}),u_t)$ is satisfied by construction.
+\end{remark}
+
+\section{Recall : Reduced Optimal Control Problem}
+We can define
+\begin{align*}
+    J(\mathbf{u}) &:= \sum_{t=0}^{T-1} \ell_t(\phi_t(\mathbf{u}), u_t) + \ell_T(\phi_T(\mathbf{u}))\\
+    &= \ell(\phi(\mathbf{u}), \mathbf{u})
+\end{align*}
+
+Thus, the optimal control problem can be recast into the so-called reduced version given by
+\[
+    \min_{\mathbf{u}\in\R^{mT}} J(\mathbf{u})
+\]
+which is an unconstrained problem with cost function $J:\R^{mT}\to\R$ where the optimization variable is only the input sequence $\mathbf{u}\in\R^{mT}$.
+
+\begin{remark}
+This is an unconstrained optimization problem in $\mathbf{u}$ with a $\mathcal{C}^2$ cost function. Notice that the cost function $J(\mathbf{u})$ inherits from the original optimal control problem its smoothness properties, but also its nonconvexity.
+\end{remark}
+
+\section{Recall : Calculation of \texorpdfstring{$\nabla J(\mathbf{u})$}{Gradient of J(u)}}
+By recalling that
+\[
+    \mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) = \ell(\mathbf{x}, \mathbf{u}) + \boldsymbol{\lambda}^T h(\mathbf{x}, \mathbf{u})
+\]
+we have
+\[
+    \nabla J(\mathbf{u}) = \nabla\phi(\mathbf{u})\nabla_1\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}) + \nabla_2\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda})
+\]
+
+Thus, choosing $\boldsymbol{\lambda} = \boldsymbol{\lambda}(\mathbf{u})$ such that
+\[
+    \nabla_1\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}(\mathbf{u})) = \nabla_1\ell(\phi(\mathbf{u}), \mathbf{u}) + \nabla_1h(\phi(\mathbf{u}), \mathbf{u})\boldsymbol{\lambda}(\mathbf{u}) = 0
+\]
+it holds
+\[
+    \nabla J(\mathbf{u}) = \nabla_2\mathcal{L}(\phi(\mathbf{u}), \mathbf{u}, \boldsymbol{\lambda}(\mathbf{u})) = \nabla_2\ell(\phi(\mathbf{u}), \mathbf{u}) + \nabla_2h(\phi(\mathbf{u}), \mathbf{u})\boldsymbol{\lambda}(\mathbf{u})
+\]
+
+\section{Recall : Gradient Method}
+Given an unconstrained problem:
+\begin{align*}
+    \min_z & \quad \ell(z)\\
+    \text{s.t.} & \quad z\in\R^d
+\end{align*}
+
+where $\ell:\R^d\to\R$, the gradient method applied to this problem reads:
+\[
+    z^{k+1} = z^k - \gamma^k\nabla\ell(z^k)
+\]
+where $\gamma^k > 0$ chosen according to Armijo, constant or diminishing rules.
+
+\section{Gradient Method for Optimal Control}
+
+\subsection{Basic Formulation}
+The gradient descent method applied to the reduced optimization problem reads as:
+\[
+    \mathbf{u}^{k+1} = \mathbf{u}^k - \gamma^k\nabla J(\mathbf{u}^k)
+\]
+
+Choosing $\boldsymbol{\lambda}^k$ such that:
+\[
+    \nabla_1\mathcal{L}(\phi(\mathbf{u}^k), \mathbf{u}^k, \boldsymbol{\lambda}^k) = 0
+\]
+the gradient descent iteration reduces to:
+\[
+    \mathbf{u}^{k+1} = \mathbf{u}^k - \gamma^k\nabla_2\mathcal{L}(\phi(\mathbf{u}^k), \mathbf{u}^k, \boldsymbol{\lambda}^k)
+\]
+or explicitly:
+\[
+    \mathbf{u}^{k+1} = \mathbf{u}^k - \gamma^k(\nabla_2\ell(\phi(\mathbf{u}^k), \mathbf{u}^k) + \nabla_2h(\phi(\mathbf{u}^k), \mathbf{u}^k)\boldsymbol{\lambda}^k)
+\]
+
+\subsection{Forward and Backward Simulations}
+Given a trajectory $(x^k, u^k)$ at the $k$-th iteration, we compute:
+\begin{enumerate}
+    \item \textbf{Backward computation:} Solve $\nabla_1\mathcal{L}(\phi(\mathbf{u}^k), \mathbf{u}^k, \boldsymbol{\lambda}^k)=0$ to find $\boldsymbol{\lambda}^k$, where $\lambda_T^k = \nabla\ell(x_T)$ is fixed and well-known for all $k$
+    \item \textbf{Forward computation:} Compute $x^{k+1} = f_t(x^{k+1}, u^{k+1})$ with $x_0^k = x_0^{\text{const}}$ fixed and well-known for all $k$
+\end{enumerate}
+
+This process yields a new trajectory $(x^{k+1}, u^{k+1})$ with lower cost compared to $(x^k, u^k)$.
+
+\begin{remark}
+The forward simulation constitutes an open-loop integration. Running the system dynamics, i.e., computing $x^{k+1}=f_t(x^{k+1}, u^{k+1})$ (given $u^{k+1}$), means performing an open-loop integration. This may lead to numerical instabilities as small errors can be amplified, particularly if the system itself is unstable. This consideration must be taken into account when selecting the step size.
+\end{remark}
+
+\subsection{Comparison of SQP and Gradient Method Approaches}
+\begin{itemize}
+    \item \textbf{SQP Approach:} While it converges to an input-state feasible trajectory, it does not provide feasible trajectories during iterations
+    \item \textbf{Gradient Method:} Provides feasible trajectories at each iteration (though generally suboptimal) that converge to an optimal solution
+\end{itemize}
+
+Moving along the trajectory manifold $\mathcal{T}$, the gradient method moves along its tangent space and then projects back onto $\mathcal{T}$ through the open-loop system dynamics.
+
+\section{Recall : Explicit Computation of \texorpdfstring{$\nabla J(\mathbf{u})$}{Gradient}}
+
+Now we can compute explicitly $\nabla J(\mathbf{u})$. We have:
+\begin{equation}
+    \mathcal{L}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) = \underbrace{\sum_{t=0}^{T-1}\ell_t(x_t, u_t) + \ell_T(x_T)}_{\ell(\mathbf{x},\mathbf{u})} + \underbrace{\sum_{t=0}^{T-1}(f_t(x_t, u_t) - x_{t+1})^T\lambda_{t+1}}_{h(\mathbf{x},\mathbf{u})^T\boldsymbol{\lambda}}
+\end{equation}
+
+Thus, given a trajectory $(\mathbf{x}, \mathbf{u})$, i.e., such that
+\[
+    x_{t+1} = f_t(x_t, u_t), \quad t = 0,1,\ldots,T-1, \quad x_0 \text{ given}
+\]
+
+the gradient at each $t$ is computed as:
+\begin{align*}
+    \lambda_t &= \nabla_1\ell_t(x_t, u_t) + \nabla_1f(x_t, u_t)\lambda_{t+1} & t &= T-1,\ldots,1, & \lambda_T &= \nabla\ell_T(x_T)\\
+    (\nabla J(\mathbf{u}))_t &= \nabla_2\ell_t(x_t, u_t) + \nabla_2f(x_t, u_t)\lambda_{t+1} & t &= T-1,\ldots,0
+\end{align*}
+
+This can be rewritten more compactly by renaming:
+\begin{align*}
+    \lambda_t &= A_t^T\lambda_{t+1} + a_t & t &= T-1,\ldots,1, & \text{with }\lambda_T &= \nabla\ell_T(x_T)\\
+    (\nabla J(\mathbf{u}))_t &= B_t^T\lambda_{t+1} + b_t & t &= T-1,\ldots,0
+\end{align*}
+
+where we have simply renamed:
+\begin{align*}
+    A_t^T &= \nabla_1f(x_t, u_t), & B_t^T &= \nabla_2f(x_t, u_t)\\
+    a_t &= \nabla_1\ell_t(x_t, u_t), & b_t &= \nabla_2\ell_t(x_t, u_t)
+\end{align*}
+
+\newpage
+
+\section{Gradient Method Algorithm}
+\begin{algorithm}
+\caption{Gradient Method for Optimal Control}
+
+\textbf{Initialization:} Consider an initial guess trajectory $(x^0, u^0)$
+
+\vspace{0.5cm}
+
+\textbf{For} $k = 0,1,\ldots$
+
+\vspace{0.5cm}
+
+\textbf{Step 1:} Compute descent direction
+\begin{enumerate}
+    \item Set matrices and vectors:
+        \begin{align*}
+            A_t^{k\top} &= \nabla_1f_t(x_t^k, u_t^k), & B_t^{k\top} &= \nabla_2f_t(x_t^k, u_t^k)\\
+            a_t^k &= \nabla_1\ell_t(x_t^k, u_t^k), & b_t^k &= \nabla_2\ell_t(x_t^k, u_t^k)
+        \end{align*}
+        
+    \item Solve backwards the co-state equation:
+        \begin{align*}
+            \lambda_t^k &= A_t^{k\top}\lambda_{t+1}^k + a_t^k, & t &= T-1,\ldots,1\\
+            \lambda_T^k &= \nabla\ell_T(x_T^k)
+        \end{align*}
+        
+    \item Compute descent direction:
+        \[
+            \Delta u_t^k = -B_t^{k\top}\lambda_{t+1}^k - b_t^k, \quad t = T-1,\ldots,0
+        \]
+\end{enumerate}
+
+\vspace{0.5cm}
+
+\textbf{Step 2:} Compute new input sequence
+\[
+    u_t^{k+1} = u_t^k + \gamma^k\Delta u_t^k
+\]
+where $\gamma^k$ is chosen according to a step-size rule (e.g., Armijo)
+
+\vspace{0.5cm}
+
+\textbf{Step 3:} Compute new state trajectory\\
+Forward integrate (open-loop) for $t = 0,\ldots,T-1$, with initial condition $x_0^{k+1} = x_{\text{init}}$:
+\[
+    x_{t+1}^{k+1} = f(x_t^{k+1}, u_t^{k+1})
+\]
+\end{algorithm}
+
+\section{Example: Pendulum Control}
+Search in the Vince's Note
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Continuous time Optimal Control}
+A continuous-time optimal control problem can be written as 
+\begin{align*}
+    \min_{(x(\cdot),u(\cdot))\in\mathcal{F}_x\times\mathcal{F}_u} &\displaystyle\int_{0}^{T}\ell_\tau(x(\tau),u(\tau))d\tau+\ell_T(x(T)) \\ 
+    \text{subj to } & \dot{x}(t) = f_t(x(t),u(t)) \quad \forall t \in [0,T]\\
+     & u(t) \in \mathcal{U}\\
+     & x(0) = x_{init}
+\end{align*}
+\begin{remark}
+    $\mathcal{F}_x,\mathcal{F}_u$ are function spaces
+\end{remark}
+
+\section{Hamiltonian function}
+Let us introduce the \emph{Hamiltonian function} $H:\R^n\times\R^m\times\R^n\times\R\to\R$
+\[
+    H(x(t),u(t),\lambda(t),t) = \ell_t(x(t),u(t)) + \lambda(t)^Tf_t(x(t),u(t))
+\]
+where $\lambda:[0,T]\to\R$. We denote the partial derivatives of $H(\cdot)$ wrt its arguments evaluated at a certain $t$ as 
+\begin{align*}
+    &H_x(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial x} H(x(t),u(t),\lambda(t),t)\\
+    &H_u(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial u} H(x(t),u(t),\lambda(t),t)\\
+    &H_\lambda(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial\lambda} H(x(t),u(t),\lambda(t),t)
+\end{align*}
+\section{Pontryagin Minimum Principle}
+Let $(x^*(t),u^*(t)), t\in[0,T]$ be an optimal trajectory where $u(t)\in\mathcal{U}$, for all $t$, then 
+\begin{enumerate}
+    \item There exists a $\lambda^*(t)$ such that, for all $t\in[0,T]$:
+        \[
+            \dot{\lambda}^*(t) = -H_x(x^*(t),u^*(t),\lambda^*(t),t)^T
+        \]
+        where $\lambda^*(T)=\nabla\ell_T(x_T^*)$
+    \item The Hamiltonian function assumes its minimum in $\mathcal{U}$ when evaluated along $u^*(t)$, i.e. 
+        \[
+            H(x^*(t),u^*(t),\lambda^*(t),t) \leq H(x^*(t),u(t),\lambda^*(t),t) \qquad \forall u(t)\in \mathcal{U},\ \forall t\in[0,T]
+        \]
+    \item The optimal trajectory $(x^*(t),u^*(t)), t\in[0,T]$ satisfies, $\forall t \in[0,T]$ 
+        \[
+            \dot{x}(t) = H_\lambda(x^*(t),u^*(t),\lambda(t)^*,t)^T
+        \]
+        where $x^*(0) = x_{\text{init}}$
+\end{enumerate}
+
+\section{Continuous-time LQ Optimal Control Problem}
+Consider a linear quadratic optimal control problem as: 
+\begin{align*}
+    \min_{(x(\cdot),u(\cdot))\in\mathcal{F}_x\times\mathcal{F}_u} &\displaystyle\int_{0}^{T} \left(\displaystyle\frac{1}{2}x(\tau)^TQ(\tau)x(\tau) + \displaystyle\frac{1}{2}u(\tau)^TR(\tau)u(\tau)\right)d\tau+\displaystyle\frac{1}{2} x(T)^TQ_Tx(T)\\
+    \text{subj to } & \dot{x}(t) = A(t)x(t) + B(t)u(t) \quad \forall t \in [0,T]\\
+     & x(0) = x_{init}
+\end{align*}
+\begin{itemize}
+    \item $Q(t)=Q(t)^T \geq 0 \quad \forall t\in[0,T]$
+    \item $Q(T)=Q(T)^T \geq 0 \quad \forall $
+    \item $R(t)=R(t)^T > 0 \quad \forall t\in[0,T]$
+\end{itemize}
+For the LQ optimal control problem we can define the Hamiltonian function as 
+\[
+    H(x(t),u(t),\lambda(t),t) = \displaystyle\frac{1}{2}x(t)^TQ(t)x(t) + \displaystyle\frac{1}{2}u(t)^TR(t)u(t) + \lambda(t)^T(A(t)x(t)+B(t)u(t))
+\]
+Imposing the necessary conditions (PMP) for optimality we obtain that, for $(x^*(t),u^*(t))$ to be optimal, we need to satisfy for all $t\in[0,T]$
+\begin{itemize}
+    \item from PMP 1) 
+        \[
+            \dot{\lambda}^*(t) = -A(t)^T\lambda^*(t)-Q(t)x^*(t)
+        \]
+        with $\lambda^*(T) = Q_Tx^*(T)$
+    \item from PMP 2), imposing $H_u(x^*(t),u^*(t),\lambda^*(t),t) = 0$
+        \[
+            R(t)u^*(t)+B(t)^T\lambda^*(t) = 0
+        \]
+    \item from PMP 3)
+        \[
+            \dot{x}^*(t) = A(t)x^*(t) + B(t)u^*(t)
+        \]
+        with $x^*(0) = x_{\text{init}}$
+\end{itemize}
+Rewriting the necessary conditions for optimality we have:
+\begin{align*}
+    & \dot{x}^*(t) = A(t)x^*(t)-B(t)R^{-1}(t)B(t)^T\lambda^*(t)\\
+    & \dot{\lambda}(t) = -A(t)^T\lambda^*(t)-Q(t)x^*(t)
+\end{align*}
+which can be re-written in matrix form as 
+\[
+    \begin{bmatrix}
+        \dot{x}^*(t) \\ \dot{\lambda}^*(t)
+    \end{bmatrix} = \begin{bmatrix}
+        A(t) & -B(t)R(t)^{-1}B(t)^T \\ -Q(t) & -A(t)^T
+    \end{bmatrix} \begin{bmatrix}
+        x^*(t) \\ \lambda^*(t)
+    \end{bmatrix}
+\]
+with $\lambda^*(T)=Q_Tx^*(T)$ and $x^*(0)=x_{\text{init}}$. This is a \emph{two point boundary value problem}\\
+Let us assume that $\lambda^*(t)=P(t)x^*(t)$ so that the optimal (feedback) input is 
+\[
+    u^*(t) = K(t)x^*(t)
+\]
+where 
+\[
+    K(t) = -R(t)^{-1}B(t)^TP(t)
+\]
+To show that this assumption holds, let us expand the costate equation: 
+\begin{align*}
+    \dot{\lambda}^*(t) &= \dot{P}(t)x^*(t)+P(t)\dot{x}^*(t)\\
+     &= \dot{P}(t)x^*(t)+P(t)A(t)x^*(t)-P(t)B(t)R(t)^{-1}B(t)^TP(t)x^*(t)\\
+    Q(t)x^*(t)+A(t)^T\lambda^*(t) &= Q(t)x^*(t)+A(t)^TP(t)x^*(t)
+\end{align*}
+hence 
+\[
+    \dot{P}(t)x^*(t) = -\left(P(t)A(t)+A(t)^TP(t)-P(t)B(t)R(t)^{-1}B(t)^TP(t)+Q(t)\right)x^*(t)
+\]
+This equation is satisfied by the solution $P(\cdot)$ of the following \emph{Riccati differential equation}:
+\[
+    \dot{P}(t) = -P(t)A(t)-A(t)^TP(t)+P(t)B(t)R^(t){-1}B(t)^TP(t)-Q(t)
+\]
+with terminal condition $P(T)=Q_T$ to be consistent with $\lambda^*(T)$
+
 
 \chapter{Newton's method for Optimal Control}
 We look for a solution to the discrete-time optimal control problem 
@@ -2606,129 +2938,6 @@ which results as
     &u_t^{k+1} = u_t^k + K_t^k(x_t^{k+1}-x_t^k ) + \gamma^k\sigma_t^k  \\ 
     & x_{t+1}^{k+1} = f_t(x_t^{k+1},u_t^{k+1})
 \end{align*}
-
-
-\chapter{Continuous time Optimal Control}
-A continuous-time optimal control problem can be written as 
-\begin{align*}
-    \min_{(x(\cdot),u(\cdot))\in\mathcal{F}_x\times\mathcal{F}_u} &\displaystyle\int_{0}^{T}\ell_\tau(x(\tau),u(\tau))d\tau+\ell_T(x(T)) \\ 
-    \text{subj to } & \dot{x}(t) = f_t(x(t),u(t)) \quad \forall t \in [0,T]\\
-     & u(t) \in \mathcal{U}\\
-     & x(0) = x_{init}
-\end{align*}
-\begin{remark}
-    $\mathcal{F}_x,\mathcal{F}_u$ are function spaces
-\end{remark}
-
-\section{Hamiltonian function}
-Let us introduce the \emph{Hamiltonian function} $H:\R^n\times\R^m\times\R^n\times\R\to\R$
-\[
-    H(x(t),u(t),\lambda(t),t) = \ell_t(x(t),u(t)) + \lambda(t)^Tf_t(x(t),u(t))
-\]
-where $\lambda:[0,T]\to\R$. We denote the partial derivatives of $H(\cdot)$ wrt its arguments evaluated at a certain $t$ as 
-\begin{align*}
-    &H_x(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial x} H(x(t),u(t),\lambda(t),t)\\
-    &H_u(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial u} H(x(t),u(t),\lambda(t),t)\\
-    &H_\lambda(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial\lambda} H(x(t),u(t),\lambda(t),t)
-\end{align*}
-\section{Pontryagin Minimum Principle}
-Let $(x^*(t),u^*(t)), t\in[0,T]$ be an optimal trajectory where $u(t)\in\mathcal{U}$, for all $t$, then 
-\begin{enumerate}
-    \item There exists a $\lambda^*(t)$ such that, for all $t\in[0,T]$:
-        \[
-            \dot{\lambda}^*(t) = -H_x(x^*(t),u^*(t),\lambda^*(t),t)^T
-        \]
-        where $\lambda^*(T)=\nabla\ell_T(x_T^*)$
-    \item The Hamiltonian function assumes its minimum in $\mathcal{U}$ when evaluated along $u^*(t)$, i.e. 
-        \[
-            H(x^*(t),u^*(t),\lambda^*(t),t) \leq H(x^*(t),u(t),\lambda^*(t),t) \qquad \forall u(t)\in \mathcal{U},\ \forall t\in[0,T]
-        \]
-    \item The optimal trajectory $(x^*(t),u^*(t)), t\in[0,T]$ satisfies, $\forall t \in[0,T]$ 
-        \[
-            \dot{x}(t) = H_\lambda(x^*(t),u^*(t),\lambda(t)^*,t)^T
-        \]
-        where $x^*(0) = x_{\text{init}}$
-\end{enumerate}
-
-\section{Continuous-time LQ Optimal Control Problem}
-Consider a linear quadratic optimal control problem as: 
-\begin{align*}
-    \min_{(x(\cdot),u(\cdot))\in\mathcal{F}_x\times\mathcal{F}_u} &\displaystyle\int_{0}^{T} \left(\displaystyle\frac{1}{2}x(\tau)^TQ(\tau)x(\tau) + \displaystyle\frac{1}{2}u(\tau)^TR(\tau)u(\tau)\right)d\tau+\displaystyle\frac{1}{2} x(T)^TQ_Tx(T)\\
-    \text{subj to } & \dot{x}(t) = A(t)x(t) + B(t)u(t) \quad \forall t \in [0,T]\\
-     & x(0) = x_{init}
-\end{align*}
-\begin{itemize}
-    \item $Q(t)=Q(t)^T \geq 0 \quad \forall t\in[0,T]$
-    \item $Q(T)=Q(T)^T \geq 0 \quad \forall $
-    \item $R(t)=R(t)^T > 0 \quad \forall t\in[0,T]$
-\end{itemize}
-For the LQ optimal control problem we can define the Hamiltonian function as 
-\[
-    H(x(t),u(t),\lambda(t),t) = \displaystyle\frac{1}{2}x(t)^TQ(t)x(t) + \displaystyle\frac{1}{2}u(t)^TR(t)u(t) + \lambda(t)^T(A(t)x(t)+B(t)u(t))
-\]
-Imposing the necessary conditions (PMP) for optimality we obtain that, for $(x^*(t),u^*(t))$ to be optimal, we need to satisfy for all $t\in[0,T]$
-\begin{itemize}
-    \item from PMP 1) 
-        \[
-            \dot{\lambda}^*(t) = -A(t)^T\lambda^*(t)-Q(t)x^*(t)
-        \]
-        with $\lambda^*(T) = Q_Tx^*(T)$
-    \item from PMP 2), imposing $H_u(x^*(t),u^*(t),\lambda^*(t),t) = 0$
-        \[
-            R(t)u^*(t)+B(t)^T\lambda^*(t) = 0
-        \]
-    \item from PMP 3)
-        \[
-            \dot{x}^*(t) = A(t)x^*(t) + B(t)u^*(t)
-        \]
-        with $x^*(0) = x_{\text{init}}$
-\end{itemize}
-Rewriting the necessary conditions for optimality we have:
-\begin{align*}
-    & \dot{x}^*(t) = A(t)x^*(t)-B(t)R^{-1}(t)B(t)^T\lambda^*(t)\\
-    & \dot{\lambda}(t) = -A(t)^T\lambda^*(t)-Q(t)x^*(t)
-\end{align*}
-which can be re-written in matrix form as 
-\[
-    \begin{bmatrix}
-        \dot{x}^*(t) \\ \dot{\lambda}^*(t)
-    \end{bmatrix} = \begin{bmatrix}
-        A(t) & -B(t)R(t)^{-1}B(t)^T \\ -Q(t) & -A(t)^T
-    \end{bmatrix} \begin{bmatrix}
-        x^*(t) \\ \lambda^*(t)
-    \end{bmatrix}
-\]
-with $\lambda^*(T)=Q_Tx^*(T)$ and $x^*(0)=x_{\text{init}}$. This is a \emph{two point boundary value problem}\\
-Let us assume that $\lambda^*(t)=P(t)x^*(t)$ so that the optimal (feedback) input is 
-\[
-    u^*(t) = K(t)x^*(t)
-\]
-where 
-\[
-    K(t) = -R(t)^{-1}B(t)^TP(t)
-\]
-To show that this assumption holds, let us expand the costate equation: 
-\begin{align*}
-    \dot{\lambda}^*(t) &= \dot{P}(t)x^*(t)+P(t)\dot{x}^*(t)\\
-     &= \dot{P}(t)x^*(t)+P(t)A(t)x^*(t)-P(t)B(t)R(t)^{-1}B(t)^TP(t)x^*(t)\\
-    Q(t)x^*(t)+A(t)^T\lambda^*(t) &= Q(t)x^*(t)+A(t)^TP(t)x^*(t)
-\end{align*}
-hence 
-\[
-    \dot{P}(t)x^*(t) = -\left(P(t)A(t)+A(t)^TP(t)-P(t)B(t)R(t)^{-1}B(t)^TP(t)+Q(t)\right)x^*(t)
-\]
-This equation is satisfied by the solution $P(\cdot)$ of the following \emph{Riccati differential equation}:
-\[
-    \dot{P}(t) = -P(t)A(t)-A(t)^TP(t)+P(t)B(t)R^(t){-1}B(t)^TP(t)-Q(t)
-\]
-with terminal condition $P(T)=Q_T$ to be consistent with $\lambda^*(T)$
-
-
-
-
-
-
-
 
 
 
