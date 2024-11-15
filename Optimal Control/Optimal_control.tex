@@ -2695,29 +2695,156 @@ Search in the Vince's Note
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Continuous time Optimal Control}
-A continuous-time optimal control problem can be written as 
-\begin{align*}
-    \min_{(x(\cdot),u(\cdot))\in\mathcal{F}_x\times\mathcal{F}_u} &\displaystyle\int_{0}^{T}\ell_\tau(x(\tau),u(\tau))d\tau+\ell_T(x(T)) \\ 
-    \text{subj to } & \dot{x}(t) = f_t(x(t),u(t)) \quad \forall t \in [0,T]\\
-     & u(t) \in \mathcal{U}\\
-     & x(0) = x_{init}
-\end{align*}
+\chapter{Continuous-time Optimal Control}
+
+\section{Continuous-time Optimal Control Problem}
+A continuous-time, i.e., $t \in \mathbb{R}$, optimal control problem can be written as
+\begin{gather*}
+    \min_{(x(\cdot),u(\cdot))\in \mathcal{F}_x \times \mathcal{F}_u} \int_{0}^{T}\ell_\tau(x(\tau),u(\tau))d\tau+\ell_T(x(T))\\
+    \begin{array}{l l }
+        \text{subj. to } & \dot{x}(t) = f_t(x(t),u(t)) \quad \forall t \in [0,T]\\
+                         & u(t) \in \mathcal{U}\\
+                         & x(0) = x^0
+    \end{array}
+\end{gather*}
+where
+\begin{itemize}
+    \item $x(t) \in \mathbb{R}^n$ state, $u(t) \in \mathbb{R}^m$ input with $x(\cdot):[0,T]\to\mathbb{R}^n$, $u(\cdot):[0,T]\to\mathbb{R}^m$
+    \item $\mathcal{U} \subseteq \mathbb{R}^m$ admissible control space
+    \item $f_t: \mathbb{R}^n \times \mathbb{R}^m \to \mathbb{R}^n$ continuous-time dynamics
+    \item $\ell_t: \mathbb{R}^n \times \mathbb{R}^m \to \mathbb{R}$ stage-cost
+    \item $\ell_T: \mathbb{R}^n \to \mathbb{R}$ terminal cost
+\end{itemize}
+
 \begin{remark}
-    $\mathcal{F}_x,\mathcal{F}_u$ are function spaces
+$\mathcal{F}_x$, $\mathcal{F}_u$ are function spaces.
 \end{remark}
 
-\section{Hamiltonian function}
-Let us introduce the \emph{Hamiltonian function} $H:\R^n\times\R^m\times\R^n\times\R\to\R$
+\section{Hamiltonian Function}
+Let us introduce the Hamiltonian function $H: \mathbb{R}^n \times \mathbb{R}^m \times \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}$
 \[
-    H(x(t),u(t),\lambda(t),t) = \ell_t(x(t),u(t)) + \lambda(t)^Tf_t(x(t),u(t))
+    H(x(t),u(t),\lambda(t),t) = \ell_t(x(t),u(t)) + \lambda(t)^T f_t(x(t),u(t))
 \]
-where $\lambda:[0,T]\to\R$. We denote the partial derivatives of $H(\cdot)$ wrt its arguments evaluated at a certain $t$ as 
+where $\lambda:[0,T] \to \mathbb{R}^n$.
+
+We denote the partial derivatives of $H(\cdot)$ with respect to its arguments evaluated at a certain $t$ as
 \begin{align*}
-    &H_x(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial x} H(x(t),u(t),\lambda(t),t)\\
-    &H_u(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial u} H(x(t),u(t),\lambda(t),t)\\
-    &H_\lambda(x(t),u(t),\lambda(t),t) := \displaystyle\frac{\partial}{\partial\lambda} H(x(t),u(t),\lambda(t),t)
+    H_x(x(t),u(t),\lambda(t),t) &:= \frac{\partial}{\partial x}H(x(t),u(t),\lambda(t),t)\\
+    H_u(x(t),u(t),\lambda(t),t) &:= \frac{\partial}{\partial u}H(x(t),u(t),\lambda(t),t)\\
+    H_\lambda(x(t),u(t),\lambda(t),t) &:= \frac{\partial}{\partial \lambda}H(x(t),u(t),\lambda(t),t)
 \end{align*}
+
+\section{Trajectory Manifold}
+The trajectory manifold $\mathcal{T}$ is defined as
+\[
+    \mathcal{T} = \{(x(\cdot),u(\cdot)) \in \mathcal{F}_x \times \mathcal{F}_u | \dot{x}(t) = f_t(x(t),u(t)), t \in [0,T]\}
+\]
+
+This represents an infinite dimensional optimization problem in which the decision variable is a function.
+
+\begin{remark}
+For points $(x(\cdot),u(\cdot))$ in the trajectory manifold, we have a functional that maps from the space of functions to $\mathbb{R}$, making this an infinite-dimensional optimization problem.
+\end{remark}
+\section{Additional Necessary Optimality Conditions: Variational Approach}
+
+\subsection{Cost Function Reformulation}
+Let $(x^*(\cdot),u^*(\cdot))$ be an optimal trajectory for the optimal control problem with $\mathcal{U} = \mathbb{R}^m$. Since the optimal trajectory fulfills the dynamics and the initial state constraint, we can rewrite the cost as
+\[
+    J(x^*(\cdot),u^*(\cdot)) = \int_0^T[\ell_\tau(x^*(\tau),u^*(\tau)) + \lambda(\tau)^T(f_t(x^*(\tau),u^*(\tau)) - \dot{x}^*(\tau))]d\tau + \ell_T(x^*(T))
+\]
+where the multiplier function $\lambda:[0,T]\to\mathbb{R}^n$ is called costate function.
+
+Now, since
+\[
+    -\lambda(t)^T\dot{x}^*(\tau) = -\frac{d}{dt}\{\lambda(t)^Tx^*(t)\} + \dot{\lambda}(t)^Tx^*(t)
+\]
+we can rewrite the cost as:
+\begin{align*}
+    J(x^*(\cdot),u^*(\cdot)) &= \int_0^T[\ell_\tau(x^*(\tau),u^*(\tau)) + \lambda(\tau)^Tf_t(x^*(\tau),u^*(\tau)) + \dot{\lambda}(\tau)^Tx^*(\tau)]d\tau\\
+    &\quad -[\lambda(\tau)^Tx^*(\tau)]_0^T + \ell_T(x^*(T))\\
+    &= \int_0^T[H(x^*(\tau),u^*(\tau),\lambda(\tau),\tau) + \dot{\lambda}(\tau)^Tx^*(\tau)]d\tau\\
+    &\quad -\lambda(T)^Tx^*(T) + \lambda(0)^Tx^*(0) + \ell_T(x^*(T))
+\end{align*}
+
+\subsection{Variational Analysis}
+Consider an admissible perturbation $(\delta x(\cdot),\delta u(\cdot))$ to the optimal trajectory, with $\delta x(0)=0$ since $x^*(0) + \delta x(0) = x_{\text{init}}$ and
+\[
+    \delta \dot{x}(t) = \nabla_1f_t(x^*(t),u^*(t))^T\delta x(t) + \nabla_2f_t(x^*(t),u^*(t))^T\delta u(t)
+\]
+
+The corresponding cost first variation can be computed as:
+\begin{align*}
+    \delta J_{(x^*,u^*)}(\delta x(\cdot),\delta u(\cdot)) &= \int_0^T(H_x(x^*(\tau),u^*(\tau),\lambda(\tau),\tau) + \dot{\lambda}(\tau)^T)\delta x(\tau)d\tau\\
+    &\quad + \int_0^T H_u(x^*(\tau),u^*(\tau),\lambda(\tau),\tau)\delta u(\tau)d\tau\\
+    &\quad + (\nabla\ell_T(x^*(T)) - \lambda(T))^T\delta x(T) + \lambda(0)^T\delta x(0)
+\end{align*}
+
+Now, since the state perturbation $\delta x$ depends on the input perturbation $\delta u$, we can express the cost variation as a function of $\delta u$ only by choosing the multiplier $\lambda^*$ as the solution to the following initial value problem:
+\begin{align*}
+    \dot{\lambda}^*(t) &= -H_x(x^*(t),u^*(t),\lambda^*(t),t)^T, \quad t \in [0,T]\\
+    \lambda^*(T) &= \nabla\ell_T(x^*(T))
+\end{align*}
+
+For linear systems, this becomes:
+\[
+    \dot{\lambda}^*(t) = -A^T(t)\lambda^*(t) - q(t)
+\]
+where
+\begin{align*}
+    q(t) &= \frac{\partial}{\partial x}\ell_t(x^*(t),u^*(t))\\
+    A(t) &= \frac{\partial}{\partial x}f_t(x^*(t),u^*(t))
+\end{align*}
+
+Hence, we end up with
+\[
+    \delta J_{(x^*,u^*,\lambda^*)}(\delta u(\cdot)) = \int_0^T H_u(x^*(\tau),u^*(\tau),\lambda^*(\tau),\tau)\delta u(\tau)d\tau
+\]
+
+As in the finite dimensional case, we have that $\delta J_{(x^*,u^*,\lambda^*)}(\delta u(\cdot))$ must be zero for all the possible perturbations $\delta u(\cdot)$, which implies:
+\[
+    H_u(x^*(t),u^*(t),\lambda^*(t),t) = 0, \quad \forall t \in [0,T]
+\]
+
+If this were not the case, we could choose $\delta u(\tau) = -\varepsilon H_u(x^*(\tau),u^*(\tau),\lambda^*(\tau),\tau)^T$ producing a cost variation
+\[
+    \delta J_{(x^*,u^*,\lambda^*)}(\delta u(\cdot)) = -\varepsilon \int_0^T \|H_u(x^*(\tau),u^*(\tau),\lambda^*(\tau),\tau)\|_2^2 d\tau < 0 \tag{1}
+\]
+and for sufficiently small $\varepsilon > 0$ this perturbation would decrease the cost, meaning that $(x^*,u^*)$ would not be a (local) minimum.
+
+Hence, under proper differentiability assumptions on the dynamics, the stage cost and the terminal cost, if $(x^*,u^*)$ is an optimal trajectory then there exists a differentiable costate function $\lambda^*$ such that:
+\begin{align*}
+    \dot{x}^*(t) &= H_\lambda(x^*(\tau),u^*(\tau),\lambda^*(\tau),\tau)^T, \quad x^*(0) = x_{\text{init}}\\
+    \dot{\lambda}^*(t) &= -H_x(x^*(\tau),u^*(\tau),\lambda^*(\tau),\tau)^T, \quad \lambda^*(T) = \nabla\ell_T(x^*(t))\\
+    0 &= H_u(x^*(\tau),u^*(\tau),\lambda^*(\tau),\tau)
+\end{align*}
+for all $t \in [0,T]$.
+
+\begin{remark}
+These equations are a generalization of the Hamilton equations in mechanics. In fact, consider an unforced mechanical system and let:
+\begin{itemize}
+    \item $q$ be a set of generalized coordinates
+    \item $U(q)$ the potential energy
+    \item $T(q,\dot{q})$ the kinetic energy
+\end{itemize}
+Then let us define the stage cost as the Lagrangian function:
+\[
+    \ell_t(x,u) = \mathcal{L}(x,u) := T(x,u) - U(x)
+\]
+where $x = q$ and $u = \dot{q}$ (hence $\dot{x} = f(x,u) = u$).
+
+Then the Hamiltonian function turns out to be $H(q,\dot{q},\lambda) = \mathcal{L}(q,\dot{q}) + \lambda^T\dot{q}$ and the last two optimality equations result in
+\begin{align*}
+    \dot{\lambda}^*(t) &= -\nabla_1H(q^*(t),\dot{q}^*(t),\lambda^*(t)) = -\nabla_1\mathcal{L}(q^*(t),\dot{q}^*(t))\\
+    \nabla_2H(q^*(t),\dot{q}^*(t),\lambda^*(t)) &= \nabla_2\mathcal{L}(q^*(t),\dot{q}^*(t)) + \lambda^*(t) = 0
+\end{align*}
+
+By solving for the costate $\lambda$ (which in mechanics is called momentum) in the second and replacing it in the first we obtain:
+\[
+    \frac{d}{dt}\{\nabla_2\mathcal{L}(q^*(t),\dot{q}^*(t))\} - \nabla_1\mathcal{L}(q^*(t),\dot{q}^*(t)) = 0
+\]
+which are the Euler-Lagrange equations.
+\end{remark}
+
 \section{Pontryagin Minimum Principle}
 Let $(x^*(t),u^*(t)), t\in[0,T]$ be an optimal trajectory where $u(t)\in\mathcal{U}$, for all $t$, then 
 \begin{enumerate}
@@ -2736,80 +2863,160 @@ Let $(x^*(t),u^*(t)), t\in[0,T]$ be an optimal trajectory where $u(t)\in\mathcal
         \]
         where $x^*(0) = x_{\text{init}}$
 \end{enumerate}
+\begin{remark}
+    The principle was in fact stated for a maximization problem so that the original name is
+Pontryagin Maximum Principle.
+\end{remark}
+
 
 \section{Continuous-time LQ Optimal Control Problem}
-Consider a linear quadratic optimal control problem as: 
+
+Consider a continuous-time linear quadratic optimal control problem:
 \begin{align*}
-    \min_{(x(\cdot),u(\cdot))\in\mathcal{F}_x\times\mathcal{F}_u} &\displaystyle\int_{0}^{T} \left(\displaystyle\frac{1}{2}x(\tau)^TQ(\tau)x(\tau) + \displaystyle\frac{1}{2}u(\tau)^TR(\tau)u(\tau)\right)d\tau+\displaystyle\frac{1}{2} x(T)^TQ_Tx(T)\\
-    \text{subj to } & \dot{x}(t) = A(t)x(t) + B(t)u(t) \quad \forall t \in [0,T]\\
-     & x(0) = x_{init}
+    \min_{(x(\cdot),u(\cdot))\in\mathcal{F}_x\times\mathcal{F}_u} &\int_0^T \left(\frac{1}{2}x(\tau)^TQ(\tau)x(\tau) + \frac{1}{2}u(\tau)^TR(\tau)u(\tau)\right)d\tau + \frac{1}{2}x(T)^TQ_Tx(T)\\
+    \text{subj. to } & \dot{x}(t) = A(t)x(t) + B(t)u(t) \quad t \in [0,T]\\
+    & x(0) = x^0
 \end{align*}
+
+where:
 \begin{itemize}
-    \item $Q(t)=Q(t)^T \geq 0 \quad \forall t\in[0,T]$
-    \item $Q(T)=Q(T)^T \geq 0 \quad \forall $
-    \item $R(t)=R(t)^T > 0 \quad \forall t\in[0,T]$
+    \item $x(t) \in \mathbb{R}^n$ and $u(T) \in \mathbb{R}^m$
+    \item $A(t) \in \mathbb{R}^{n\times n}$
+    \item $B(t) \in \mathbb{R}^{n\times m}$
+    \item $Q(t) \in \mathbb{R}^{n\times n}$ and $Q(t) = Q(t)^T \geq 0$ for all $t \in [0,T]$
+    \item $Q_T \in \mathbb{R}^{n\times n}$ and $Q_T = Q_T^T \geq 0$
+    \item $R(t) \in \mathbb{R}^{m\times m}$ and $R(t) = R(t)^T > 0$ for all $t \in [0,T]$
 \end{itemize}
-For the LQ optimal control problem we can define the Hamiltonian function as 
+
+\begin{remark}
+In classical approach, while $A(t)$ and $B(t)$ may change slowly (gain scheduling), we can design $\lambda(t)$ to be continuous and achieve stability.
+\end{remark}
+
+\section{Necessary Conditions for Optimality in CT LQ Problems}
+
+\subsection{Hamiltonian Function}
+For the LQ optimal control problem, we define the Hamiltonian function as:
 \[
-    H(x(t),u(t),\lambda(t),t) = \displaystyle\frac{1}{2}x(t)^TQ(t)x(t) + \displaystyle\frac{1}{2}u(t)^TR(t)u(t) + \lambda(t)^T(A(t)x(t)+B(t)u(t))
+    H(x(t),u(t),\lambda(t),t) = \frac{1}{2}x(t)^TQ(t)x(t) + \frac{1}{2}u(t)^TR(t)u(t) + \lambda(t)^T(A(t)x(t) + B(t)u(t))
 \]
-Imposing the necessary conditions (PMP) for optimality we obtain that, for $(x^*(t),u^*(t))$ to be optimal, we need to satisfy for all $t\in[0,T]$
-\begin{itemize}
-    \item from PMP 1) 
+
+\subsection{Pontryagin's Maximum Principle}
+For $(x^*(t),u^*(t))$ to be optimal, the following conditions must be satisfied for all $t\in[0,T]$:
+
+\begin{enumerate}
+    \item \textbf{Costate equation} (from PMP i):
         \[
-            \dot{\lambda}^*(t) = -A(t)^T\lambda^*(t)-Q(t)x^*(t)
+            \dot{\lambda}^*(t) = -A(t)^T\lambda^*(t) - Q(t)x^*(t)
         \]
-        with $\lambda^*(T) = Q_Tx^*(T)$
-    \item from PMP 2), imposing $H_u(x^*(t),u^*(t),\lambda^*(t),t) = 0$
+        with terminal condition $\lambda^*(T) = Q_Tx^*(T)$
+
+    \item \textbf{Stationarity condition} (from PMP ii):
         \[
-            R(t)u^*(t)+B(t)^T\lambda^*(t) = 0
+            R(t)u^*(t) + B(t)^T\lambda^*(t) = 0
         \]
-    \item from PMP 3)
+
+    \item \textbf{State equation} (from PMP iii):
         \[
             \dot{x}^*(t) = A(t)x^*(t) + B(t)u^*(t)
         \]
-        with $x^*(0) = x_{\text{init}}$
-\end{itemize}
-Rewriting the necessary conditions for optimality we have:
+        with initial condition $x^*(0) = x^0$
+\end{enumerate}
+
+\subsection{Matrix Form of Optimality Conditions}
+Rewriting the necessary conditions for optimality, we have:
 \begin{align*}
-    & \dot{x}^*(t) = A(t)x^*(t)-B(t)R^{-1}(t)B(t)^T\lambda^*(t)\\
-    & \dot{\lambda}(t) = -A(t)^T\lambda^*(t)-Q(t)x^*(t)
+    \dot{x}^*(t) &= A(t)x^*(t) - B(t)R^{-1}(t)B(t)^T\lambda^*(t)\\
+    \dot{\lambda}^*(t) &= -A(t)^T\lambda^*(t) - Q(t)x^*(t)
 \end{align*}
-which can be re-written in matrix form as 
+
+This system can be written in matrix form as:
 \[
     \begin{bmatrix}
         \dot{x}^*(t) \\ \dot{\lambda}^*(t)
-    \end{bmatrix} = \begin{bmatrix}
-        A(t) & -B(t)R(t)^{-1}B(t)^T \\ -Q(t) & -A(t)^T
-    \end{bmatrix} \begin{bmatrix}
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        A(t) & -B(t)R(t)^{-1}B(t)^T \\
+        -Q(t) & -A(t)^T
+    \end{bmatrix}
+    \begin{bmatrix}
         x^*(t) \\ \lambda^*(t)
     \end{bmatrix}
 \]
-with $\lambda^*(T)=Q_Tx^*(T)$ and $x^*(0)=x_{\text{init}}$. This is a \emph{two point boundary value problem}\\
-Let us assume that $\lambda^*(t)=P(t)x^*(t)$ so that the optimal (feedback) input is 
+with boundary conditions $\lambda^*(T) = Q_Tx^*(T)$ and $x^*(0) = x^0$. This constitutes a two-point boundary value problem.
+
+\subsection{Feedback Solution via Riccati Equation}
+Let us assume that $\lambda^*(t) = P(t)x^*(t)$. Under this assumption, the optimal feedback input takes the form:
 \[
     u^*(t) = K(t)x^*(t)
 \]
-where 
+where
 \[
     K(t) = -R(t)^{-1}B(t)^TP(t)
 \]
-To show that this assumption holds, let us expand the costate equation: 
-\begin{align*}
-    \dot{\lambda}^*(t) &= \dot{P}(t)x^*(t)+P(t)\dot{x}^*(t)\\
-     &= \dot{P}(t)x^*(t)+P(t)A(t)x^*(t)-P(t)B(t)R(t)^{-1}B(t)^TP(t)x^*(t)\\
-    Q(t)x^*(t)+A(t)^T\lambda^*(t) &= Q(t)x^*(t)+A(t)^TP(t)x^*(t)
-\end{align*}
-hence 
-\[
-    \dot{P}(t)x^*(t) = -\left(P(t)A(t)+A(t)^TP(t)-P(t)B(t)R(t)^{-1}B(t)^TP(t)+Q(t)\right)x^*(t)
-\]
-This equation is satisfied by the solution $P(\cdot)$ of the following \emph{Riccati differential equation}:
-\[
-    \dot{P}(t) = -P(t)A(t)-A(t)^TP(t)+P(t)B(t)R^(t){-1}B(t)^TP(t)-Q(t)
-\]
-with terminal condition $P(T)=Q_T$ to be consistent with $\lambda^*(T)$
 
+\subsection{Verification of the Assumption}
+To verify this assumption, let us expand the costate equation:
+
+\subsubsection{Left-Hand Side}
+\begin{align*}
+    \dot{\lambda}^*(t) &= \dot{P}(t)x^*(t) + P(t)\dot{x}^*(t)\\
+    &= \dot{P}(t)x^*(t) + P(t)A(t)x^*(t) + P(t)B(t)K(t)x^*(t)\\
+    &= \dot{P}(t)x^*(t) + P(t)A(t)x^*(t) - P(t)B(t)R(t)^{-1}B(t)^TP(t)x^*(t)
+\end{align*}
+
+\subsubsection{Right-Hand Side}
+\[
+    Q(t)x^*(t) + A(t)^T\lambda^*(t) = Q(t)x^*(t) + A(t)^TP(t)x^*(t)
+\]
+
+\subsubsection{Riccati Differential Equation}
+Equating both sides and requiring the equality to hold for all $x^*(t)$, we obtain:
+\[
+    \dot{P}(t) = -P(t)A(t) - A(t)^TP(t) + P(t)B(t)R(t)^{-1}B(t)^TP(t) - Q(t)
+\]
+with terminal condition $P(T) = Q_T$ to be consistent with $\lambda^*(T) = Q_Tx^*(T)$.
+
+\begin{remark}
+The use of this linear mapping between the costate and state variables (seen back in liberation and Hamiltonian mechanics) is a key step for solving the optimal control problem, reducing it to finding the solution of the Riccati differential equation.
+\end{remark}
+
+\section{Infinite Horizon Linear Quadratic Optimal Control Problem}
+
+Consider the infinite horizon optimal control problem:
+\begin{align*}
+    \min_{x(\cdot),u(\cdot)} & \int_0^{\infty} \left(\frac{1}{2}x(\tau)^TQx(\tau) + \frac{1}{2}u(\tau)^TRu(\tau)\right)d\tau\\
+    \text{subj. to } & \dot{x}(t) = Ax(t) + Bu(t), \quad t \in [0,\infty)\\
+    & x(0) = x_0 \text{ given}
+\end{align*}
+
+where:
+\begin{itemize}
+    \item $A,B,Q,R$ are constant matrices
+    \item $Q = Q^T \geq 0$
+    \item $R = R^T > 0$
+    \item $x(\cdot):[0,\infty) \to \mathbb{R}^n$
+    \item $u(\cdot):[0,\infty) \to \mathbb{R}^m$
+\end{itemize}
+
+Under controllability of $(A,B)$ and observability of $(A,C)$ , the optimal control law takes the form:
+\[
+    u^*(t) = K^*x^*(t) \quad \text{with } K^* = -R^{-1}B^TP_\infty
+\]
+
+where $P_\infty$ is the solution of the algebraic Riccati equation:
+\[
+    P_\infty A + A^TP_\infty - P_\infty BR^{-1}B^TP_\infty + Q = 0
+\]
+
+The resulting closed-loop system:
+\[
+    \dot{x}(t) = (A + BK^*)x(t)
+\]
+is asymptotically stable, i.e., $A + BK^*$ is Hurwitz.
+
+\begin{remark}
+The Hurwitz property of $A + BK^*$ follows from the controllability assumption and guarantees that we can choose freely the poles for the feedback system.
+\end{remark}
 
 \chapter{Newton's method for Optimal Control}
 We look for a solution to the discrete-time optimal control problem 
