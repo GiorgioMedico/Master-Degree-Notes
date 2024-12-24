@@ -2693,7 +2693,6 @@ Forward integrate (open-loop) for $t = 0,\ldots,T-1$, with initial condition $x_
 Search in the Vince's Note
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Continuous-time Optimal Control}
 
@@ -3018,6 +3017,7 @@ is asymptotically stable, i.e., $A + BK^*$ is Hurwitz.
 The Hurwitz property of $A + BK^*$ follows from the controllability assumption and guarantees that we can choose freely the poles for the feedback system.
 \end{remark}
 
+
 \chapter{Newton's method for Optimal Control}
 We look for a solution to the discrete-time optimal control problem 
 \begin{align*}
@@ -3029,7 +3029,7 @@ with given initial condition $x_0=x_{\text{init}}\in\R^n$, where $\ell_t:\R^n\ti
 \section{Newton's method for unconstrained optimization}
 Given an unconstrained problem: 
 \begin{align*}
-    \min_{z} & \ell(z)\\  
+    \min_{z} & \ell(z) (=J(u))\\
     \text{subj. to } & z\in\R^d
 \end{align*}
 where $\ell:\R^d\to\R$, Newton's method applied to this problem reads:
@@ -3048,7 +3048,7 @@ where
 \[
     \Delta\mathbf{u}^k = \argmin_{\Delta u} \nabla J(\mathbf{u}^k)^T \Delta\mathbf{u} + \displaystyle\frac{1}{2}\Delta \mathbf{u}^T\nabla^2J(\mathbf{u}^k)\Delta\mathbf{u}
 \]
-%\section{Calculation of $\nabla^2J(u)$}
+
 \section{Calculation of \texorpdfstring{$\nabla^2J(u)$}{Calculation of the Hessian of J(u)}}
 
 In order to calculate $\nabla^2J(\mathbf{u})$ we move from:
@@ -3065,53 +3065,202 @@ since $\boldsymbol{\lambda}=\boldsymbol{\lambda}(\mathbf{u})$ such that $\nabla_
 In this case, we also need to take into account $\nabla \phi(\mathbf{u})$. 
 
 \section{Algorithm}
-\subsubsection{Step 1 : Descent direction calculation}
-Evaluate $\nabla_1f_t(x_t^k,u_t^k),\nabla_2f_t(x_t^k,u_t^k),\nabla_1\ell_t(x_t^k,u_t^k),\nabla_2\ell_t(x_t^k,u_t^k),\nabla\ell_T(x_T^k)$\\ 
-Solve backwards the co-state equation, with $\lambda_T^k = \nabla\ell_T(x_T^k)$
-\[
-    \lambda_t^k = \nabla_1f_t(x_t^k,u_t^k)\lambda_{t+1}^k + \nabla_1\ell(x_t^k,u_t^k) \quad t = T-1,\dots,1
-\]
-Compute for all $t= 0,\dots,T-1$
-\begin{gather*}
-    Q_t^k := \nabla_{11}^2\ell_t(x_t^k,u_t^k) + \nabla^2_{11}f_t(x_t^k,u_t^k)\cdot \lambda_{t+1}^k, \quad R_t^k := \nabla_{22}^2\ell_t(x_t^k,u_t^k) + \nabla^2_{22}f_t(x_t^k,u_t^k)\cdot \lambda_{t+1}^k\\
-    S_t^k := \nabla_{22}^2\ell_t(x_t^k,u_t^k) + \nabla^2_{22}f_t(x_t^k,u_t^k)\cdot \lambda_{t+1}^k
-\end{gather*}
-and $Q_T^k := \nabla_{22}^2 \ell_T(x_T^k)$. Compute the descent direction solving 
+Consider a discrete-time optimal control problem:
 \begin{align*}
-    \min_{\mathbf{\Delta x, \Delta u}}  &\displaystyle\sum_{t=0}^{T-1}\begin{bmatrix}
-        \nabla_1\ell_t(x_t^k,u_t^k)\\
-        \nabla_1\ell_t(x_t^k,u_t^k)
+    \min_{\substack{x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1}\ell_t(x_t,u_t)+\ell_T(x_T)\\
+    \text{subj.\ to } & x_{t+1}=f_t(x_t,u_t), \quad t=0,\dots,T-1\\
+    & x_0 = x_{\text{init}}
+\end{align*}
+
+The Newton's method algorithm for this problem consists of the following steps:
+
+\subsection{Initialization}
+Consider an initial guess trajectory $(x^0,u^0)$
+
+\subsection{Main Algorithm}
+For each iteration $k=0,1,\dots$:
+
+\subsubsection{Step 1: Descent direction calculation}
+\begin{enumerate}
+    \item Evaluate $\nabla_1f_t(x_t^k,u_t^k),\nabla_2f_t(x_t^k,u_t^k),\nabla_1\ell_t(x_t^k,u_t^k),\nabla_2\ell_t(x_t^k,u_t^k),\nabla\ell_T(x_T^k)$
+    \item Solve backwards the co-state equation, with $\lambda_T^k = \nabla\ell_T(x_T^k)$:
+        \[
+            \lambda_t^k = \nabla_1f_t(x_t^k,u_t^k)\lambda_{t+1}^k + \nabla_1\ell(x_t^k,u_t^k) \quad t = T-1,\dots,1
+        \]
+    \item Compute for all $t= 0,\dots,T-1$:
+        \begin{gather*}
+            Q_t^k := \nabla_{11}^2\ell_t(x_t^k,u_t^k) + \nabla^2_{11}f_t(x_t^k,u_t^k)\cdot \lambda_{t+1}^k \\
+            R_t^k := \nabla_{22}^2\ell_t(x_t^k,u_t^k) + \nabla^2_{22}f_t(x_t^k,u_t^k)\cdot \lambda_{t+1}^k\\
+            S_t^k := \nabla_{12}^2\ell_t(x_t^k,u_t^k) + \nabla^2_{12}f_t(x_t^k,u_t^k)\cdot \lambda_{t+1}^k
+        \end{gather*}
+        and $Q_T^k := \nabla^2\ell_T(x_T^k)$
+    \item Compute the descent direction by solving:
+        \begin{align*}
+            \min_{\mathbf{\Delta x, \Delta u}} &\displaystyle\sum_{t=0}^{T-1}\begin{bmatrix}
+                \nabla_1\ell_t(x_t^k,u_t^k)\\
+                \nabla_2\ell_t(x_t^k,u_t^k)
+            \end{bmatrix}^T \begin{bmatrix}
+                \Delta x_t \\ \Delta u_t
+            \end{bmatrix} + \displaystyle\frac{1}{2}\begin{bmatrix}
+                \Delta x_t \\ \Delta u_t
+            \end{bmatrix}^T \begin{bmatrix}
+                Q_t^k & {S_t^k}^T \\ S_t^k & R_t^k
+            \end{bmatrix}\begin{bmatrix}
+                \Delta x_t \\ \Delta u_t
+            \end{bmatrix}\\
+            &+ \nabla\ell_T(x_T^k)^T\Delta x_T + \displaystyle\frac{1}{2}\Delta x_T^TQ_T^k\Delta x_T\\
+            \text{subj.\ to } & \Delta x_{t+1} = \nabla_1f_t(x_t^k,u_t^k)^T\Delta x_t + \nabla_2f_t(x_t^k,u_t^k)^T\Delta u_t \quad t=0,\dots,T-1\\
+            & \Delta x_0 = 0
+        \end{align*}
+\end{enumerate}
+
+\subsubsection{Step 2: Input sequence update}
+Compute new input sequence (implement step-size selection rule, e.g., Armijo):
+\[
+    u_t^{k+1} = u_t^k + \gamma^k\Delta u_t^k
+\]
+
+\subsubsection{Step 3: State trajectory update}
+Forward integrate (open-loop), for all $t=0,\dots,T-1$, with $x_0^{k+1}=x^0$:
+\[
+    x_{t+1}^{k+1} = f(x_t^{k+1},u_t^{k+1})
+\]
+
+\subsection{Example: Pendulum (DT)}
+Consider the discrete-time pendulum system:
+\[
+    \begin{cases}
+        x_{t+1,1} = \delta x_{t,1}\\
+        x_{t+1,2} = \delta(-g/l\sin x_{t,1}-b/lm x_{t,2}+1/m u_t)
+    \end{cases}
+\]
+
+This leads to the following gradients:
+\begin{gather*}
+    \nabla_1f_{t,1}(x_t,u_t) = \begin{bmatrix}
+        1 \\ \delta
+    \end{bmatrix}, \quad
+    \nabla_1f_{t,2}(x_t,u_t) = \begin{bmatrix}
+        -\delta g/l\cos x_{t,1} \\ 1-\delta b/lm
+    \end{bmatrix}\\
+    \nabla_{11}^2f_{t,1}(x_t,u_t) = \begin{bmatrix}
+        0 & 0 \\ 0 & 0
+    \end{bmatrix}, \quad
+    \nabla_{11}^2f_{t,2}(x_t,u_t) = \begin{bmatrix}
+        \delta g/l\sin x_{t,1} & 0 \\ 0 & 0
+    \end{bmatrix}
+\end{gather*}
+
+\section{Newton's Method for Optimal Control - Practical Implementation}
+
+\subsection{Regularization}
+In some cases (especially during the first iterations), the matrices $Q_t^k$, $R_t^k$, and $S_t^k$ may not be positive definite. A viable solution is to implement a "first-order" update by solving the affine LQR problem using the following matrices instead:
+
+\begin{align*}
+    \tilde{Q}_t^k &:= \nabla_{11}^2\ell_t(x_t^k, u_t^k), & \tilde{R}_t^k &:= \nabla_{22}^2\ell_t(x_t^k, u_t^k),\\
+    \tilde{S}_t^k &:= \nabla_{12}^2\ell_t(x_t^k, u_t^k), & \tilde{Q}_T^k &:= \nabla^2\ell_T(x_T^k).
+\end{align*}
+
+Specifically, at the first iterations (before switching to the full algorithm version), solve:
+\begin{align*}
+    \min_{\Delta\mathbf{x},\Delta\mathbf{u}} &\sum_{t=0}^{T-1} \begin{bmatrix}
+        \nabla_1\ell_t(x_t^k, u_t^k) \\
+        \nabla_2\ell_t(x_t^k, u_t^k)
     \end{bmatrix}^T \begin{bmatrix}
         \Delta x_t \\ \Delta u_t
-    \end{bmatrix} + \displaystyle\frac{1}{2}\begin{bmatrix}
+    \end{bmatrix} + \frac{1}{2}\begin{bmatrix}
         \Delta x_t \\ \Delta u_t
     \end{bmatrix}^T \begin{bmatrix}
-        Q_t^k & {S_t^k}^T \\ S_t^k & R_t^k
+        \tilde{Q}_t^k & \tilde{S}_t^{k\top} \\
+        \tilde{S}_t^k & \tilde{R}_t^k
     \end{bmatrix}\begin{bmatrix}
         \Delta x_t \\ \Delta u_t
-    \end{bmatrix} 
-     + \nabla\ell_T(x_T^k)^T\Delta x_T + \displaystyle\frac{1}{2}\Delta x_T^TQ_T^k\Delta x_T\\
-    \text{subj to } & \Delta x_{t+1} = \nabla_1f_t(x_t^k,u_t^k)^T\Delta x_t + \nabla_2f_t(x_t^k,u_t^k)^T\Delta u_t \quad t=0,\dots,T-1 \\ 
+    \end{bmatrix} \\
+    &\quad + \nabla\ell_T(x_T^k)^\top \Delta x_T + \frac{1}{2}\Delta x_T^\top\tilde{Q}_T^k\Delta x_T\\
+    \text{subject to } & \Delta x_{t+1} = \nabla_1f_t(x_t^k, u_t^k)^\top \Delta x_t + \nabla_2f_t(x_t^k, u_t^k)^\top \Delta u_t,\\
     & \Delta x_0 = 0
 \end{align*}
-\subsubsection{Step 2: compute new input sequence}
-Implement setp-size selection rule 
-\[
-    u_t^{k+1} = u_t + \gamma^k\Delta u_t^k
-\]
-\subsubsection{Step 3: compute new state trajectory}
-Forward integrate (open-loop), for all $t=0,\dots,T-1$, with $x_0^{k+1}=x_{\text{init}}$
-\[
-    x_{t+1}^{k+1} = f_t(x_{t}^{k+1},u_t^{k+1})
-\]
-\subsection{Regularization}
-In many cases the matrices $Q_t^k,R_t^k$ and $S_t^k$ may not be positive definite. A viable choice is to implement a "first order" update solving the affine LQR problem using, in their place, the matrices 
+
+\begin{remark}
+This algorithm loses the quadratic convergence property of Newton's method but remains usable and avoids issues with non-positive definite matrices.
+\end{remark}
+
+Alternative strategy: use $\tilde{R}_t^k = R_t^k + E_t$, where $E_t$ is a positive definite diagonal matrix.
+
+\subsection{Affine LQR}
+Consider an LQR problem with affine cost and affine dynamics:
 \begin{align*}
-    & \tilde{Q}_t^k := \nabla_{11}^2\ell_t(x_t^k,u_t^k), & & \tilde{R}_t^k := \nabla_{22}^2\ell_t(x_t^k,u_t^k)\\
-    & \tilde{S}_t^k := \nabla_{12}^2\ell_t(x_t^k,u_t^k), & & \tilde{Q}_T^k := \nabla^2\ell_T(x_T^k)
+    \min_{\substack{\Delta x_1,\ldots,\Delta x_T\\\Delta u_0,\ldots,\Delta u_{T-1}}} &\sum_{t=0}^{T-1} \begin{bmatrix}
+        q_t \\ r_t
+    \end{bmatrix}^\top \begin{bmatrix}
+        \Delta x_t \\ \Delta u_t
+    \end{bmatrix} + \frac{1}{2}\begin{bmatrix}
+        \Delta x_t \\ \Delta u_t
+    \end{bmatrix}^\top \begin{bmatrix}
+        Q_t & S_t^\top \\ S_t & R_t
+    \end{bmatrix}\begin{bmatrix}
+        \Delta x_t \\ \Delta u_t
+    \end{bmatrix} + q_T^\top x_T + \frac{1}{2}\Delta x_T^\top Q_T\Delta x_T\\
+    \text{subject to } &\Delta x_{t+1} = A_t\Delta x_t + B_t\Delta u_t + c_t, \quad t = 0,\ldots,T-1
 \end{align*}
+where:
+\begin{itemize}
+    \item $Q_t \in \mathbb{R}^{n_x \times n_x}$ and $Q_t = Q_t^\top \geq 0$ for all $t = 0,\ldots,T$
+    \item $R_t \in \mathbb{R}^{n_u \times n_u}$ and $R_t = R_t^\top > 0$ for all $t = 0,\ldots,T-1$
+    \item $S_t \in \mathbb{R}^{n_u \times n_x}$ such that $Q_t - S_t^\top R_t^{-1}S_t$ is positive semidefinite
+\end{itemize}
+
+This problem can be solved by augmenting the state as:
+\[
+    \Delta \tilde{x}_t := \begin{bmatrix} 1 \\ \Delta x_t \end{bmatrix}
+\]
+
+The system matrices can then be rewritten as:
+\begin{gather*}
+    \tilde{Q}_t := \begin{bmatrix} 0 & q_t^\top \\ q_t & Q_t \end{bmatrix}, \quad
+    \tilde{S}_t := \begin{bmatrix} r_t & S_t \end{bmatrix}, \quad
+    \tilde{R}_t := R_t\\
+    \tilde{A}_t := \begin{bmatrix} 1 & 0 \\ c_t & A_t \end{bmatrix}, \quad
+    \tilde{B}_t := \begin{bmatrix} 0 \\ B_t \end{bmatrix}
+\end{gather*}
+
+\begin{remark}
+The Riccati equation in the augmented state framework can be obtained by imposing $\tilde{P}$ to have the form $\begin{bmatrix} 0 & p_t^\top \\ p_t & P_t \end{bmatrix}$ where $P_t$ is given by the Riccati equation in the original state framework, and $p_t$ is defined to make the $\tilde{P}_t$ expression match a Riccati equation structure.
+\end{remark}
+
+\subsection{Optimal Solution of the Affine LQR Problem}
+
+The optimal solution exhibits a feedback structure that can be advantageous for addressing open-loop simulation issues in Newton's method for optimal control. The solution takes the following form for $t = 0,\ldots,T-1$:
+
+\begin{align*}
+    \Delta u_t^* &= K_t^*\Delta x_t^* + \sigma_t^* \\
+    \Delta x_{t+1}^* &= A_t\Delta x_t^* + B_t\Delta u_t^*
+\end{align*}
+
+The feedback gain matrix $K_t^*$ and feedforward term $\sigma_t^*$ are given by:
+\begin{align*}
+    K_t^* &= -(R_t + B_t^\top P_{t+1}B_t)^{-1}(S_t + B_t^\top P_{t+1}A_t) \\
+    \sigma_t^* &= -(R_t + B_t^\top P_{t+1}B_t)^{-1}(r_t + B_t^\top p_{t+1} + B_t^\top P_{t+1}c_t)
+\end{align*}
+
+The vectors $p_t$ and matrices $P_t$ are computed recursively backward in time according to:
+\begin{align*}
+    p_t &= q_t + A_t^\top p_{t+1} + A_t^\top P_{t+1}c_t - {K_t^*}^\top(R_t + B_t^\top P_{t+1}B_t)\sigma_t^* \\
+    P_t &= Q_t + A_t^\top P_{t+1}A_t - {K_t^*}^\top(R_t + B_t^\top P_{t+1}B_t)K_t^*
+\end{align*}
+
+with terminal conditions:
+\begin{align*}
+    p_T &= q_T \\
+    P_T &= Q_T
+\end{align*}
+
+\begin{remark}
+The feedback structure inherent in this solution provides a significant advantage when dealing with the open-loop system simulation in Step 3 of Newton's method for optimal control. The feedback nature of the controller helps maintain stability during the integration process.
+\end{remark}
+
 \subsection{Robustified step 2 update: closed-loop state-input trajectory update}
-Idea: approximate $\Delta x_t \approx x_t^{k+1}-x_t^k$\\ 
+Idea: approximate $\Delta x_t \approx x_t^{k+1}-x_t^k$.\\ 
 \textbf{Initialization}: consider an initial guess trajectory $(\mathbf{x}^0,\mathbf{u}^0)$\\
 For each iter $k$, \\
 \textbf{Step 1:} solve the affine LQR
@@ -3135,7 +3284,7 @@ For each iter $k$, \\
 and obtain gain matrices $K_t^k$ and feed-forward actions $\sigma_t^k$ for all $t=0,\dots,T-1$\\ 
 \textbf{Step 2:} compute new state-input trajectory 
 
-Forward integrate(closed-loop), for all $t=0,\dots,T-1$ with $x_0^{k+1}=x_{\text{init}}$
+Forward integrate(closed-loop), for all $t=0,\dots,T-1$ with $x_0^{k+1}=x^0$
 \begin{align*}
     &u_t^{k+1} = u_t^k + \gamma^k(\sigma_t^k + K_t^k\Delta x_t^k) + K_t^k(x_t^{k+1}-x_t^k - \gamma^k\Delta x_t)\\ 
     & x_{t+1}^{k+1} = f_t(x_t^{k+1},u_t^{k+1})
@@ -3148,8 +3297,7 @@ which results as
 
 
 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Dynamic Programming}
 Consider the optimal control problem 
 \begin{gather*}
