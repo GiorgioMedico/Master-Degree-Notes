@@ -3297,7 +3297,6 @@ which results as
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Dynamic Programming}
 Consider the optimal control problem 
 \begin{gather*}
@@ -3309,324 +3308,397 @@ Consider the optimal control problem
 \end{gather*}
 Dynamic programming aims at solving optimal control problems by exploiting Bellman's principle of optimality: Each subtrajectory of an optimal trajectory is an optimal trajectory as well
 
-The optimal value function (or \emph{cost-to-go function}) 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{bellman.png}
+    \caption{Bellman's Principle of Optimality}
+    \label{fig:bellman}
+\end{figure}
+
+
+The optimal value function (or \emph{cost-to-go function}) $V_t^*:\R^n \to \R$ for each $t \in \{0,\dots,T-1\}$ is defined as:
 \begin{align*}
     V_t^*(\bar{x})=  \min_{\substack{x_{t+1},\dots,x_T\\u_t,\dots,u_{T-1}}} &  \displaystyle\sum_{\tau=t}^{T-1}\ell_\tau(x_\tau,u_\tau)+\ell_T(x_T)\\
                             \text{subj. to } & x_{\tau+1}=f_\tau(x_\tau,u_\tau), \quad \tau = t,\dots,T-1\\
                                              & x_t = \bar{x}
 \end{align*}
-It is the cost incurred starting from $x_t=\bar{x}$ in the horizon $[t,T]$ when the optimal poilcy is applied.
+
 \begin{remark}
-     Notice that $V_T^*(\bar{x})=\ell_T(\bar{x})$
+Notice that $V_T^*(\bar{x})=\ell_T(\bar{x})$
 \end{remark}
 
+To develop the Bellman equation, let's first write $V_{T-1}^*(\bar{x})$ explicitly:
+\begin{align*}
+    V_{T-1}^*(\bar{x}) &= \min_{u_{T-1}\in\R^m} \{\ell_{T-1}(x_{T-1},u_{T-1}) + \ell_T(x_T)\} \\
+    \text{subj. to } & x_T = f_{T-1}(x_{T-1},u_{T-1}); \quad x_{T-1} = \bar{x}
+\end{align*}
 
-\section{Dynamic programming Recursion}
-By isolationg the first contribution in the cost, we have: 
-\begin{align*}
-    V_t^*(\bar{x})=  \min_{\substack{x_{t+1},\dots,x_T\\u_t,\dots,u_{T-1}}} & \ell_t(x_t,u_t) +  \displaystyle\sum_{\tau=t}^{T-1}\ell_\tau(x_\tau,u_\tau)+\ell_T(x_T)\\
-                            \text{subj. to } & x_{\tau+1}=f_\tau(x_\tau,u_\tau), \quad \tau = t,\dots,T-1\\
-                                             & x_t = \bar{x}
-\end{align*}
-Take $\bar{x}_{t+1} = f_t(\bar{x}_t,u_t^*)$ with $u_t^*$ solution of the previous problem we can write: 
-\begin{align*}
-    V_{t+1}^*(f_t(\bar{x}_t,u_t^*))=  \min_{\substack{x_{t+2},\dots,x_T\\u_{t+1},\dots,u_{T-1}}} & \ell_t(x_t,u_t) +  \displaystyle\sum_{\tau=t}^{T-1}\ell_\tau(x_\tau,u_\tau)+\ell_T(x_T)\\
-                            \text{subj. to } & x_{\tau+1}=f_\tau(x_\tau,u_\tau), \quad \tau = t+1,\dots,T-1\\
-                                             & x_{t+1} = \bar{x}_{t+1}
-\end{align*}
-for $t=0,\dots,T-1$ the optimal value function satisfies: 
+Setting $z = u_{T-1}\in\R^m$:
 \[
-    V_t^*(\bar{x})=\min_{u\in\R^m}\ell_t(\bar{x},u)+V_{t+1}^*(f_t(\bar{x},u))
+    V_{T-1}^*(\bar{x}) = \min_{z\in\R^m} \{\ell_{T-1}(\bar{x},z) + V_T(f_{T-1}(\bar{x},z))\}
 \]
-for any $\bar{x}\in\R^n$. This equation is known as \emph{Bellman's Equation}
-\begin{remark}
-    The optimal cost for the original optimal control problem is $V_0^*(x_{init})$
-\end{remark}
 
-\subsection{Optimal Control Policy and Trajectory}
-Policy: a policy is a feedback control law $\pi_t(x)$ that associates, at time $t$, to each state $x$ an input $u$, i.e., $\pi_t:\R^n\to\R^m$.
-
-The optimal policy to apply at time $t$ when in a given state $x_t$ can be computed as: 
-\[
-    \pi_t^*(x_t) = \argmin_u \ell_t(x_t,u)+V_{t+1}^*(f_t(x_t,u))
-\]
-Given this policy, an optimal trajectory can be computed by forward simulation as: 
+From the definition of optimal value function, we can write:
 \begin{align*}
-    u_t^* &= \pi_t^*(x_t^*)\\
-    x_{t+1}^* &= f_t(x_t^*,u_t^*) \qquad t=0,\dots,T-1\\
-    x_0^* &= x_{init}
-\end{align*}
-
-\subsection{DP Advantages and Limitations}
-Advantages: 
-\begin{itemize}
-    \item no need for differentiability or convexity assumptios on $\ell_t(\cdot),\ell_T(\cdot), f_t(\cdot) $
-    \item works well on discrete state-control spaces
-\end{itemize}
-Disadvantages:
-\begin{itemize}
-    \item analytical solution not available on continuous spaces (e.g. $\R^n$) – \emph{curse of dimensionality}
-\end{itemize}
-Remark: A special case where DP can be performed exactly is Linear Quadratic optimal control.
-
-\subsection{Linear Quadratic Optimal Control via DP}
-Consider a linear quadratic control problem as: 
-\begin{align*}
-    \min_{\substack{x_1,\dots,x_T \\ u_0,\dots,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u_t
-    \end{bmatrix}^T \begin{bmatrix}
-        Q_t & S_t^T \\ S_t & R_t
-    \end{bmatrix}  \begin{bmatrix}
-        x_t \\ u_t
-    \end{bmatrix}+ \displaystyle\frac{1}{2}x_T^TQ_Tx_T\\
-    \text{subj. to } & x_{t+1} = A_tx_t + B_tu_t \quad t=0,\dots,T-1\\
-    &x_0 = x_{\text{init}}
-\end{align*}
-where $Q_t=Q_t^T\geq 0 \ \forall t=0,\dots,T$, $R_t=R_t^T>0\ \forall t=0,\dots,T-1$ and $S_t$ such that the problem is convex, i.e. $Q_t-S_t^TR_t^{-1}S_t\geq 0$ \\
-Let us write Bellman's equation for this problem: 
-\[
-    V_t^*(x_t) = \min_{u\in\R^m}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q_t & S_t^T \\ S_t & R_t
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u
-    \end{bmatrix} + V_{t+1}^*(A_tx_t+B_tu)
-\]
-The optimal input policiy is the minimizer, i.e., 
-\[
-    \pi_t^*(x_t)=\argmin_{u\in\R^m}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q_t & S_t^T \\ S_t & R_t
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u
-    \end{bmatrix} + V_{t+1}^*(A_tx_t+B_tu)
-\]
-by considering 
-\[
-    V_{t+1}^*(z)=\displaystyle\frac{1}{2}z^TP_{t+1}z
-\]
-we obtain 
-\begin{align*}
-    \pi_t^*(x_t)&=\argmin_{u\in\R^m}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q_t & S_t^T \\ S_t & R_t
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u
-    \end{bmatrix} + (A_tx_t+B_tu)^TP_{t+1}(A_tx_t+B_tu)\\
-    &= \argmin_{u\in\R^m} \displaystyle\frac{1}{2} \begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q_t+A_t^TP_{t+1}A_t & S_t^T + A_t^TP_{t+1}B_t \\ S_t + B_t^TP_{t+1}A_t & R_t + B_t^TP_{t+1}B_t
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}
-\end{align*}
-Because the optimization is wrt $u\in\R^m$, the terms that do not depend on $u$ need not be considered as they do not affect the minimization problem. The problem can be rewritten as: 
-\[
-    \argmin_{u\in\R^m}\displaystyle\frac{1}{2}u^T(R_t+B_t^TP_{t+1}B_t)u+x_t^T(S_t^T+A_t^TP_{t+1}B_t)u + \text{const}
-\]
-This is a Quadratic Program. Because $R_t+B_t^TP_{t+1}B_t$ is positive definite, the second order sufficient optimality conditions are satisfied, therefore there exists a unique minimum. Let us take the gradient and set it to zero: 
-\[
-    (R_t+B_t^TP_{t+1}B_t)u + (S_t+B_t^T P_{t+1} A_t)x_t = 0
-\]
-which leads to 
-\begin{align*}
-    u^* = \pi^*(x_t) &= -(R_t+B_t^T P_{t+1} B_t )^{-1}(S_t + B_t^T P_{t+1} A_t)x_t \\
-    &= K^*x_t
-\end{align*}
-It is therefore possible to write 
-\begin{align*}
-    V_t^*(x_t) &= \frac{1}{2} \begin{bmatrix}
-        x_t \\ K_t^* x_t
-    \end{bmatrix}^T \begin{bmatrix}
-        Q_t+A_t^T P_{t+1} A_t & S_t^T + A_t^T P_{t+1} B_t\\ 
-        S_t + B_t^T P_{t+1} A_t & R_t + B_t^T P_{t+1} B_t
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ K_t^* x_t
-    \end{bmatrix} \\
-    \displaystyle\frac{1}{2}x_t^TP_tx_t&= \displaystyle\frac{1}{2}x_t^T\left(Q_t +A_t^TP_{t+1}A_t-(S_t^T+A_t^TP_{t+1}B_t)(R_t+B_t^TP_{t+1}B_t^{-1})(S_t^T+B_t^TP_{t+1}A_t)\right)x_t
-\end{align*}
-which should hold for all $x_t$, therefore we obtain the so-called \emph{Difference Riccati Equation}:
-\[
-    P_t = Q_t +A_t^TP_{t+1}A_t-(S_t^T+A_t^TP_{t+1}B_t)(R_t+B_t^TP_{t+1}B_t^{-1})(S_t^T+B_t^TP_{t+1}A_t)
-\]
-Setting $P_T=Q_T$, it is possible to otbain $P_t$ via a backward integration for $t=T-1,\dots,=$
-
-\subsection{DP for LQP – Summary}
-Consider a linear quadratic control problem 
-\begin{align*}
-    \min_{\substack{x_1,\dots,x_T \\ u_0,\dots,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u_t
-    \end{bmatrix}^T \begin{bmatrix}
-        Q_t & S_t^T \\ S_t & R_t
-    \end{bmatrix}  \begin{bmatrix}
-        x_t \\ u_t
-    \end{bmatrix}+ \displaystyle\frac{1}{2}x_T^TQ_Tx_T\\
-    \text{subj. to } & x_{t+1} = A_tx_t + B_tu_t \quad t=0,\dots,T-1\\
-    &x_0 = x_{\text{init}}
-\end{align*}
-\begin{enumerate}
-    \item Set $P_T=Q_T$ and backward iterate $t=T-1,\dots,0$:
-        \[
-            P_t = Q_t +A_t^TP_{t+1}A_t-(S_t^T+A_t^TP_{t+1}B_t)(R_t+B_t^TP_{t+1}B_t^{-1})(S_t^T+B_t^TP_{t+1}A_t)
-        \]
-    \item Define the feedback gain: 
-        \[
-            K_t^* = -(R_t+B_t^TP_{t+1}B_t)^{-1}(S_t+B_t^TP_{t+1}A_t)
-        \]
-    \item Compute the trajectory by forward integration $t=0,\dots,T-1$:
-        \begin{align*}
-            u_t^* &= K_t^*x_t^*\\
-            x_{t+1}^* &= A_tx_t^*+B_tu_t^* \qquad x_0^* = x_{\text{init}}
-        \end{align*}
-\end{enumerate}
-
-
-\subsection{LQ for time-invariant systems and cost}
-The solution turns out to be: 
-\begin{align*}
-    P_T &= Q_T \\ 
-    P_t &= Q + A^TP_{t+1}A + (S^T+A^TP_{t+1}B)(R+B^TP_{t+1}B)^{-1}(S^T+B^TP_{t+1}A)\\
-    K_t^* &= -(R+B^TP_{t+1}B)^{-1}(S+B^TP_{t+1}A)
-\end{align*}
-we can notice that even though the system is not time-varying, the optimal gain is. We can consider this to be a dynamical system with $P_t$ as the state, that has as an equilibrium the solution to the algebraic Riccati equation
-
-\section{Infinite Horizon Linear Quadratic Problems}
-Consider a linear quadratic optimal control problem as: 
-\begin{align*}
-    \min_{\substack{x_1,\dots \\ u_0,\dots}} & \displaystyle\sum_{t=0}^{\infty} \displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u_t
-    \end{bmatrix}^T \begin{bmatrix}
-        Q & S^T \\ S & R 
-    \end{bmatrix}\begin{bmatrix}
-        x_t \\ u_t
-    \end{bmatrix}\\
-    \text{subj to } & x_{t+1} = Ax_t+ Bu_t \qquad t=0,\dots,T-1\\
-    & x_0 = x_{\text{init}}
-\end{align*}
-With the usual assumptions on simmetricity and positive definitiveness, assuming also that the pair $(A,B)$ is controllable and the pair $(A,C)$ with $Q=C^TC$ is observable\\
-The optimal value function can be defined as: 
-\begin{align*}
-    V_t^*(\bar{x}) = \min_{\substack{x_{t+1},\dots\\u_t,\dots}} &\displaystyle\sum_{\tau=t}^{\infty} \displaystyle\frac{1}{2}\begin{bmatrix}
-        x_\tau \\ u_\tau
-    \end{bmatrix}^T \begin{bmatrix}
-        Q & S^T \\ S & R 
-    \end{bmatrix}\begin{bmatrix}
-        x_\tau \\ u_\tau
-    \end{bmatrix}\\
-    \text{subj to } & x_{\tau+1} = Ax_\tau+ Bu_\tau \qquad t\in[t,\infty]\\
+    V_t^*(\bar{x}) &= \min_{\substack{x_{t+1},\dots,x_T \\ u_t,\dots,u_{T-1}}} \{\ell_t(x_t,u_t) + \sum_{\tau=t+1}^{T-1} \ell_\tau(x_\tau,u_\tau) + \ell_T(x_T)\} \\
+    \text{subj. to } & x_{t+1} = f_t(x_t,u_t) \\
+    & x_{\tau+1} = f_\tau(x_\tau,u_\tau), \quad \forall\tau=t+1,\dots,T-1 \\
     & x_t = \bar{x}
 \end{align*}
-which does not depend on time $t$ (the horizon is always $\infty$), i.e. 
+
+Similarly for $V_{t+1}^*(\bar{x})$:
+\begin{align*}
+    V_{t+1}^*(\bar{x}) &= \min_{\substack{x_{t+2},\dots,x_T \\ u_{t+1},\dots,u_{T-1}}} \{\sum_{\tau=t+1}^{T-1} \ell_\tau(x_\tau,u_\tau) + \ell_T(x_T)\} \\
+    \text{subj. to } & x_{\tau+1} = f_\tau(x_\tau,u_\tau), \quad \forall\tau=t+1,\dots,T-1 \\
+    & x_{t+1} = \bar{x} = f_t(x_t,u_t)
+\end{align*}
+
+Merging these results we obtain:
+
+\begin{theorem}[Bellman Equation]
+For any $t \in \{0,\dots,T-1\}$ and any $\bar{x} \in \R^n$:
 \[
-    V_{t_1}^*(\bar{x})=V_{t_2}^*(\bar{x}) \qquad \forall t_1\neq t_2, \forall \bar{x}
+    V_t^*(\bar{x}) = \min_{z\in\R^m} \{\ell_t(\bar{x},z) + V_{t+1}^*(f_t(\bar{x},z))\}
 \]
-therefore, we say that infinite horizon LQ is \emph{shift invariant} and we can then drop the subscript $t$ in the definition of the optimal value function, namely, for  all $t$: 
+where $z = u_t$.
+\end{theorem}
+
+
+\section{Derivation of the Recursion}
+By isolating the first contribution in the cost, we have:
+\begin{align*}
+    V_t^*(\bar{x}) = \min_{\substack{x_{t+1},\dots,x_T \\ u_t,\dots,u_{T-1}}} & \ell_t(x_t,u_t) + \sum_{\tau=t+1}^{T-1} \ell_\tau(x_\tau,u_\tau) + \ell_T(x_T)\\
+    \text{subject to } & x_{\tau+1} = f_t(x_\tau,u_\tau), \quad \tau=t,t+1,\dots,T-1\\
+    & x_t = \bar{x}
+\end{align*}
+
+Take $\bar{x}_{t+1} = f_t(\bar{x}_t,u_t^*)$ with $u_t^*$ solution of the previous problem we can write:
+\begin{align*}
+    V_{t+1}^*(f_t(\bar{x}_t,u_t^*)) = \min_{\substack{x_{t+2},\dots,x_T \\ u_{t+1},\dots,u_{T-1}}} & \sum_{\tau=t+1}^{T-1} \ell_\tau(x_\tau,u_\tau) + \ell_T(x_T)\\
+    \text{subject to } & x_{\tau+1} = f_t(x_\tau,u_\tau), \quad \tau=t+1,\dots,T-1\\
+    & x_{t+1} = \bar{x}_{t+1}
+\end{align*}
+
+For $t=0,\dots,T-1$ the optimal value function satisfies:
 \[
-    V^*(\bar{x}) = V^*_t(\bar{x})
+    V_t^*(\bar{x}) = \min_{u\in\R^m} \{\ell_t(\bar{x},u) + V_{t+1}^*(f_t(\bar{x},u))\}
 \]
-If we suppose $V^*$ to be a positive semi-difinite quadratic function, we can write 
+for any $\bar{x}\in\R^n$. This equation is known as Bellman's Equation.
+
+\begin{remark}
+The optimal cost for the original optimal control problem is $V_0^*(x_{\text{init}})$.
+\end{remark}
+
+\begin{remark}
+If $V_{t+1}^*$ expression is known, this becomes a classical optimal control problem.
+Meaning: if we know the optimal cost from time $t+1$ to the end, then we need to optimize only the "previous time stuff"!
+\end{remark}
+
+\subsection{Example: Graph Path Optimization}
+Consider a directed weighted graph with vertices $\{V_0,V_1,\dots,V_6\}$ where we want to find the optimal path (cost: roads) between $V_0$ and $V_6$. The problem can be divided into three stages:
+\begin{itemize}
+    \item Stage T-2: vertices $\{V_1,V_2,V_3\}$
+    \item Stage T-1: vertices $\{V_4,V_5\}$  
+    \item Stage T: vertex $V_6$
+\end{itemize}
+
+Solving backwards from T-1:
+\begin{align*}
+    V_{T-1}^*(V_4) &= \min\{1,2+3\} = 1\\
+    V_{T-1}^*(V_5) &= \min\{3,2+2\} = 3
+\end{align*}
+
+Therefore at stage T-1, the optimal path from $V_4$ to $V_6$ has cost 1.
+
+For stage T-2:
 \[
-    V^*(\bar{x}) = \frac{1}{2} \bar{x}^T P\bar{x}
+    V_{T-2}^*(V_3) = \min\{2+V_{T-1}^*(V_4), 5+V_{T-1}^*(V_5)\} = 3
 \]
-where $P=P^T\geq 0$
-\subsection{DP Recursion in Infinite Horizon LQ Problem}
+
+\subsection{Complexity Analysis}
+For this example:
+\begin{itemize}
+    \item Exhaustive search complexity: $O(m^T n)$
+    \item Dynamic Programming complexity: $O(nmT)$ for $t=0,\dots,T-1$
+\end{itemize}
+where:
+\begin{itemize}
+    \item $m = |U|$ (cardinality of input space)
+    \item $n = |X|$ (cardinality of state space)
+\end{itemize}
+
+\section{Optimal Control Policy and Trajectory}
+
+\subsection{Policy Definition and Computation}
+A policy (feedback control law) $\pi_t(x)$ is a function that associates, at time $t$, to each state $x$ an input $u$, i.e., $\pi_t: \R^n \to \R^m$.
+
+The optimal policy to apply at time $t$ when in a given state $x_t$ can be computed as:
+\[
+    \pi_t^*(x_t) = \argmin_u \{\ell_t(x_t,u) + V_{t+1}^*(f_t(x_t,u))\}
+\]
+
+Given this policy, an optimal trajectory can be computed by forward simulation as:
+\begin{align*}
+    u_t^* &= \pi_t^*(x_t^*) \\
+    x_{t+1}^* &= f_t(x_t^*, u_t^*) \quad t = 0,\ldots,T-1 \\
+    x_0^* &= x_{\text{init}}
+\end{align*}
+
+\begin{remark}
+$u_t^*$ is not just a value in time, but rather a policy - a feedback control law!
+\end{remark}
+
+\section{Dynamic Programming: Advantages and Limitations}
+
+\subsection{Advantages}
+\begin{itemize}
+    \item No need for differentiability or convexity assumptions on $\ell_t(\cdot)$, $\ell_T(\cdot)$, $f_t(\cdot)$
+    \item Works well on discrete state-control spaces (where $x$ and $u$ have finite cardinality)
+\end{itemize}
+
+\subsection{Disadvantages}
+\begin{itemize}
+    \item Analytical solution not available on continuous spaces (e.g., $\R^n$) - course of dimensionality
+    \item For continuous spaces, we need to parametrize the space with a finite set of parameters
+\end{itemize}
+
+\begin{remark}
+A special case where DP can be performed exactly is Linear Quadratic optimal control, where we know the $V_{t+1}^*$ expression!
+\end{remark}
+
+\section{Linear Quadratic Optimal Control via Dynamic Programming}
+
+Consider a linear quadratic optimal control problem as:
+\begin{align*}
+\min_{\substack{x_1,\dots,x_T \\ u_0,\dots,u_{T-1}}} & \sum_{t=0}^{T-1} \frac{1}{2}\begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix}^T \begin{bmatrix}
+Q_t & S_t^T \\ S_t & R_t
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix} + \frac{1}{2}x_T^T Q_T x_T\\
+\text{subj. to } & x_{t+1} = A_tx_t + B_tu_t \quad t=0,\dots,T-1\\
+&x_0 = x_{\text{init}}
+\end{align*}
+where:
+\begin{itemize}
+\item $x \in \mathbb{R}^n$ and $u \in \mathbb{R}^m$
+\item $A_t \in \mathbb{R}^{n\times n}$
+\item $B_t \in \mathbb{R}^{n\times m}$
+\item $Q_t \in \mathbb{R}^{n\times n}$ and $Q_t = Q_t^T \geq 0$ for all $t=0,\dots,T$
+\item $R_t \in \mathbb{R}^{m\times m}$ and $R_t = R_t^T > 0$ for all $t=0,\dots,T-1$
+\item $S_t \in \mathbb{R}^{m\times n}$ such that the problem is convex\footnote{Namely, $Q_t - S_t^T R_t^{-1} S_t$ positive semi-definite.}
+\end{itemize}
+
+\subsection{Optimal Value Function}
+The optimal value function can be defined as:
+\begin{align*}
+V_t^*(\bar{x}) = \min_{\substack{x_{t+1},\dots,x_T\\u_t,\dots,u_{T-1}}} \sum_{\tau=t}^{T-1} \frac{1}{2}\begin{bmatrix}
+x_\tau \\ u_\tau
+\end{bmatrix}^T \begin{bmatrix}
+Q_\tau & S_\tau^T \\ S_\tau & R_\tau
+\end{bmatrix} \begin{bmatrix}
+x_\tau \\ u_\tau
+\end{bmatrix} + \frac{1}{2}x_T^T Q_T x_T\\
+\text{subj. to } x_{\tau+1} = A_\tau x_\tau + B_\tau u_\tau \quad \tau \in [t,T-1]\\
+x_t = \bar{x}
+\end{align*}
+
+\noindent\textbf{Guess:} $V_t^*$ is a positive semi-definite quadratic function at any time, i.e., we can write:
+\[
+V_t^*(\bar{x}) = \frac{1}{2}\bar{x}^T P_t\bar{x}
+\]
+where $P_t = P_t^T \geq 0$.
+
+At $t=T$, it trivially results that $P_T = Q_T$.
+
+Then, try to compute $P_t$ recursively from $P_{t+1}$ based on the principle of optimality.
+
+\subsection{Dynamic Programming Recursion}
 Consider the dynamic programming recursion:
 \[
-    V^*(x_t) = \min_{u}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q & S^T \\ S & R
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u
-    \end{bmatrix} + V^*(Ax_t+Bu)
+V_t^*(x_t) = \min_{u\in\mathbb{R}^m} \frac{1}{2}\begin{bmatrix}
+x_t \\ u
+\end{bmatrix}^T \begin{bmatrix}
+Q_t & S_t^T \\ S_t & R_t
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u
+\end{bmatrix} + V_{t+1}^*(A_tx_t + B_tu)
 \]
-The optimal input policiy is the minimizer, i.e., 
-\[
-    \pi_t^*(x_t)=\argmin_{u}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q & S^T \\ S & R
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u
-    \end{bmatrix} + V^*(Ax_t+Bu)
-\]
-by considering 
-\[
-    V^*(z)=\displaystyle\frac{1}{2}z^TPz
-\]
-we obtain 
+
+The optimal input policy is the minimizer:
 \begin{align*}
-    \pi^*(x_t)&=\argmin_{u}\displaystyle\frac{1}{2}\begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q & S^T \\ S & R
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u
-    \end{bmatrix} + (Ax_t+Bu)^TP(Ax_t+Bu)\\
-    &= \argmin_{u\in\R^m} \displaystyle\frac{1}{2} \begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}^T \begin{bmatrix}
-        Q+A^TPA & S^T + A^TPB \\ S + B^TPA & R + B^TPB
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ u 
-    \end{bmatrix}\\
-    &= -(R+B^TPB)^{-1}(S + B^TPA)x_t
+\pi_t^*(x_t) &= \argmin_{u\in\mathbb{R}^m} \frac{1}{2}\begin{bmatrix}
+x_t \\ u
+\end{bmatrix}^T \begin{bmatrix}
+Q_t & S_t^T \\ S_t & R_t
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u
+\end{bmatrix} + \frac{1}{2}(A_tx_t + B_tu)^T P_{t+1}(A_tx_t + B_tu)\\
+&= \argmin_{u\in\mathbb{R}^m} \frac{1}{2}\begin{bmatrix}
+x_t \\ u
+\end{bmatrix}^T \begin{bmatrix}
+Q_t + A_t^T P_{t+1} A_t & S_t^T + A_t^T P_{t+1} B_t\\
+S_t + B_t^T P_{t+1} A_t & R_t + B_t^T P_{t+1} B_t
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u
+\end{bmatrix}\\
+&= -(R_t + B_t^T P_{t+1} B_t)^{-1}(S_t + B_t^T P_{t+1} A_t)x_t = K_t^*x_t
 \end{align*}
-Since: 
-\[
-    \pi^*(x_t) = K^*x_t \qquad \text{with } K^* := -(R+B^TPB)^{-1}(S + B^TPA)
-\]
-It is possible to write 
+
+Since $\pi_t^*(x_t) = K_t^*x_t$, we can write:
 \begin{align*}
-    V^*(x_t) &= \frac{1}{2} \begin{bmatrix}
-        x_t \\ K^* x_t
-    \end{bmatrix}^T \begin{bmatrix}
-        Q+A^T P A & S^T + A^T P B\\ 
-        S + B^T P A & R + B^T P B
-    \end{bmatrix} \begin{bmatrix}
-        x_t \\ K^* x_t
-    \end{bmatrix} \\
-    \displaystyle\frac{1}{2}x_t^TPx_t&= \displaystyle\frac{1}{2}x_t^T\left(Q +A^TPA-(S^T+A^TPB)(R+B^TPB^{-1})(S^T+B^TPA)\right)
+V_t^*(x_t) &= \frac{1}{2}\begin{bmatrix}
+x_t \\ K_t^*x_t
+\end{bmatrix}^T \begin{bmatrix}
+Q_t + A_t^T P_{t+1} A_t & S_t^T + A_t^T P_{t+1} B_t\\
+S_t + B_t^T P_{t+1} A_t & R_t + B_t^T P_{t+1} B_t
+\end{bmatrix} \begin{bmatrix}
+x_t \\ K_t^*x_t
+\end{bmatrix}\\
+\frac{1}{2}x_t^T P_tx_t &= \frac{1}{2}x_t^T(Q_t + A_t^T P_{t+1} A_t - (S_t^T + A_t^T P_{t+1} B_t)(R_t + B_t^T P_{t+1} B_t)^{-1}(S_t^T + B_t^T P_{t+1} A_t))x_t
 \end{align*}
-which should hold for all $x_t$, therefore we obtain the so-called \emph{Algebraic Riccati Equation}:
+
+This should hold for all $x_t$, therefore we obtain the Difference Riccati Equation:
 \[
-    Q +A^TPA-(S^T+A^TPB)(R+B^TPB^{-1})(S^T+B^TPA)
+P_t = Q_t + A_t^T P_{t+1} A_t - (S_t^T + A_t^T P_{t+1} B_t)(R_t + B_t^T P_{t+1} B_t)^{-1}(S_t^T + B_t^T P_{t+1} A_t)
 \]
-It can be shown that $K^*$ is exponentially stabilizing under the assumption of $(A,B)$ controllable and $(A,C)$ observable
 
-\subsubsection{Time invariant cost and dynamics} % (fold)
+Setting $P_T = Q_T$, it is possible to obtain $P_t$ via backward integration for $t = T-1,\dots,0$.
 
+\subsection{Summary}
+Consider a linear quadratic optimal control problem:
+\begin{align*}
+\min_{\substack{x_1,\dots,x_T \\ u_0,\dots,u_{T-1}}} & \sum_{t=0}^{T-1} \frac{1}{2}\begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix}^T \begin{bmatrix}
+Q_t & S_t^T \\ S_t & R_t
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix} + \frac{1}{2}x_T^T Q_T x_T\\
+\text{subj. to } & x_{t+1} = A_tx_t + B_tu_t \quad t=0,\dots,T-1\\
+&x_0 = x_{\text{init}}
+\end{align*}
+
+The solution procedure is:
+
+\begin{enumerate}
+\item Set $P_T = Q_T$ and backward iterate $t = T-1,\dots,0$:
 \[
-    V^*(\bar{x})= \min \displaystyle\sum_{\tau=t}^{\infty}\ell(\bar{x},u)
+P_t = Q_t + A_t^T P_{t+1} A_t - (S_t^T + A_t^T P_{t+1} B_t)(R_t + B_t^T P_{t+1} B_t)^{-1}(S_t^T + B_t^T P_{t+1} A_t)
 \]
-does not depend explicitly on time
 
+\item Define the feedback gain:
+\[
+K_t^* := -(R_t + B_t^T P_{t+1} B_t)^{-1}(S_t + B_t^T P_{t+1} A_t)
+\]
 
+\item Compute the optimal trajectory by forward integration $t = 0,\dots,T-1$:
+\begin{align*}
+u_t^* &= K_t^*x_t^*\\
+x_{t+1}^* &= A_tx_t^* + B_tu_t^*, \quad x_0^* = x_{\text{init}}
+\end{align*}
+\end{enumerate}
 
+\section{Infinite Horizon Linear Quadratic Problems}
 
+\subsection{Problem Formulation}
+Consider a linear quadratic optimal control problem:
+\begin{align*}
+\min_{\substack{x_1,\dots \\ u_0,\dots}} &\sum_{t=0}^{\infty} \frac{1}{2}\begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix}^T \begin{bmatrix}
+Q & S^T \\ S & R
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u_t
+\end{bmatrix}\\
+\text{subj. to } & x_{t+1} = Ax_t + Bu_t \quad t=0,\dots,\infty\\
+&x_0 = x_{\text{init}}
+\end{align*}
+where:
+\begin{itemize}
+\item $x \in \mathbb{R}^n$ and $u \in \mathbb{R}^m$
+\item $A \in \mathbb{R}^{n\times n}$
+\item $B \in \mathbb{R}^{n\times m}$
+\item $Q \in \mathbb{R}^{n\times n}$ and $Q = Q^T \geq 0$  
+\item $R \in \mathbb{R}^{m\times m}$ and $R = R^T > 0$
+\item $S \in \mathbb{R}^{m\times n}$ such that the problem is convex\footnote{Namely, $Q - S^T R^{-1} S$ semi-positive definite.}
+\end{itemize}
 
-% subsubsection Time invariant cost and dynamics (end)
+\textbf{Assumption:} The pair $(A,B)$ is controllable and the pair $(A,C)$, with $Q=C^TC$, is observable.
 
+\subsection{Optimal Value Function}
+The optimal value function can be defined as:
+\begin{align*}
+V_t^*(\bar{x}) = \min_{\substack{x_{t+1},\dots\\u_t,\dots}} &\sum_{\tau=t}^{\infty} \frac{1}{2}\begin{bmatrix}
+x_\tau \\ u_\tau
+\end{bmatrix}^T \begin{bmatrix}
+Q & S^T \\ S & R
+\end{bmatrix} \begin{bmatrix}
+x_\tau \\ u_\tau
+\end{bmatrix}\\
+\text{subj. to } & x_{\tau+1} = Ax_\tau + Bu_\tau \quad \tau \in [t,\infty)\\
+&x_t = \bar{x}
+\end{align*}
 
+This does not depend on time $t$ (the horizon is always $\infty$), i.e.,
+\[
+V_{t_1}^*(\bar{x}) = V_{t_2}^*(\bar{x}) \quad \forall t_1 \neq t_2, \forall \bar{x}
+\]
+Therefore, infinite horizon LQ is shift invariant and we can drop the subscript $t$:
+\[
+V^*(\bar{x}) := V_t^*(\bar{x})
+\]
 
+\textbf{Guess:} $V^*$ is a positive semi-definite quadratic function:
+\[
+V^*(\bar{x}) = \frac{1}{2}\bar{x}^T P\bar{x}
+\]
+where $P = P^T \geq 0$.
 
+\subsection{Dynamic Programming Recursion}
+Consider the dynamic programming recursion:
+\[
+V^*(x_t) = \min_u \frac{1}{2}\begin{bmatrix}
+x_t \\ u
+\end{bmatrix}^T \begin{bmatrix}
+Q & S^T \\ S & R
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u
+\end{bmatrix} + V^*(Ax_t + Bu)
+\]
 
+The optimal input policy is:
+\begin{align*}
+\pi^*(x_t) &= \argmin_u \frac{1}{2}\begin{bmatrix}
+x_t \\ u
+\end{bmatrix}^T \begin{bmatrix}
+Q & S^T \\ S & R
+\end{bmatrix} \begin{bmatrix}
+x_t \\ u
+\end{bmatrix} + \frac{1}{2}(Ax_t + Bu)^T P(Ax_t + Bu)\\
+&= -(R + B^T PB)^{-1}(S + B^T PA)x_t = K^*x_t
+\end{align*}
 
+Since $\pi^*(x_t) = K^*x_t$, with $K^* := -(R + B^T PB)^{-1}(S + B^T PA)$, we can write:
+\begin{align*}
+V^*(x_t) &= \frac{1}{2}\begin{bmatrix}
+x_t \\ K^*x_t
+\end{bmatrix}^T \begin{bmatrix}
+Q + A^T PA & S^T + A^T PB\\
+S + B^T PA & R + B^T PB
+\end{bmatrix} \begin{bmatrix}
+x_t \\ K^*x_t
+\end{bmatrix}\\
+\frac{1}{2}x_t^T Px_t &= \frac{1}{2}x_t^T(Q + A^T PA - (S^T + A^T PB)(R + B^T PB)^{-1}(S + B^T PA))x_t
+\end{align*}
 
+This should hold for all $x_t$, yielding the Algebraic Riccati Equation:
+\[
+P = Q + A^T PA - (S^T + A^T PB)(R + B^T PB)^{-1}(S + B^T PA)
+\]
 
-
-
-
-
-
-
-
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Model Predictive Control}
 \section{Introductionn}
 \subsubsection{Motivations}
