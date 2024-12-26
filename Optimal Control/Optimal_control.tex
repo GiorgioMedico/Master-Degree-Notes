@@ -3698,7 +3698,169 @@ This should hold for all $x_t$, yielding the Algebraic Riccati Equation:
 P = Q + A^T PA - (S^T + A^T PB)(R + B^T PB)^{-1}(S + B^T PA)
 \]
 
+
+\chapter{Optimal Control based trajectory generation and tracking}
+
+\section{Trajectory Tracking Task}
+Consider controlling a (discrete-time) nonlinear system:
+\[
+    x_{t+1} = f_t(x_t,u_t)
+\]
+along a (possibly aggressive) evolution to perform a task while satisfying some performance criteria.
+
+\noindent\textbf{Example:}
+Move a quadrotor from a point $A$ to a point $B$ or follow a desired time law in the position.
+
+\noindent\textbf{Possible performance criteria:}
+\begin{itemize}
+    \item reduce energy consumption
+    \item avoid excessive accelerations (due to, e.g., a fragile payload)
+\end{itemize}
+
+\section{Main strategy idea over a finite horizon}
+First, a trajectory generation task is reformulated into an optimal control problem such as:
+\begin{align*}
+    \min_{\substack{x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} & \sum_{t=0}^{T-1} \frac{1}{2}\|x_t-x_t^{\text{des}}\|_{Q_t}^2 + \frac{1}{2}\|u_t-u_t^{\text{des}}\|_{R_t}^2 + \frac{1}{2}\|x_T-x_T^{\text{des}}\|_{P_f}^2\\
+    \text{subject to } & x_{t+1} = f(x_t,u_t) \quad t=0,\dots,T-1\\
+    & x_0 = x^0
+\end{align*}
+
+where $Q_t$, $R_t$, $P_f$ are suitably chosen cost matrices and $(\mathbf{x}^{\text{des}},\mathbf{u}^{\text{des}})$ is a "reference curve" describing a desired evolution.
+
+\begin{remark}
+$(\mathbf{x}^{\text{des}},\mathbf{u}^{\text{des}})$ is NOT a trajectory, i.e., it does not need to satisfy the dynamics. It is based, e.g., on geometric considerations.
+\end{remark}
+
+\noindent\textbf{Idea:} By using an optimal control algorithm, compute an open loop (optimal) state-input trajectory $(\mathbf{x}^{\text{traj}},\mathbf{u}^{\text{traj}})$, i.e., such that $x_{t+1}^{\text{traj}} = f(x_t^{\text{traj}},u_t^{\text{traj}}), t=0,\dots,T-1$.
+Then, a feedback controller can be used to track the system trajectory $(\mathbf{x}^{\text{traj}},\mathbf{u}^{\text{traj}})$.
+
+Given a trajectory on an infinite horizon $x_{t+1} = f_t(x_t,u_t), t=0,1,\dots$, let's suppose to linearize the given trajectory:
+
+\[
+A_t = \nabla_1f(x_t^{\text{traj}},u_t^{\text{traj}}) = \begin{bmatrix}
+\frac{\partial f_1}{\partial x_1}(x_t^{\text{traj}},u_t^{\text{traj}}) & \cdots & \frac{\partial f_1}{\partial x_n}(x_t^{\text{traj}},u_t^{\text{traj}})\\
+\vdots & \ddots & \vdots\\
+\frac{\partial f_n}{\partial x_1}(x_t^{\text{traj}},u_t^{\text{traj}}) & \cdots & \frac{\partial f_n}{\partial x_n}(x_t^{\text{traj}},u_t^{\text{traj}})
+\end{bmatrix}
+\]
+
+\[
+B_t = \nabla_2f(x_t^{\text{traj}},u_t^{\text{traj}}) = \begin{bmatrix}
+\frac{\partial f}{\partial u}(x_t^{\text{traj}},u_t^{\text{traj}})
+\end{bmatrix}
+\]
+
+\section{LQR-based trajectory tracking}
+
+\subsection{Linearization Approach}
+\textbf{Idea:} Track the generated (optimal) trajectory $(\mathbf{x}^{\text{traj}}, \mathbf{u}^{\text{traj}})$ via a (stabilizing) feedback Linear Quadratic Regulator (LQR) on the linearization.
+
+\subsubsection{Step 1 - Linearize the system}
+Linearize the dynamics about the (feasible) trajectory $(\mathbf{x}^{\text{traj}}, \mathbf{u}^{\text{traj}})$ to get the linear (time-varying) system:
+\[
+    \Delta x_{t+1} = A_t^{\text{traj}}\Delta x_t + B_t^{\text{traj}}\Delta u_t, \quad t = 0,1,\ldots
+\]
+where $A_t^{\text{traj}} \in \mathbb{R}^{n \times n}$ and $B_t^{\text{traj}} \in \mathbb{R}^{n \times m}$ are defined as:
+\begin{align*}
+    A_t^{\text{traj}} &:= \nabla_1 f_t(x_t^{\text{traj}}, u_t^{\text{traj}})^\top \\
+    B_t^{\text{traj}} &:= \nabla_2 f_t(x_t^{\text{traj}}, u_t^{\text{traj}})^\top
+\end{align*}
+
+\subsection{Remarks on Trajectory Tracking}
+\begin{remark}
+Under suitable assumptions, it can be shown that an infinite horizon trajectory of a nonlinear system, $(x_t, u_t)$ with $t = 0,\ldots,$ is (locally) exponentially stable if and only if the system linearization about the trajectory is exponentially stable, that is, if $\Delta x_{t+1} = (A_t + B_tK_t^{\text{reg}})\Delta x_t$ is exponentially stable.
+\end{remark}
+
+\begin{remark}[Important]
+The (state-input) trajectory $(\mathbf{x}^{\text{traj}}, \mathbf{u}^{\text{traj}})$ can be generated via optimal control, but only on a finite horizon, i.e., $(x_t^{\text{traj}}, u_t^{\text{traj}})$, with $t = 0,\ldots,T$. Also, the LQR can be computed on a finite horizon.
+\end{remark}
+
+\subsection{Notation and System Definitions}
+Let us define:
+\begin{align*}
+    \tilde{x}_t &= x_t - x_t^{\text{traj}} \\
+    \tilde{u}_t &= u_t - u_t^{\text{traj}} \\
+    \tilde{x}_{t+1} &= f(x_t + x_t^{\text{traj}}, u_t + u_t^{\text{traj}}) - f(x_t^{\text{traj}}, u_t^{\text{traj}})
+\end{align*}
+
+\textbf{Comments:}
+\begin{itemize}
+    \item For $u_t = 0 \implies \tilde{x} = 0$ is an equilibrium
+    \item The linearized system is time-varying
+\end{itemize}
+
+\subsection{Step 2 - LQ Optimal Controller}
+On the finite horizon, $t = 0,\ldots,T$, solve the optimal control problem:
+\[
+    \min_{\substack{\Delta x_1,\ldots,\Delta x_T \\ \Delta u_0,\ldots,\Delta u_{T-1}}} \sum_{t=0}^{T-1} \Delta x_t^\top Q_t^{\text{reg}}\Delta x_t + \Delta u_t^\top R_t^{\text{reg}}\Delta u_t + \Delta x_T^\top Q_T^{\text{reg}}\Delta x_T
+\]
+subject to:
+\begin{align*}
+    \Delta x_{t+1} &= A_t^{\text{traj}}\Delta x_t + B_t^{\text{traj}}\Delta u_t \quad t = 0,\ldots,T-1 \\
+    \Delta x_0 &= 0
+\end{align*}
+for some cost matrices $Q_t^{\text{reg}} \geq 0 \in \mathbb{R}^{n\times n}$, $R_t^{\text{reg}} > 0 \in \mathbb{R}^{n\times m}$ and $Q_T^{\text{reg}} \geq 0 \in \mathbb{R}^{n\times n}$.
+
+Set $P_T = Q_T^{\text{reg}}$ and backward iterate $t = T-1,\ldots,0$:
+\begin{equation}
+    P_t = Q_t^{\text{reg}} + A_t^{\text{traj},\top}P_{t+1}A_t^{\text{traj}} - (A_t^{\text{traj},\top}P_{t+1}B_t^{\text{traj}})(R_t^{\text{reg}} + B_t^{\text{traj},\top}P_{t+1}B_t^{\text{traj}})^{-1}(B_t^{\text{traj},\top}P_{t+1}A_t^{\text{traj}})
+\end{equation}
+
+Define for all $t = 0,\ldots,T-1$, the feedback gain $K_t^{\text{reg}} \in \mathbb{R}^{m\times n}$:
+\[
+    K_t^{\text{reg}} := -(R_t^{\text{reg}} + B_t^{\text{traj},\top}P_{t+1}B_t^{\text{traj}})^{-1}(B_t^{\text{traj},\top}P_{t+1}A_t^{\text{traj}})
+\]
+
+\subsection{Step 3 - Track the Generated Trajectory}
+Apply the feedback controller designed on the linearization to the nonlinear system to track $(\mathbf{x}^{\text{traj}}, \mathbf{u}^{\text{traj}})$. 
+
+Namely, apply:
+\begin{align*}
+    u_t &= u_t^{\text{traj}} + K_t^{\text{reg}}(x_t - x_t^{\text{traj}}) \\
+    x_{t+1} &= f_t(x_t, u_t) \quad t = 0,1,\ldots
+\end{align*}
+with $x_0$ given.
+
+\begin{remark}[Important]
+The nominal trajectory and the feedback gains have been computed on a finite horizon of length $T$. Other considerations are needed to "extend" the trajectory and the controller on an infinite horizon.
+\end{remark}
+
+\subsection{Asymptotic Trajectory Tracking}
+Consider the asymptotically constant trajectory:
+\begin{center}
+\begin{tikzpicture}
+\draw[->] (0,0) -- (5,0) node[right] {$t$};
+\draw[->] (0,0) -- (0,2) node[above] {$x_t^{\text{traj}}$};
+\draw[red, thick] (0,1.5) to[out=0,in=180] (2,1.2) to[out=0,in=180] (5,1.2);
+\end{tikzpicture}
+\end{center}
+
+Consider the linearization about the equilibrium $(x_e, u_e)$:
+\[
+    \Delta x_{t+1} = A_t\Delta x_t + B_t\Delta u_t \quad t = 0,1,\ldots
+\]
+
+We can design an LQR for the time-invariant linearization by solving the infinite-horizon problem and obtaining $K_e^{\text{reg}} = -(R_e + B_e^T P_\infty B_e)^{-1}(B_e^T P_\infty A_e)$.
+
+\begin{remark}
+For $t > T$, we can set $K_t^{\text{reg}} = K_e^{\text{reg}}$ to manage the infinite horizon past point $T$.
+\end{remark}
+
+\subsection{Design Strategy on a Finite Horizon}
+\textbf{Trajectory generation and control strategy:}
+\begin{enumerate}
+    \item Formulate the nonlinear optimal control problem given desired evolution and task specifications
+    \item Solve the nonlinear optimal control problem and generate a nominal (optimal) trajectory $(\mathbf{x}^{\text{traj}}, \mathbf{u}^{\text{traj}})$
+    \item Track the trajectory by means of an LQ controller on the linearization:
+        \begin{enumerate}
+            \item Linearize the system about $(\mathbf{x}^{\text{traj}}, \mathbf{u}^{\text{traj}})$
+            \item Solve LQ optimal control problem and get $K_t^{\text{reg}}$
+        \end{enumerate}
+    \item Apply the feedback controller to the original nonlinear system
+\end{enumerate}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter{Model Predictive Control}
 \section{Introductionn}
 \subsubsection{Motivations}
@@ -3884,90 +4046,6 @@ Reinforcement learning is generally data-driven, whereas optimal control is gene
 \subsubsection{problem formulation}
 The Reinforcement Learning (RL) problem can be written in optimal control language as 
 % TODO slide 2
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \chapter{Optimal Control based trajectory generation and tracking}
-% Task request: We want to control a (discrete-time) nonlinear system 
-% \[
-%     x_{t+1}=f_t(x_t,u_t)
-% \]
-% along a (possibly aggressive) evolution to perform a task while satisfying some performance criteria.
-% \\Possible performance criteria:
-% \begin{itemize}
-%     \item reduce energy consumption
-%     \item avoid excessive accelerations (due to e.g., a fragile payload)
-% \end{itemize}
-% \section{Main strategy idea over a finite horizon} 
-% First, a trajectory generation task is reformulated into an optimal control problem such as 
-% \begin{align*}
-%     \min \sum_{t=0}^{T-1} \displaystyle\frac{1}{2} \| x_t-x_t^{des}\|_{Q_t}^2+ \displaystyle\frac{1}{2}\|u_t-u_t^{des}\|^2_{R_t}+\displaystyle\frac{1}{2}\|x_T-x_T^{des}\|^2_{P_f} \\
-%     \text{s.t.} x_{t+1} = f(x_t,u_t) \quad t=0,\dots,T-1\\
-%     x_0 = x_{\text{init}}
-% \end{align*}
-% Where $Q_t,R_t,P_f$ are suitably chosen cost matrices and $(\mathbf{x}^{des},\mathbf{u}^{des})$ is a "reference curve" describing a desired evolution. 
-
-% Note: $(\mathbf{x}^{des},\mathbf{u}^{des})$ is NOT a trajectory. It is based, e.g., on geometric considerations
-
-% Idea: by using an optimal control algorithm, compute an open loop (optimal) state-input trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$, i.e., such that $x_{t+1}^{opt}=f(x_t^{opt},u_t^{opt}),  t=0,\dots,T-1$. Then, a feedback controller can be used to track the system trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$.
-
-
-% \section{LQR based trajectory tracking}
-% Idea: track the generated (optimal) trajectory via a (stabilizing) feedback Linear Quadratic Regulator (LQR) on the linearization.
-
-% \subsubsection{Step 1 - linearize the system}
-% Linearize the dynamics about the (feasible) trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$, get the linear (time-varying) system 
-% \[
-%     \Delta x_{t+1}=A_t^{opt}\Delta x_t+B_t^{opt}\Delta u_t
-% \]
-% where $A_t^{opt}\in \R^{n\times n}$ and $B_t^{opt}\in\R^{n\times m}$ are defined as: 
-% \begin{gather}
-%     A_t^{opt}:=\nabla_1f_t{(x_t^{opt},u_t^{opt})}^T \\
-%     B_t^{opt}:=\nabla_2f_t{(x_t^{opt},u_t^{opt})}^T
-% \end{gather}
-% for all $(x_t^{opt},u_t^{opt})$ with $t=0,\dots,T$, state-input pairs at time $t$ of trajectory $(\mathbf{x}^{opt},\mathbf{u}^{opt})$ with length $T$.
-
-% \subsubsection{Step 2 - calculate the LQ optimal controller}
-% Solve the optimal control problem 
-% \begin{align*}
-%     \min_{\substack{\Delta x_1,\dots \Delta, x_T \\ \Delta u_0u,\dots,\Delta u_{T-1}}} & \displaystyle\sum_{t=0}^{\infty}\Delta x_t^TQ_t^{\text{reg}}\Delta x_t+\Delta u_t^TR_t^{\text{reg}}\Delta u_t + \Delta x_T^TQ_T^{\text{reg}}\Delta x_T \\
-%         \text{subj. to } & \Delta x_{t+1} = A_t^{opt} \Delta x_t + B_t^{opt}\Delta u_t \quad t=0,1,\dots\\
-%                         &\Delta x_0 = 0
-% \end{align*}
-% for some cost matrices $Q_t^{reg}\geq 0 \in \R^{n\times R},\ R_t^{reg}>0 \in \R^{n\times m}$ and $Q_T^{reg}\geq 0 \in \R^{n\times n}$ (DoF). \\
-% Set $P_T=Q_T^{reg}$ and backward iterate $t=T-1,\dots,0$: 
-% \[
-%     P_t=Q_t^{reg}+{A_t^{opt}}^T P_{t+1}A_t^{opt}-({A_t^{opt}}^T P_{t+1}B_t^{opt})(R_t^{reg}+{B_t^{opt}}^TP_{t+1}B_t^{opt})^{-1}({B_t^{opt}}^TP_{t+1}A_t^{opt})
-% \]
-% and define for all $t=0,\dots,T-1$, the feedback gain $K_t^{reg}\in\R^{m\times n}$
-% \[
-%     K_t^{reg} := -(R_t^{reg}+{B_t^{opt}}^TP_{t+1}B_t^{opt})^{-1}({B_t^{opt}}^TP_{t+1}A_t^{opt})
-% \]
-
-% \subsubsection{Step 3 - track the generated (optimal) trajectory}
-% Apply the feedback controller designed on the linearization to the nonlinear system to track   $(\mathbf{x}^{opt},\mathbf{u}^{opt})$. Namely, for all $t=0,\dots,T-1$, we apply 
-% \begin{align*}
-%     u_t &= u_t^{opt}+K_t^{reg}(x_t-x_t^{opt})\\ 
-%     x_{t+1} &= f_t(x_t,u_t)
-% \end{align*}
-% with $x_0$ given
-
-% Remark: Under suitable assumptions, it can be shown that an infinite horizon trajectory of a nonlinear system, $(x_t,u_t)$ with $t=0,\dots$ is (locally) exponentially stable if and only if the system linearization about the trajectory is exponentially stable. (this can be viewed as a time-varying version of the Lyapunov indirect theorem)
-
-% % TODO slide 6
-
-% \section{Affine LQR for trajectory tracking}
-% The general trajectory tracking problem for a linear system can be recast into an affine LQR problem, with the affine part being generated by the trajectory.
-% % idk get notes from someone for math or figure it out
-
-
 
 
 
