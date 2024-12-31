@@ -3862,7 +3862,7 @@ For $t > T$, we can set $K_t^{\text{reg}} = K_e^{\text{reg}}$ to manage the infi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Model Predictive Control}
-\section{Introductionn}
+\section{Introduction}
 \subsubsection{Motivations}
 We want to control a system 
 \[
@@ -3880,7 +3880,7 @@ via a \emph{stabilizing} controller, which
     \item works \emph{online}
 \end{itemize}
 Idea: at each sampling time $t$ solve an optimal control problem and apply the first optimal input.
-\subsubsection{Idea} % (fold)
+\subsubsection{Idea}
 For each $t$
 \begin{enumerate}
     \item Measure the current state $x_t$ 
@@ -3888,79 +3888,143 @@ For each $t$
     \item Apply the first control input $u^*_{t|t}$
     \item Measure $x_{t+1}$ and repeat
 \end{enumerate}
-\subsubsection{prediction horizon vs time horizon}
+\pagebreak
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{mpc1.png}
+        \caption{MPC Scheme 1}
+        \label{fig:mpc1}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{mpc2.png}
+        \caption{MPC Scheme 2}
+        \label{fig:mpc2}
+    \end{minipage}
+\end{figure}
+
+
+\subsection{Prediction horizon vs Time horizon}
 Two time-scales: 
 \begin{itemize}
     \item time $t=0,\dots,\infty$ time instants in the real world 
     \item prediction iteration $\tau=t,\dots,t+T$, samples evaulated by the mpc algorithm at each time instant $t$
 \end{itemize}
-\subsubsection{optimal control problem to be solved at each t}
-At each time instant $t$, solve 
-\begin{align*}
-    \min_{\substack{x_0,x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} & \displaystyle\sum_{\tau=t}^{t+T-1}\ell_t(x_\tau,u_\tau)+\ell_{t+T}(x_{t+T})\\
-        \text{subj.\ to } & x_{\tau+1}=f(x_\tau,u_\tau) \quad \tau=t,\dots,t+T-1\\
-                         & x_\tau \in \mathcal{X}, u_\tau \in \mathcal{U} \qquad \tau=t,\dots,t+T\\
-                         & x_t = x_t^{\text{meas}}\text{\footnotemark}
-\end{align*}
-\footnotetext{$x_t^{\text{meas}}$ is the measured state at time isntant $t$}
 
-\section{MPC with Zero Terminal Constraint} 
-At each time instant $t$, solve
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{mpc3.png}
+    \label{fig:mpc3}
+\end{figure}
+
+\subsection{Optimal control problem to be solved at each t}
+At each time instant $t$, we solve:
 \begin{align*}
-    \min_{\substack{x_0,x_1,\dots,x_T\\u_0,\dots,u_{T-1}}} & \displaystyle\sum_{\tau=t}^{t+T-1}\ell_t(x_\tau,u_\tau) \\
-        \text{subj.\ to } & x_{\tau+1}=f(x_\tau,u_\tau) \quad \tau=t,\dots,t+T-1\\
-                          & x_\tau \in \mathcal{X}, u_\tau \in \mathcal{U} \qquad \tau=t,\dots,t+T-1\\ 
-                          & x_t = x_t^{\text{meas}} \\
-                          & x_{t+T}=0
+    \min_{\substack{x_t,\ldots,x_{t+T}\\u_t,\ldots,u_{t+T-1}}} & \sum_{\tau=t}^{t+T-1} \ell_\tau(x_\tau, u_\tau) + \ell_{t+T}(x_{t+T})\\
+    \text{subject to } & x_{\tau+1} = f(x_\tau, u_\tau) \quad \forall\tau = t,\ldots,t+T-1\\
+    & x_\tau \in \mathcal{X}, u_\tau \in \mathcal{U} \quad \forall\tau = t,\ldots,t+T\\
+    & x_t = x_t^{\text{meas}}
 \end{align*}
-where 
+
+where:
 \begin{itemize}
-    \item $x_{\tau}$ and $u_\tau$ state and input predictions at future time $\tau$ computed at current time $t$ 
-    \item $x_t^{\text{meas}}$ state (of the real system) measured at $t$ 
-    \item $x=0$ equilibrium point for the system we want to stabilize 
-    \item $\mathcal{X}$ and $\mathcal{U}$ state and input constraint sets, which satisfy $(0,0)\in \text{int}\{\mathcal{X}\times \mathcal{U}\}$.
-    \item $\ell_\tau:\R^n\times \R^m \times \mathbb{Z}^+\to \R$ is a positive definite continous stage cost $\forall\tau\in\mathbb{Z}^+$.
+    \item $x_{\tau+1} = f(x_\tau, u_\tau)$ is the prediction model
+    \item $x_t^{\text{meas}}$ is the state of the real system measured at time $t$
 \end{itemize}
-Remark: in the more general case in which $(x^{eq},u^{eq})\neq (0,0)$, we can always perform a global change of coordinates $\psi:(x,u)\to(\bar{x},\bar{u})$ such that $(x^{eq},u^{eq})\to(0,0)$ which brings us back to the previous case 
-\begin{theorem}[]
-    Consider the discrete-time system
-    \[
-        x_{t+1}=f(x_t,u_t)
-    \]
-    with $f:\R^n\times\R^m\to\R^n$ Lipschitz continuous wrt $x$. If the stage cost is continuous, bounded and positive definite for all $\tau$, then the Zero Terminal Constraint MPC scheme is recursively feasible and the origin is asymptotically stable for the resulting closed-loop system.
-    Assumptions: the optimal control problem at $t=0$ is feasible and some regularity on the constraint funcitinos ($g_t(x_t,u_t)\leq0$)
+
+\begin{remark}
+Some stability proofs rely on additional terms such as terminal state constraints (e.g., $x_{t+T} = 0$), input constraints, and specific terminal cost matrices. However, it has been demonstrated that these are not necessary if $T$ is sufficiently large.
+\end{remark}
+
+\section{MPC with Zero Terminal Constraint}
+At each time instant $t$, solve:
+\begin{align*}
+    \min_{\substack{x_t,\ldots,x_{t+T} \\ u_t,\ldots,u_{t+T-1}}} & \sum_{\tau=t}^{t+T-1} \ell_\tau(x_\tau,u_\tau) \\
+    \text{subject to } & x_{\tau+1} = f(x_\tau,u_\tau), \quad \tau=t,\ldots,t+T-1 \\
+    & x_\tau \in \mathcal{X}, u_\tau \in \mathcal{U}, \quad \tau=t,\ldots,t+T-1 \\
+    & x_t = x_t^{\text{meas}} \\
+    & x_{t+T} = 0
+\end{align*}
+
+where:
+\begin{itemize}
+    \item $x_\tau$ and $u_\tau$ are state and input predictions at future time $\tau$ computed at current time $t$
+    \item $x_t^{\text{meas}}$ is the state (of the real system) measured at $t$
+    \item $x=0$ is the equilibrium point for the system we want to stabilize
+    \item $\mathcal{X}$ and $\mathcal{U}$ are state and input constraint sets, which satisfy $(0,0) \in \text{int}\{\mathcal{X} \times \mathcal{U}\}$
+    \item $\ell_\tau: \mathbb{R}^n \times \mathbb{R}^m \times \mathbb{Z}^+ \to \mathbb{R}$ is a positive definite continuous stage cost $\forall \tau \in \mathbb{Z}^+$
+\end{itemize}
+
+\begin{remark}
+In the more general case where $(x^{\text{eq}},u^{\text{eq}}) \neq (0,0)$, we can always perform a global change of coordinates $\varphi:(x,u) \mapsto (\bar{x},\bar{u})$ such that $(x^{\text{eq}},u^{\text{eq}}) \mapsto (0,0)$ which brings us back to the previous case.
+\end{remark}
+
+\begin{theorem}
+Consider the discrete-time system
+\[
+    x_{t+1} = f(x_t,u_t)
+\]
+with $f:\mathbb{R}^n \times \mathbb{R}^m \to \mathbb{R}^n$ Lipschitz continuous with respect to $x$. If the stage cost is continuous, bounded and positive definite for all $\tau$, then the Zero Terminal Constraint MPC scheme is recursively feasible and the origin is asymptotically stable for the resulting closed-loop system.
+
+Assumptions: the optimal control problem at $t=0$ is feasible and some regularity on the constraint functions ($g_t(x_t,u_t) \leq 0$).
 \end{theorem}
-\begin{proof}[Proof (sketch of)]
-    \begin{itemize}
-        \item Recursive Feasibility
-            \begin{itemize}
-                \item Assume the problem is feasible at generic time $t$ and $\{u^*_{\tau|t}\}^{t+T-1}_{\tau=t}$ is the corresponding optimal input sequence, and assume $x_t^{\text{meas}}=x^*_{t|t},\dots,x^*_{t+T|t}$
-                \item At time $t+1$ consider the following candidate input trajectory: 
-                    \[
-                        u_{\tau|t+1}:=\left\{\begin{array}{l l}
-                                u_{\tau|t}^*, & \tau = t+1,\dots,t+T-1\\
-                                0, & \tau = t+T
-                        \end{array} \right.
-                    \]
-                \item As it can be easily verified, this new trajectory is still feasible for the MPC problem (though in general suboptimal).
-            \end{itemize}
-        \item Asympototic Stability 
-            \begin{itemize}
-                \item The idea is to use the optimal cost $J^*(x_t^{\text{meas}})$ as a Lyapunov function 
-                \item First note that $J^*(x)\geq 0, \forall x\in\mathcal{X}$ and $J^*(x)=0 \iff x=0$
-                    \item Then observe that 
-                        \begin{align*}
-                            J^*(x_{t+1}^{\text{meas}}) & =\displaystyle\sum_{\tau=t+1}^{t+T}\ell_{\tau}(x_{\tau|t+1}^*,u_{\tau|t+1})\\
-                                                       &\leq \displaystyle\sum_{\tau=t+1}^{t+T-1}\ell_{\tau}(x_{\tau|t}^*,u_{\tau|t}^*)+\ell_{t+T}(0,0)\\
-                                                       & =J^*(x_t^{\text{meas}})-\ell_t(x_{\tau|t}^*,u^*_{\tau|t})=J^*(x_t^{\text{meas}})-\ell_t(x_t^{\text{meas}},u_t^{\text{MPC}})
-                        \end{align*}
-                        Thus
-                        \[
-                            J^*(x_{t+1}^{\text{meas}})-J^*(x_t^{\text{meas}})<0, \quad \forall x_t^{\text{meas}}\neq 0
-                        \]
-            \end{itemize}
-    \end{itemize}
+
+\begin{proof}[Sketch of proof]
+The proof consists of two main parts:
+
+\paragraph{1. Recursive Feasibility}
+\begin{itemize}
+    \item Assume the problem is feasible at generic time $t$ and $\{u_{\tau|t}^*\}_{\tau=t}^{t+T-1}$ is the corresponding optimal input sequence, and assume $x_t^{\text{meas}} = x_{t|t}^*, \ldots, x_{t+T|t}^*$
+    \item At time $t+1$ consider the following candidate input trajectory:
+    \[
+        u_{\tau|t+1} := \begin{cases}
+            u_{\tau|t}^*, & \tau = t+1,\ldots,t+T-1 \\
+            0, & \tau = t+T
+        \end{cases}
+    \]
+    \item As it can be easily verified, this new trajectory is still feasible for the MPC problem (though in general suboptimal)
+\end{itemize}
+
+\paragraph{2. Asymptotic Stability}
+\begin{itemize}
+    \item The idea is to use the optimal cost $J^*(x_t^{\text{meas}})$ as a Lyapunov function
+    \item First note that $J^*(x) \geq 0, \forall x \in \mathcal{X}$ and $J^*(x) = 0 \iff x = 0$
+    \item Then observe that
+    \begin{align*}
+        J^*(x_{t+1}^{\text{meas}}) &= \sum_{\tau=t+1}^{t+T} \ell_\tau(x_{\tau|t+1}^*, u_{\tau|t+1}^*) \\
+        &\leq \sum_{\tau=t+1}^{t+T-1} \ell_\tau(x_{\tau|t}^*, u_{\tau|t}^*) + \underbrace{\ell_{t+T}(0,0)}_{=0} \\
+        &= J^*(x_t^{\text{meas}}) - \ell_t(x_{t|t}^*, u_{t|t}^*) = J^*(x_t^{\text{meas}}) - \ell_t(x_t^{\text{meas}}, u_t^{\text{MPC}})
+    \end{align*}
+    Thus
+    \[
+        J^*(x_{t+1}^{\text{meas}}) - J^*(x_t^{\text{meas}}) < 0, \quad \forall x_t^{\text{meas}} \neq 0
+    \]
+    which proves that the origin is asymptotically stable.
+\end{itemize}
 \end{proof}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{mpc4.png}
+    \label{fig:mpc4}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{mpc5.png}
+    \label{fig:mpc5}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{mpc6.png}
+    \label{fig:mpc6}
+\end{figure}
+
+\pagebreak
 
 \section{Quasi-Infinte Horizon MPC}
 Main idea: Since the terminal constraint introduces nuerical instabilities, relax the terminal condition by introducing a proper terminal cost $\ell_{t+T}$ and constraining the terminal state to be in a proper region $\mathcal{X}^f$ around the origin
@@ -4000,55 +4064,503 @@ Result: Under this assumption it can be proven that for a proper terminal cost a
         and we apply to the real system the first optimal input $u^*_{t|t}(x_t^{\text{meas}})$
 \end{itemize}
 
-\section{Optimal control with constraints}
-when dealing with constrained optimal control, with constraints $g(x_t,u_t)\leq 0$ barrier functions can be used: 
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{mpc7.png}
+        \label{fig:mpc7}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{mpc8.png}
+        \label{fig:mpc8}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{mpc9.png}
+        \label{fig:mpc9}
+    \end{minipage}
+\end{figure}
+
+
+\section{Linear Quadratic MPC Example: Double Integrator}
+
+Consider the case where the dynamics is linear and the cost quadratic. At each time $t$, with initial measured state $x_t^{\text{meas}}$, we solve the LQ problem:
+
 \begin{align*}
-    \min_{\substack{x_1,\dots,x_T\\u_0,...,u_{T-1}}} & \displaystyle\sum_{t=0}^{T-1}[\ell_t(x_t,u_t)-\varepsilon\log(-g(x_t,u_t))]+\ell_T(x_T)\\
-    \text{subj to } &x_{t+1}=f_t(x_t,u_t) \quad t=0,\dots,T-1
+\min_{\substack{x_t,\ldots,x_{t+T} \\ u_t,\ldots,u_{t+T-1}}} & \sum_{\tau=t}^{t+T-1} x_\tau^\top Q_\tau x_\tau + u_\tau^\top R_\tau u_\tau + x_{t+T}^\top Q_T x_{t+T} \\
+\text{subject to } & x_{\tau+1} = A_\tau x_\tau + B_\tau u_\tau \quad \forall\tau = t,\ldots,t+T-1 \\
+& x_\tau \in \mathcal{X}, u_\tau \in \mathcal{U} \quad \forall\tau = t,\ldots,t+T \\
+& x_t = x_t^{\text{meas}}
 \end{align*}
-start with $\varepsilon=\varepsilon^0$, solve the relaxed problem above, decrease $\varepsilon>0$\\
-Remarks: \begin{itemize}
-    \item need to initialize with feasible initial trajectory 
-        \item alternatively extend the $-\log(\cdot)$ function on the entire domain, i.e. use some function \[
-            b(z)= \begin{cases}
-                -\log(z) & z\leq -\delta\\
-                \text{smooth function} & z\geq -\delta
-            \end{cases} \qquad \delta>0
-        \]
-        \item use some heuristics to remain within the constraints when
+
+where $T$ is the prediction horizon, and:
+\begin{itemize}
+\item $x_\tau \in \mathbb{R}^n$ and $u_\tau \in \mathbb{R}^m$
+\item $A_\tau \in \mathbb{R}^{n \times n}, B_\tau \in \mathbb{R}^{n \times m}$ prediction model
+\item $\mathcal{X}$ connected and closed, $\mathcal{U}$ compact
+\item $Q_\tau \in \mathbb{R}^{n \times n}$ and $Q_\tau = Q_\tau^\top \geq 0$ for all $\tau$
+\item $R_\tau \in \mathbb{R}^{m \times m}$ and $R_\tau = R_\tau^\top > 0$ for all $\tau$
+\item $Q_T \in \mathbb{R}^{n \times n}$ and $Q_T = Q_T^\top \geq 0$
 \end{itemize}
-% TODO ask someone what's missing
+
+\subsection{Double Integrator Example}
+Consider the (discrete-time) double integrator dynamics where $x_t \in \mathbb{R}^2$, $u_t \in \mathbb{R}$:
+
+\[
+x_{t+1} = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix} x_t + \begin{bmatrix} 0 \\ 1 \end{bmatrix} u_t.
+\]
+
+We want to steer the system to the origin within an infinite time-horizon.
+
+We implement a stabilizing MPC scheme where, at each $t$, we solve the constrained LQ problem:
+
+\begin{align*}
+\min_{\substack{x_t,\ldots,x_{t+T} \\ u_t,\ldots,u_{t+T-1}}} & \sum_{\tau=t}^{t+T-1} x_\tau^\top \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} x_\tau + \frac{1}{2}u_\tau^2 
++ x_{t+T}^\top \begin{bmatrix} 10 & 0 \\ 0 & 10 \end{bmatrix} x_{t+T} \\
+\text{subject to } & x_{\tau+1} = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix} x_\tau + \begin{bmatrix} 0 \\ 1 \end{bmatrix} u_\tau \quad \forall\tau = t,\ldots,t+T-1 \\
+& x_\tau \in \mathcal{X}, u_\tau \in \mathcal{U} \quad \forall\tau = t,\ldots,t+T \\
+& x_t = x_t^{\text{meas}}
+\end{align*}
+
+with prediction horizon $T = 5$.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{di_unconstr}
+    \caption{Double integrator with no constraints}
+    \label{fig:di_unconstr}
+\end{figure}
+
+\subsection{Double Integrator with Input Constraints}
+Using an MPC scheme we can implement constraints over the input, i.e.
+\[
+u_{\min} \leq u_t \leq u_{\max}
+\]
+where $u_{\min} = -1$ and $u_{\max} = 1$.
+
+Consider as initial condition $x_{\text{init}} = [10 \quad 1]^\top$.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{di_input_constr}
+    \caption{Double integrator with input constraints}
+    \label{fig:di_input_constr}
+\end{figure}
+
+\subsection{Double Integrator with State Constraints}
+Using an MPC scheme we can implement constraints over the velocity, e.g.
+\[
+x_{2,\min} \leq x_{2,t} \leq x_{2,\max}
+\]
+where $x_{2,\min} = -1$ and $x_{2,\max} = 1$.
+
+Consider as initial condition $x_{\text{init}} = [10 \quad 1]^\top$.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{di_state_constr}
+    \caption{Double integrator with state constraints}
+    \label{fig:di_state_constr}
+\end{figure}
 
 
 \chapter{Reinforcement Learning}
-\section{Notation}
+
+\section{Introduction and Notation}
+In Reinforcement Learning (RL), we use different notation than typically adopted in the literature:
+
+\subsection{Reinforcement Learning vs Control Theory Notation}
 \begin{itemize}
-    \item States and actions:
-        \[
-            (s,a)\in\mathcal{S}\times\mathcal{A}
-        \]
-        \item Transition Probability:
-            \[
-                s^+ \sim p(\cdot|s,a)
-            \]
-        \item Reward function at time $t$:
-            \[
-                R_t(s_t,a_t) \text{ or } R_t(s_{t-1},a_{t-1},s_t)
-            \]
-            
-            \item Discounted Return: \begin{align*}
-               &G_t(s_t):=\displaystyle\sum_{\tau=t}^{\infty}\gamma^\tau R_\tau(s_\tau,a_\tau) \\
-               &\text{subj to } s_{\tau+1}\sim p(\cdot|s_\tau,a_\tau),a_\tau\sim \pi(\cdot|s_\tau),\forall \tau \geq 0
-            \end{align*}
-                
+    \item \textbf{Reinforcement Learning Notation:}
+    \begin{itemize}
+        \item States and Actions: $(s,a) \in \mathcal{S} \times \mathcal{A}$
+        \item Transition Probability: $s^+ \sim p(\cdot|s,a)$
+        \item Reward function at time $t$: $R_t(s_t,a_t)$ or $R_t(s_{t-1},a_{t-1},s_t)$
+        \item Discounted Return: $G_t(s_t) := \sum_{\tau=t}^{\infty} \gamma^\tau R_\tau(s_\tau,a_\tau)$\\
+        subject to: $s_{\tau+1} \sim p(\cdot|s_\tau,a_\tau), a_\tau \sim \pi(\cdot|s_\tau), \forall \tau \geq 0$
+    \end{itemize}
+
+    \item \textbf{Control Theory Notation:}
+    \begin{itemize}
+        \item States and Inputs: $(x,u) \in \mathcal{X} \times \mathcal{U}$
+        \item Dynamics: $x^+ \sim f(x,u)$ or $x^+ = f(x,u,w), w \sim p_w(\cdot|x,u)$
+        \item Reward function at time $t$: $r_t(x_t,u_t) = -\ell_t(x_t,u_t)$
+        \item Discounted Return: $J_t(x_t) := \sum_{\tau=t}^{\infty} \gamma^\tau r_\tau(x_\tau,u_\tau)$\\
+        subject to: $x_{\tau+1} \sim f(x_\tau,u_\tau), u_\tau \sim \pi(x_\tau), \forall \tau \geq 0$
+    \end{itemize}
 \end{itemize}
-Reinforcement learning is generally data-driven, whereas optimal control is generally model-based.
-\subsubsection{problem formulation}
-The Reinforcement Learning (RL) problem can be written in optimal control language as 
-% TODO slide 2
 
+\section{The Reinforcement Learning Problem}
+The Reinforcement Learning (RL) problem can be written in optimal control language as:
+\begin{align*}
+    \max_{\pi(\cdot)} & \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(x_t,u_t)\right] \\
+    \text{subject to } & x_{t+1} \sim f(x_t,u_t), \quad t=0,1,\ldots \\
+    & u_t \sim \pi(x_t), \quad t=0,1,\ldots \\
+    & x_0 \sim \mu_0 \\
+    & (x_t,u_t) \in \mathcal{X} \times \mathcal{U}, \quad t=0,1,\ldots
+\end{align*}
 
+where:
+\begin{itemize}
+    \item $f(x,u) := p_f(\cdot|x,u)$ is the dynamics distribution
+    \item the map $x \mapsto \pi(x)$ is called policy, where, for any fixed $x \in \mathcal{X}$, $\pi(x) := p_\pi(\cdot|x)$ is a probability distribution on $\mathcal{U}$
+    \item $r : \mathcal{X} \times \mathcal{U} \to \mathbb{R}$ called reward function, describes the "goodness" of each pair $(x,u)$
+    \item $\mu_0$ is the probability distribution of the initial state
+    \item $\gamma \in [0,1)$ is called discount factor
+\end{itemize}
 
+\subsection{Notation for Random Variables and Probability Expectation}
+\begin{remark}
+Often in Reinforcement Learning, the reward is assumed stochastic and thus described by a probability distribution rather than a real-valued function.
+\end{remark}
 
+\textbf{Shortcut Notation:} Whenever we need to compute the expectation of a random variable, say $z$, with distribution $p_z(\cdot|\xi)$, which depends on the outcome $\xi$ of another random variable $x$ with distribution $p_x$, we write:
+
+\[
+\mathbb{E}[z(x)|x \sim p_x]
+\]
+
+where, if $x$ and $z$ are defined over discrete spaces $\mathcal{X}$ and $\mathcal{Z}$:
+
+\[
+\mathbb{E}[z(x)|x \sim p_x] := \sum_{\xi\in\mathcal{X}} p_x(\xi) \sum_{\zeta\in\mathcal{Z}} p_z(\zeta|\xi)\zeta = \sum_{\zeta\in\mathcal{Z}} \left(\sum_{\xi\in\mathcal{X}} p_z(\zeta|\xi)p_x(\xi)\right) \zeta
+\]
+
+\section{Gridworld Example}
+\subsection{Problem Setup}
+Consider an agent moving through adjacent boxes of a finite grid of dimension $N \times M$ where:
+
+\begin{itemize}
+    \item Available actions are: 'up', 'down', 'right', 'left'
+    \item The agent starts from position $(i_0,j_0)$ and must reach target position $(i_t,j_t)$
+    \item Some boxes are uncrossable (obstacles)
+\end{itemize}
+
+\textbf{Goal:} Find a policy to move along the shortest path towards the target without hitting obstacles or falling outside the grid.
+
+\textbf{State Space:} $\mathcal{X} = \{(i,j)|i \in \{-1,0,\ldots,N-1,N\}, j \in \{-1,0,\ldots,M-1,M\}\}$. Terminal states are points $(i,j)$ with either $i \in \{-1,N\}$ and/or $j \in \{-1,M\}$ (points outside grid, set $\mathcal{N}$), plus obstacle points (set $\mathcal{O}$) and target $(i_t,j_t)$.
+
+\textbf{Input Space:} $\mathcal{U} = \{(0,1),(0,-1),(1,0),(-1,0)\}$, representing 'up', 'down', 'right', 'left'.
+
+\subsection{Dynamics and Reward}
+The dynamics is fully deterministic:
+
+\[
+f(x,u) = p_f(x^+|x,u) = \begin{cases}
+1 & \text{if } x^+ = (i+u_1,j+u_2) \\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+The reward function depends only on the state:
+
+\[
+r(x) = \begin{cases}
+0 & \text{if } x = (i_t,j_t) \\
+-R & \text{if } x \in \mathcal{N} \cup \mathcal{O}, \text{ where } R \gg N + M \\
+-1 & \text{otherwise}
+\end{cases}
+\]
+
+where $R$ is a large penalty for hitting obstacles or going outside the grid.
+
+\section{Value Functions and Optimality}
+
+\subsection{Value Function and Action-Value Function}
+\begin{definition}[Value Function]
+Given a policy (i.e., a stochastic feedback law) $\pi$ and a discount factor $\gamma \in [0,1)$, we define the value function $V_\pi: \mathcal{X} \to \mathbb{R}$ corresponding to the policy $\pi$ as the expected discounted return for each state $x$:
+\[
+V_\pi(x) = \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(x_t, u_t) \middle| x_0 = x, u_t \sim \pi(x_t), x_{t+1} \sim f(x_t, u_t), \forall t \geq 0\right]
+\]
+where $\tau_\pi$ is the probability distribution of the state trajectories under the policy $\pi$.
+\end{definition}
+
+\begin{definition}[Action-Value Function]
+Given a policy $\pi$ and a discount factor $\gamma \in [0,1)$, we define the action-value function $Q_\pi: \mathcal{X} \times \mathcal{U} \to \mathbb{R}$ corresponding to the policy $\pi$ as the expected discounted return for each state $x$ when we apply the control $u$:
+\[
+Q_\pi(x, u) = \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(x_t, u_t) \middle| x_0 = x, u_0 = u, u_t \sim \pi(x_t), x_{t+1} \sim f(x_t, u_t), \forall t \geq 0\right]
+\]
+\end{definition}
+
+\subsection{The Bellman Expectation Equation}
+The value function of a given policy $\pi$ satisfies the Bellman expectation equation:
+\[
+V_\pi(x) = \mathbb{E}\left[r(x, u) + \gamma V_\pi(x^+) \middle| x^+ \sim f(x, u), u \sim \pi(x)\right]
+\]
+
+Similarly, the action-value function has its own Bellman expectation equation:
+\[
+Q_\pi(x, u) = \mathbb{E}\left[r(x, u) + \gamma Q_\pi(x^+, u^+) \middle| u^+ \sim \pi(x^+), x^+ \sim f(x, u)\right]
+\]
+
+\begin{remark}
+In finite-horizon with time-invariant reward and probability distribution (dynamics), the value function is time-invariant.
+\end{remark}
+
+\subsection{The Bellman Optimality Equation}
+A policy $\pi^*$ is optimal if and only if it maximizes $V$ for all states:
+\[
+V^*(x) := V_{\pi^*}(x) \geq V_\pi(x), \quad \forall x, \pi
+\]
+
+The optimal value function $V^*$ satisfies:
+\[
+V^*(x) = \max_{u \in \mathcal{U}} \mathbb{E}\left[r(x, u) + \gamma V^*(x^+) \middle| x^+ \sim f(x, u)\right]
+\]
+
+Analogously, the optimal action-value function satisfies:
+\[
+Q^*(x, u) = \mathbb{E}\left[r(x, u) + \gamma \max_{u^+ \in \mathcal{U}}\{Q^*(x^+, u^+)\} \middle| x^+ \sim f(x, u)\right]
+\]
+
+\begin{remark}
+Note that: $V^*(x) = \max_{u \in \mathcal{U}} Q^*(x, u)$
+\end{remark}
+
+\section{Finding Optimal Policies}
+
+\subsection{Optimal Policy Computation}
+Given the optimal value function $V^*$, the optimal policy can be computed by picking with probability 1 any input from the set:
+\[
+\pi^*(x) = \argmax_{u\in\mathcal{U}} \mathbb{E}\left[r(x,u) + \gamma V^*(x^+) \middle| x^+ \sim f(x,u)\right], \quad \forall x \in \mathcal{X}
+\]
+
+Alternatively, given the optimal action-value function $Q^*$, the optimal policy can be retrieved by choosing with probability 1 any input from the set:
+\[
+\pi^*(x) = \argmax_{u\in\mathcal{U}} Q^*(x,u), \quad \forall x \in \mathcal{X}
+\]
+
+\begin{remark}
+Given $Q^*$ we do not need to know the dynamics $f(x,u)$ to compute the optimal policy.
+\end{remark}
+
+\subsection{Greedy Policies}
+\begin{definition}[Greedy Policy]
+Given an estimate $\hat{Q}$ of the optimal action-value function, we say that a policy $\hat{\pi}$ is greedy with respect to $\hat{Q}$ if it chooses with probability 1 an input from the set:
+\[
+\argmax_{u\in\mathcal{U}} \hat{Q}(x,u), \quad \forall x \in \mathcal{X}
+\]
+\end{definition}
+
+\subsection{Policy Evaluation}
+Given a policy $\pi$, its value function $V_\pi$ can be computed using the Bellman expectation equation iteratively:
+
+\begin{algorithm}[H]
+\caption{Policy Evaluation}
+\begin{algorithmic}[1]
+\State \textbf{Inputs:} $k = 0$, $\gamma \in (0,1]$, policy $\pi$, $\varepsilon > 0$, initial guess $V^0$ for all $x$
+\Repeat
+    \For{each $x \in \mathcal{X}$}
+        \State $V^{k+1}(x) = \mathbb{E}\left[r(x,u) + \gamma V^k(x^+) \middle| x^+ \sim f(x,u), u \sim \pi(x)\right]$
+    \EndFor
+    \State $k \leftarrow k + 1$
+\Until{$\|V^k - V^{k-1}\|_\infty < \varepsilon$}
+\State \Return $V^k$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Value Iteration}
+Given an initial guess for the optimal value function, we can improve it using the Bellman optimality equation iteratively:
+
+\begin{algorithm}[H]
+\caption{Value Iteration}
+\begin{algorithmic}[1]
+\State \textbf{Inputs:} $k = 0$, $\gamma \in (0,1]$, $\varepsilon > 0$, initial guess $V^0$ for all $x$
+\Repeat
+    \For{each $x \in \mathcal{X}$}
+        \State $V^{k+1}(x) = \max_{u\in\mathcal{U}} \mathbb{E}\left[r(x,u) + \gamma V^k(x^+) \middle| x^+ \sim f(x,u)\right]$
+    \EndFor
+    \State $k \leftarrow k + 1$
+\Until{$\|V^k - V^{k-1}\|_\infty < \varepsilon$}
+\State \Return $V^k$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Policy Iteration}
+Policy iteration alternates between policy evaluation and policy improvement:
+
+\begin{algorithm}[H]
+\caption{Policy Iteration}
+\begin{algorithmic}[1]
+\State \textbf{Inputs:} $k = 0$, $\gamma \in (0,1]$, $\varepsilon > 0$, initial policy $\pi^0$ for all $x$
+\State Compute $V_{\pi^0}$ via policy evaluation
+\Repeat
+    \State Define $\pi^{k+1}$, $\forall x$ by assigning probability 1 to:
+    \State \quad $\argmax_{u\in\mathcal{U}} \mathbb{E}\left[r(x,u) + \gamma V_{\pi^k}(x^+) \middle| x^+ \sim f(x,u)\right]$
+    \State Compute $V_{\pi^{k+1}}$ via policy evaluation
+    \State $k \leftarrow k + 1$
+\Until{$\|V_{\pi^k} - V_{\pi^{k-1}}\|_\infty < \varepsilon$}
+\State \Return $\pi^k$
+\end{algorithmic}
+\end{algorithm}
+
+\pagebreak
+
+\section{Learning the Optimal Policy}
+\subsection{Main Idea and Exploration-Exploitation Dilemma}
+
+The key idea is to use a given policy to control the system, use the measured rewards to improve an estimate $\hat{Q}$ of the $Q$ function, and use this estimate to improve the given policy.
+
+\subsubsection{Exploration and Exploitation Dilemma}
+We need to balance between two conflicting objectives:
+\begin{itemize}
+    \item To learn a good estimate of $Q^*$ and, thus, better policies, we need to explore the input-state space
+    \item To make the best decision exploiting the current knowledge, we need to be greedy with respect to $\hat{Q}$
+\end{itemize}
+
+The exploration vs exploitation dilemma can be tackled in several ways. We will briefly describe two approaches to solving it.
+
+\subsection{SARSA Algorithm}
+\subsubsection{Basic Concept}
+The main idea is to use the best possible (greedy) policy according to the current information but "sometimes" take a random action to explore.
+
+\subsubsection{$\varepsilon$-greedy Policy}
+\begin{definition}[$\varepsilon$-greedy policy]
+Given an estimate $\hat{Q}$ of an action-value function, we say that a policy $\hat{\pi}$ is $\varepsilon$-greedy for some $\varepsilon > 0$ if the greedy policy is selected with probability $1-\varepsilon$.
+\end{definition}
+
+\subsubsection{The SARSA Algorithm}
+The SARSA algorithm consists of the following steps:
+\begin{enumerate}
+    \item At time $t$ measure the current state $x_t^{\text{meas}}$, apply $u_t$ obtained via an $\varepsilon$-greedy policy
+    \item Measure the reward $r_t^{\text{meas}}$ and the next state $x_{t+1}^{\text{meas}}$
+    \item Apply the $\varepsilon$-greedy policy to get $u_{t+1}$
+    \item Update $\hat{Q}(x_t^{\text{meas}}, u_t)$ as:
+    \[
+        \hat{Q}(x_t^{\text{meas}}, u_t) + \alpha(r_t^{\text{meas}} + \gamma\hat{Q}(x_{t+1}^{\text{meas}}, u_{t+1}) - \hat{Q}(x_t^{\text{meas}}, u_t))
+    \]
+    for some $\alpha \in (0,1)$
+\end{enumerate}
+
+\subsection{Example: Gridworld Problem}
+\subsubsection{Problem Setup}
+Consider a gridworld problem with the following specifications:
+\begin{itemize}
+    \item $10 \times 10$ grid
+    \item Agent starts in position $(1,0)$
+    \item Target point $(9,9)$
+\end{itemize}
+
+An $\varepsilon$-greedy SARSA with $\varepsilon = 0.001$ has been implemented to train the agent.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{grid1.png}
+    \caption{After 50-150 episodes}
+    \label{fig:grid1}
+\end{figure}
+
+\subsubsection{Results}
+\begin{itemize}
+    \item After 50 episodes, the action-value function and greedy policy still vary consistently, resulting in quasi-random motion of the agent
+    \item The overlapped paths taken by the agent in episodes 50-150 show extensive exploration
+    \item After several hundred episodes (900-1000), the agent eventually finds an optimal path (not unique) and tends to follow it, with occasional small deviations due to the $\varepsilon$-greediness of the policy
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{grid2.png}
+    \caption{After 900-1000 episodes}
+    \label{fig:grid2}
+\end{figure}
+
+\section{The Linear-Quadratic Case}
+\subsection{Problem Setup}
+Consider a scenario in which:
+\begin{enumerate}
+    \item The input and the state are unconstrained:
+        \[
+            \mathcal{X} = \mathbb{R}^n
+        \]
+        \[
+            \mathcal{U} = \mathbb{R}^m
+        \]
+    
+    \item The dynamics is linear and deterministic:
+        \[
+            f(x,u) = Ax + Bu
+        \]
+        for some $A \in \mathbb{R}^{n\times n}$ and $B \in \mathbb{R}^{n\times m}$.
+    
+    \item The reward is deterministic and is described by a quadratic function:
+        \[
+            r(x,u) = -x^\top Qx - u^\top Ru
+        \]
+        for some $Q \succeq 0$, $R \succ 0$.
+    
+    \item With slight abuse of notation, we will indicate a linear deterministic policy with gain $K$, as
+        \[
+            \pi(x) = Kx
+        \]
+        hence, $\pi(x)$ will indicate no longer a probability distribution, but a deterministic control law.
+\end{enumerate}
+
+\subsection{Evaluation of a Linear Policy}
+\subsubsection{Bellman's Expectation Equation}
+Assume that we are given a deterministic, linear policy $\pi(x) = Kx$. Then, the corresponding value function is a quadratic form
+\[
+    V_\pi(x) = x^\top Px
+\]
+where the matrix $P$ is a solution of the following Lyapunov equation:
+\[
+    P = Q + K^\top RK + \gamma(A + BK)^\top P(A + BK)
+\]
+
+\subsubsection{Policy Evaluation}
+The policy evaluation algorithm turns into the following Lyapunov iteration method:
+\[
+    P^{k+1} = Q + K^\top RK + \gamma(A + BK)^\top P^k(A + BK)
+\]
+
+\pagebreak
+\subsection{Computation of the Optimal Policy}
+\subsubsection{Policy Iteration Algorithm}
+The policy iteration updates for the (discounted) linear quadratic case are given by the following steps:
+
+\begin{enumerate}
+    \item (Policy Improvement) Update the gain as
+        \[
+            K^{k+1} = -\gamma(R + \gamma B^\top P^k B)^{-1}B^\top P^k A
+        \]
+    
+    \item (Policy Evaluation) Compute $P^{k+1}$ either directly as the solution of
+        \[
+            P^{k+1} = Q + (K^{k+1})^\top RK^{k+1} + \gamma(A + BK^{k+1})^\top P^{k+1}(A + BK^{k+1})
+        \]
+        or iteratively via the update rule
+        \[
+            P_{i+1}^{k+1} = Q + (K^{k+1})^\top RK^{k+1} + \gamma(A + BK^{k+1})^\top P_i^{k+1}(A + BK^{k+1})
+        \]
+\end{enumerate}
+
+\subsection{Q-Learning for LQR}
+To retrieve the action-value function $Q_\pi$, we can exploit the relation:
+\[
+    Q_\pi(x,u) = \mathbb{E}[r(x,u) + \gamma V_\pi(x^+)|x^+ \sim f(x,u)]
+\]
+
+In this framework, if $V_\pi(x) = -x^\top P_\pi x$, it takes the form:
+\begin{align*}
+    Q_\pi(x,u) &= -x^\top Qx - u^\top Ru - \gamma(Ax + Bu)^\top P_\pi(Ax + Bu) \\
+    &= -x^\top(Q + \gamma A^\top P_\pi A)x - u^\top(R + \gamma B^\top P_\pi B)u - 2\gamma u^\top B^\top P_\pi Ax
+\end{align*}
+
+which can be rewritten as a quadratic form in $[x^\top, u^\top]^\top$:
+\[
+    Q_\pi(x,u) = -\begin{bmatrix} x \\ u \end{bmatrix}^\top 
+    \underbrace{\begin{bmatrix} 
+        Q + \gamma A^\top P_\pi A & \gamma A^\top P_\pi B \\
+        \gamma B^\top P_\pi A & R + \gamma B^\top P_\pi B
+    \end{bmatrix}}_{:=\Theta}
+    \begin{bmatrix} x \\ u \end{bmatrix}
+\]
+
+\begin{remark}
+The main effort in Q-learning algorithms in the LQ case lies in the estimation of $\Theta$.
+\end{remark}
 
 \end{document}
